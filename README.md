@@ -1,14 +1,14 @@
 # SET UP PROJECT
 1. In terminal: Go to the folder you want to put the project in (Hint: use `cd` command)
-2. In terminal: `git clone https://github.com/jessicadpo/LiteReview.git`
-3. Navigate to the LiteReview folder in your file explorer.
-4. Open the LiteReview folder in PyCharm.
+2. In terminal: `git clone https://github.com/jessicadpo/CapstoneTagMe.git`
+3. Navigate to the CapstoneTagMe folder in your file explorer.
+4. Open the CapstoneTagMe folder in PyCharm.
 5. In PyCharm's terminal:
    1. Windows: `pip install django`
    2. macOS: `pip3 install django`
 
 # CREATE A NEW BRANCH
-1. Create a new branch per JIRA task, NOT per person.
+1. Create a new branch per task, NOT per person.
 2. `git pull origin main` Make sure you have the most recent version of the main branch.
 3. `git checkout -b task-branch-name` Create and switch to your task branch at the same time.
 4. `git status`. Double-check you're in the correct branch.
@@ -44,7 +44,6 @@
 10. `git push origin task-branch-name` DO NOT WRITE "git push origin main". DO NOT WRITE "git merge task-branch-name". 
 11. In GitHub: Make sure your code passes all linters & automated tests 
 12. In GitHub: If the code is complete and tested, create a pull request. 
-13. In JIRA: Paste the link to the pull request in as the JIRA task's Comment or Description box. 
 14. Ping the Discord server to ask someone to review your code.
 
 # PEER-REVIEW CODE
