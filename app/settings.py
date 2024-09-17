@@ -68,7 +68,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "app.wsgi.litereview"
+WSGI_APPLICATION = "app.wsgi.tagme"
 
 
 # Database
