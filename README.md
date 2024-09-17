@@ -1,8 +1,8 @@
 # SET UP PROJECT
 1. In terminal: Go to the folder you want to put the project in (Hint: use `cd` command)
-2. In terminal: `git clone https://github.com/jessicadpo/CapstoneTagMe.git`
-3. Navigate to the CapstoneTagMe folder in your file explorer.
-4. Open the CapstoneTagMe folder in PyCharm.
+2. In terminal: `git clone https://github.com/jessicadpo/Capstone.git`
+3. Navigate to the Capstone folder in your file explorer.
+4. Open the Capstone folder in PyCharm.
 5. In PyCharm's terminal:
    1. Windows: `pip install django`
    2. macOS: `pip3 install django`
