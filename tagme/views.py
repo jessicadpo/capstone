@@ -3,7 +3,6 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from .forms import SignUpForm, LoginForm
 
-
 def homepage(request):
     """View for index page (AKA homepage)"""
     #if request.method == 'POST':
@@ -45,10 +44,12 @@ def logout_view(request):
     logout(request)
     return redirect("homepage")
 
-def about_view(request):
+
+def about(request):
     """View for About page"""
     return render(request, 'about.html')
 
-def sitemap_view(request):
+
+def sitemap(request):
     """View for Sitemap page"""
     return render(request, 'sitemap.html')
