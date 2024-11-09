@@ -1,0 +1,131 @@
+html {
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    background-color: #F7F7F7;
+}
+
+* {
+    font-family: "Roboto", serif;
+    font-weight: 300; /* Regular roboto = 400 */
+    font-style: normal;
+    color: black;
+}
+
+/**********************************************************************************************************************/
+/* TOP BAR */
+#top-bar {
+    height: 80px;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row; /* Main axis = Horizontal */
+    justify-content: space-between; /* Alignment on horizontal (main) axis */
+    align-items: center; /* Alignment on vertical (cross) axis */
+}
+
+#top-right-block {
+    font-color: white;
+    margin-right: 35px;
+    margin-left: auto; /* Aligns to far right of top-bar */
+    font-size: 1.5em;
+}
+
+#top-right-block a {
+    text-decoration: none;
+}
+
+#top-right-block a:hover {
+    color: #537A00;
+    text-decoration: underline;
+}
+
+/**********************************************************************************************************************/
+/* DROPDOWN MENUS */
+
+.dropdown-button {
+    background-color: #537A00;
+    color: white;
+    font-size: 1.3em;
+    border: solid #3B6000 1px;
+    border-radius: 10px;
+    cursor: pointer;
+    height: 100%;
+    width: 100%;
+}
+
+.dropdown-button:hover, .dropdown-button:focus {
+    background-color: #3B6000;
+}
+
+.dropdown-button:focus { /*TODO: Make border radius change based on visibility of dropdown-options (not focus)*/
+    border-radius: 10px 10px 0px 0px;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Hidden by Default */
+.dropdown-options {
+    display: none;
+    position: absolute;
+    z-index: 1;
+    min-width: 100%;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+}
+
+.dropdown-options p {
+    display: block;
+    margin: 0px;
+    padding: 12px 16px;
+    background-color: white; /*TODO: Figure out why background-color corners not rounding with border on last item*/
+    border: solid #3B6000 1px;
+    color: black;
+    text-decoration: none;
+    font-size: 1.1em;
+}
+
+.dropdown-options p:last-of-type {
+    border-radius: 0px 0px 10px 10px;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-options p:hover {
+    background-color: #E0EEAC;
+}
+
+/* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
+.show {display:block;}
+
+/**********************************************************************************************************************/
+/* FOOTER */
+#footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 30px;
+    width: 100%;
+    padding: 5px 10px;
+    background-color: black;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row; /* Main axis = Horizontal */
+    align-items: center; /* Alignment on vertical (cross) axis */
+    column-gap: 10px;
+}
+
+#footer a, #footer span {
+    color: white;
+    text-decoration: none;
+}
+
+#footer a:hover {
+    text-decoration: underline;
+}
+
+
+
+

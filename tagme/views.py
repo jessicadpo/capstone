@@ -1,4 +1,4 @@
-"""Module for litereview views"""
+"""Module for TagMe views"""
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
@@ -26,7 +26,7 @@ def signup_login(request):
                 login(request, user)
                 return redirect("user-profile-page", username=username)
             forms = {"signup_form": form, "login_form": LoginForm()}
-            return render(request, 'signup-login.html', {'forms': forms})
+            return render(request, 'signup_login.html', {'forms': forms})
 
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -36,12 +36,20 @@ def signup_login(request):
             login(request, user)
             return redirect("user-profile-page", username=username)
         forms = {"signup_form": SignUpForm(), "login_form": form}
-        return render(request, 'signup-login.html', {'forms': forms})
+        return render(request, 'signup_login.html', {'forms': forms})
     forms = {"signup_form": SignUpForm(), "login_form": LoginForm()}
-    return render(request, 'signup-login.html', {'forms': forms})
+    return render(request, 'signup_login.html', {'forms': forms})
 
 
 def logout_view(request):
     """View for Logout Functionality"""
     logout(request)
     return redirect("homepage")
+
+def about_view(request):
+    """View for About page"""
+    return render(request, 'about.html')
+
+def sitemap_view(request):
+    """View for Sitemap page"""
+    return render(request, 'sitemap.html')
