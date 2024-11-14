@@ -3,42 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TagMe: Homepage</title>
+    <title>TagMe</title>
 
     <!-- Roboto font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
 
-    <!-- Search icon -->
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <link rel="stylesheet" href="../static/CSS/global.css">
     <link rel="stylesheet" href="../static/CSS/homepage.css">
-    <script type="text/javascript" src="../static/JavaScript/homepage.js"></script>
 </head>
 
 <body>
-    {% include "top_bar.html" %}
+    {% include "global_top_bar.html" %}
 
-    <img src="../static/icons/logo.svg" alt="TagMe logo" id="logo">
-    <p id="slogan">Slogan here</p>
+    <main>
+        <img src="../static/icons/logo.svg" alt="TagMe logo" id="logo">
+        <p id="slogan">Slogan here</p>
 
-    <div id="search-bar">
-        <div id="search-dropdown" class="dropdown">
-            <button onclick="openSearchDropdown()" id="search-dropdown-button" class="dropdown-button">Keyword</button>
-            <div id="search-dropdown-options" class="dropdown-options">
-                <p>Keyword</p>
-                <p>Tag</p>
-                <p>Title</p>
-                <p>Author</p>
-                <p>Subject</p>
+        <div id="search-bar">
+            <div id="search-dropdown" class="dropdown">
+                <button onclick="openSearchDropdown()" id="search-dropdown-button" class="dropdown-button">Keyword</button>
+                <div id="search-dropdown-options" class="dropdown-options">
+                    <a href="#" class="search-dropdown-item">Keyword</a>
+                    <a href="#" class="search-dropdown-item">Tag</a>
+                    <a href="#" class="search-dropdown-item">Title</a>
+                    <a href="#" class="search-dropdown-item">Author</a>
+                    <a href="#" class="search-dropdown-item">Subject</a>
+                </div>
             </div>
+            <input type="text" placeholder="Search" id="search-input"/>
+            <button type="submit" id="search-button"><i class="fa fa-search"></i></button>
         </div>
-        <input type="text" placeholder="Search" id="search-input"/>
-        <button type="submit" id="search-button"><i class="fa fa-search"></i></button>
-    </div>
+    </main>
 
-    {% include "footer.html" %}
+    {% include "global_footer.html" %}
+
+    <!-- JavaScript -->
+    <script type="text/javascript" src="../static/JavaScript/homepage.js"></script>
 </body>
 </html>

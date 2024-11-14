@@ -1,5 +1,4 @@
-/* When the user clicks on the button,
-toggle between hiding and showing the dropdown content */
+// When the user clicks on the button, toggle between hiding and showing the dropdown content
 function openSearchDropdown() {
   document.getElementById("search-dropdown-options").classList.toggle("show");
 }
@@ -21,3 +20,13 @@ window.onclick = function(event) {
     }
   }
 }
+
+// Update the text inside the dropdown menu button to the selected item
+const dropdownButton = document.getElementById("search-dropdown-button");
+const dropdownItems = document.querySelectorAll(".search-dropdown-item");
+dropdownItems.forEach(item => {
+    item.addEventListener("click", function(event) {
+        event.preventDefault(); // Prevent page from jumping
+        dropdownButton.textContent = this.textContent; // Change the button text to the clicked item's text
+    });
+});

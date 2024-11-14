@@ -4,7 +4,11 @@ html {
 }
 
 body {
+    display: flex;
+    flex-direction: column; /* Main axis = Vertical */
+    height: 100vh;
     background-color: #F7F7F7;
+    margin: 0px;
 }
 
 * {
@@ -23,11 +27,20 @@ body {
     flex-direction: row; /* Main axis = Horizontal */
     justify-content: space-between; /* Alignment on horizontal (main) axis */
     align-items: center; /* Alignment on vertical (cross) axis */
+    padding: 1vh 1vw;
+}
+
+#return-to-homepage {
+    height: 100%;
+}
+
+#top-bar-logo {
+    height: 90%;
 }
 
 #top-right-block {
     font-color: white;
-    margin-right: 35px;
+    margin-right: 25px;
     margin-left: auto; /* Aligns to far right of top-bar */
     font-size: 1.5em;
 }
@@ -41,8 +54,55 @@ body {
     text-decoration: underline;
 }
 
+#account-dropdown-button {
+    background-color: transparent;
+    border-color: transparent;
+    color: #3B6000;
+    font-size: 1em;
+    min-width: 215px;
+    padding: 5px 30px 5px 20px;
+    display: flex;
+    flex-direction: row; /* Main axis = Horizontal */
+    align-items: center;
+    gap: 15px;
+}
+
+/* Keep focus styling even if click out of window if dropdown-options are shown */
+#account-dropdown-button:focus,
+#account-dropdown-button:has(~.show) {
+    background-color: #3B6000;
+    border-color: #3B6000;
+    color: white;
+}
+
+.fa-user-circle {
+    color: #3B6000;
+    background-color: white;
+    border: solid 1px #F7F7F7;
+    border-radius: 50%;
+    font-size: 1.7em;
+}
+
+#account-dropdown-options a {
+    font-size: 0.8em;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+#account-dropdown-options a:hover {
+    text-decoration: none;
+    color: black;
+}
+
+#account-dropdown-options i {
+    color: #537A00;
+    font-size: 1.2em;
+}
+
 /**********************************************************************************************************************/
-/* DROPDOWN MENUS */
+/* DROPDOWN MENUS (GENERAL - CAN BE OVERWRITTEN FOR SPECIFIC MENUS */
 
 .dropdown-button {
     background-color: #537A00;
@@ -59,7 +119,8 @@ body {
     background-color: #3B6000;
 }
 
-.dropdown-button:focus { /*TODO: Make border radius change based on visibility of dropdown-options (not focus)*/
+/* Applies to the dropdown-button only when "show" class is added to dropdown-options */
+.dropdown-button:has(~.show) {
     border-radius: 10px 10px 0px 0px;
 }
 
@@ -75,39 +136,38 @@ body {
     z-index: 1;
     min-width: 100%;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    border-radius: 0px 0px 10px 10px;
 }
 
-.dropdown-options p {
+.dropdown-options > * {
     display: block;
     margin: 0px;
     padding: 12px 16px;
-    background-color: white; /*TODO: Figure out why background-color corners not rounding with border on last item*/
+    background-color: white;
     border: solid #3B6000 1px;
     color: black;
     text-decoration: none;
     font-size: 1.1em;
 }
 
-.dropdown-options p:last-of-type {
+.dropdown-options > *:last-of-type {
     border-radius: 0px 0px 10px 10px;
 }
 
 /* Change color of dropdown links on hover */
-.dropdown-options p:hover {
+.dropdown-options > *:hover {
     background-color: #E0EEAC;
 }
 
-/* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
-.show {display:block;}
+/* Show the dropdown menu ("show" class added to .dropdown-options using JavaScript */
+.show {
+    display:block;
+}
 
 /**********************************************************************************************************************/
 /* FOOTER */
 #footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
     height: 30px;
-    width: 100%;
     padding: 5px 10px;
     background-color: black;
     display: flex;

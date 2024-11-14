@@ -1,19 +1,20 @@
-body {
+main {
+    flex-grow: 1; /* Take up all available space between top bar and footer */
     display: flex;
     flex-direction: column; /* Main axis = Vertical */
-    justify-content: /*TODO*/; /* Alignment on vertical (main) axis */
+    padding: 10vh 0px;
 }
 
 #logo {
-    width: 400px;
-    display: block;
-    margin: auto;
+    width: 60vw;
+    max-width: 400px;
+    align-self: center;
 }
 
 #slogan {
     text-align: center;
     font-size: 2em;
-    margin: 0;
+    margin: 20px 20px 5vh 20px;
 }
 
 #search-bar {
@@ -27,7 +28,6 @@ body {
 
 #search-dropdown {
     width: 165px;
-
 }
 
 #search-input {

@@ -15,13 +15,13 @@ class SignUpForm(UserCreationForm):  # pylint: disable=too-many-ancestors
     With some modifications
     """
     username = forms.CharField(label=False, min_length=1, max_length=150, widget=forms.TextInput(
-        attrs={'class': 'signup-input', 'placeholder': 'Username'}))
+        attrs={'class': 'signup-input', 'placeholder': 'Username', 'label': 'Username'}))
     email = forms.EmailField(label=False, widget=forms.EmailInput(
-        attrs={'class': 'signup-input', 'placeholder': 'Email'}))
+        attrs={'class': 'signup-input', 'placeholder': 'Email', 'label': 'Email'}))
     password1 = forms.CharField(label=False, widget=forms.PasswordInput(
-        attrs={'class': 'signup-input', 'placeholder': 'Password'}))
+        attrs={'class': 'signup-input', 'placeholder': 'Password', 'label': 'Password'}))
     password2 = forms.CharField(label=False, widget=forms.PasswordInput(
-        attrs={'class': 'signup-input', 'placeholder': 'Confirm Password'}))
+        attrs={'class': 'signup-input', 'placeholder': 'Confirm Password', 'label': 'Confirm Password'}))
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Allows rearranging of form elements"""
@@ -33,7 +33,7 @@ class SignUpForm(UserCreationForm):  # pylint: disable=too-many-ancestors
         username = self.cleaned_data['username'].lower()
         new = User.objects.filter(username=username)
         if new.count():
-            raise ValidationError("Username already exists!")
+            raise ValidationError("Username already exists.")
         return username
 
     def clean_email(self):
@@ -41,7 +41,7 @@ class SignUpForm(UserCreationForm):  # pylint: disable=too-many-ancestors
         email = self.cleaned_data['email'].lower()
         new = User.objects.filter(email=email)
         if new.count():
-            raise ValidationError("Email belongs to existing user!")
+            raise ValidationError("Email belongs to existing user.")
         return email
 
     def clean_password2(self):
@@ -50,7 +50,7 @@ class SignUpForm(UserCreationForm):  # pylint: disable=too-many-ancestors
         password2 = self.cleaned_data['password2']
 
         if password1 and password2 and password1 != password2:
-            raise ValidationError("Passwords don't match!")
+            raise ValidationError("Passwords don't match.")
         return password2
 
     def save(self, commit=True):
@@ -66,17 +66,21 @@ class SignUpForm(UserCreationForm):  # pylint: disable=too-many-ancestors
 class LoginForm(forms.Form):
     """Copied from https://medium.com/@devsumitg/django-auth-user-signup-and-login-7b424dae7fab"""
     username = forms.CharField(label=False, min_length=1, max_length=150,
-        widget=forms.TextInput(attrs={'class': 'login-input', 'placeholder': 'Username'}))
+        widget=forms.TextInput(attrs={'class': 'login-input', 'placeholder': 'Username', 'label': 'Username'}))
     password = forms.CharField(label=False,
-        widget=forms.PasswordInput(attrs={'class': 'login-input', 'placeholder': 'Password'}))
+        widget=forms.PasswordInput(attrs={'class': 'login-input', 'placeholder': 'Password', 'label': 'Password'}))
 
     def clean(self):
         """Ensures password and username match"""
-        username = self.cleaned_data.get('username')
-        password = self.cleaned_data['password']
+        cleaned_data = super().clean()
+        username = cleaned_data.get('username')
+        password = cleaned_data.get('password')
         user = User.objects.filter(username=username)
         if user.count() == 0:
-            raise ValidationError("Username does not exist.")
+            self.add_error("username", "Username does not exist.")
+            # raise ValidationError("Username does not exist.")
         user = authenticate(username=username, password=password)
         if not user:
-            raise ValidationError("Password does not match our records.")
+            self.add_error("password", "Password does not match our records.")
+            # raise ValidationError("Password does not match our records.")
+        return cleaned_data

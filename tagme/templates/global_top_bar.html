@@ -1,0 +1,36 @@
+<div id="top-bar">
+    <!--Do not show logo in top-left if on homepage-->
+    {% if request.get_full_path != "/" %}
+        <a href="http://127.0.0.1:8000/" aria-label="Return to homepage" title="Return to homepage" id="return-to-homepage">
+            <img src="../static/icons/logo.svg" alt="TagMe logo" id="top-bar-logo">
+        </a>
+    {% endif %}
+
+    <!--Do not show signup/login/account menu in top-right if on signup-login page-->
+    {% if request.get_full_path != "/signup-login" %}
+        <div id="top-right-block">
+
+            <!--Show account menu if user is logged in-->
+            {% if request.user.is_authenticated %}
+            <div class="dropdown">
+                <button onclick="openAccountDropdown()" id="account-dropdown-button" class="dropdown-button">
+                    <i class="fa fa-user-circle" aria-hidden="true"></i>
+                    {{ request.user.username }}
+                </button>
+                <div id="account-dropdown-options" class="dropdown-options">
+                    <a href="/user"><i class="fa fa-user-o" aria-hidden="true"></i>My Profile</a>
+                    <a href="/user/saved-items"><i class="fa fa-thumb-tack" aria-hidden="true"></i>Saved Items</a>
+                    <a href="/user/settings"><i class="fa fa-cog" aria-hidden="true"></i>Account Settings</a>
+                    <a href="/logout"><i class="fa fa-sign-out" aria-hidden="true"></i>Log Out</a>
+                </div>
+            </div>
+
+            <!--Show links to signup/login page if user is NOT logged in-->
+            {% else %}
+                <a href="signup-login" aria-label="Sign up">Sign Up</a>
+                <span>|</span>
+                <a href="signup-login" aria-label="Login">Login</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
