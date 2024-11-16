@@ -22,11 +22,15 @@ window.onclick = function(event) {
 }
 
 // Update the text inside the dropdown menu button to the selected item
+// Set the hidden Select element (from Django form) to the selected value
+// Doing it this way because Select HTML elements can't be formatted/styled properly
 const dropdownButton = document.getElementById("search-dropdown-button");
 const dropdownItems = document.querySelectorAll(".search-dropdown-item");
 dropdownItems.forEach(item => {
     item.addEventListener("click", function(event) {
         event.preventDefault(); // Prevent page from jumping
         dropdownButton.textContent = this.textContent; // Change the button text to the clicked item's text
+        const selectedValue = this.getAttribute('data-value');
+        document.getElementById('search-type-select').value = selectedValue;
     });
 });

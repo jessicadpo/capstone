@@ -1,11 +1,25 @@
 """"Module containing forms for the LiteReview"""
-
-
 from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
+
+SEARCH_TYPES = (
+    ("Keyword", "Keyword"),
+    ("Tag", "Tag"),
+    ("Title", "Title"),
+    ("Author", "Author"),
+    ("Subject", "Subject")
+)
+
+
+class SearchForm(forms.Form):
+    """ Form for search bar """
+    search_type = forms.ChoiceField(label=False, choices=SEARCH_TYPES, required=True, widget=forms.Select(
+        attrs={'id': 'search-type-select'}))
+    search_string = forms.CharField(label=False, min_length=1, max_length=999, widget=forms.TextInput(
+        attrs={'id': 'search-input', 'placeholder': 'Search', 'label': 'Search'}))
 
 
 class SignUpForm(UserCreationForm):  # pylint: disable=too-many-ancestors
@@ -78,9 +92,8 @@ class LoginForm(forms.Form):
         user = User.objects.filter(username=username)
         if user.count() == 0:
             self.add_error("username", "Username does not exist.")
-            # raise ValidationError("Username does not exist.")
+
         user = authenticate(username=username, password=password)
         if not user:
             self.add_error("password", "Password does not match our records.")
-            # raise ValidationError("Password does not match our records.")
         return cleaned_data

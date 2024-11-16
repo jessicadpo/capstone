@@ -23,26 +23,12 @@
     <main>
         <img src="../static/icons/logo.svg" alt="TagMe logo" id="logo">
         <p id="slogan">Slogan here</p>
-
-        <div id="search-bar">
-            <div id="search-dropdown" class="dropdown">
-                <button onclick="openSearchDropdown()" id="search-dropdown-button" class="dropdown-button">Keyword</button>
-                <div id="search-dropdown-options" class="dropdown-options">
-                    <a href="#" class="search-dropdown-item">Keyword</a>
-                    <a href="#" class="search-dropdown-item">Tag</a>
-                    <a href="#" class="search-dropdown-item">Title</a>
-                    <a href="#" class="search-dropdown-item">Author</a>
-                    <a href="#" class="search-dropdown-item">Subject</a>
-                </div>
-            </div>
-            <input type="text" placeholder="Search" id="search-input"/>
-            <button type="submit" id="search-button"><i class="fa fa-search"></i></button>
-        </div>
+        {% include "global_search_bar.html" %}
     </main>
 
     {% include "global_footer.html" %}
 
     <!-- JavaScript -->
-    <script type="text/javascript" src="../static/JavaScript/homepage.js"></script>
+    <script type="text/javascript" src="../static/JavaScript/global.js"></script>
 </body>
 </html>

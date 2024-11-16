@@ -4,8 +4,8 @@
 3. Navigate to the capstone folder in your file explorer.
 4. Open the capstone folder in PyCharm.
 5. In PyCharm's terminal:
-   1. Windows: `pip install django`
-   2. macOS: `pip3 install django`
+   1. Windows: `pip install django` `pip install requests` (for querying APIs)
+   2. macOS: `pip3 install django` `pip3 install requests` (for querying APIs)
 
 # CREATE A NEW BRANCH
 1. Create a new branch per task, NOT per person.

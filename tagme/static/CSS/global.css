@@ -18,92 +18,67 @@ body {
     color: black;
 }
 
+b, strong {
+    font-weight: 500;
+}
 /**********************************************************************************************************************/
-/* TOP BAR */
-#top-bar {
-    height: 80px;
-    display: flex;
-    flex-wrap: nowrap;
-    flex-direction: row; /* Main axis = Horizontal */
-    justify-content: space-between; /* Alignment on horizontal (main) axis */
-    align-items: center; /* Alignment on vertical (cross) axis */
-    padding: 1vh 1vw;
+/* TAGS */
+.tag {
+    min-height: fit-content;
+    max-width: 100%;
+    background: url('../icons/tag.svg');
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    border: none;
+
+    margin: 5px 5px;
+    padding: 5% 13% 5% 5%;
+
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
 }
 
-#return-to-homepage {
-    height: 100%;
-}
-
-#top-bar-logo {
-    height: 90%;
-}
-
-#top-right-block {
-    font-color: white;
-    margin-right: 25px;
-    margin-left: auto; /* Aligns to far right of top-bar */
-    font-size: 1.5em;
-}
-
-#top-right-block a {
-    text-decoration: none;
-}
-
-#top-right-block a:hover {
-    color: #537A00;
-    text-decoration: underline;
-}
-
-#account-dropdown-button {
-    background-color: transparent;
-    border-color: transparent;
-    color: #3B6000;
-    font-size: 1em;
-    min-width: 215px;
-    padding: 5px 30px 5px 20px;
-    display: flex;
-    flex-direction: row; /* Main axis = Horizontal */
+.deletable-tag {
+    display: inline-grid;
+    column-gap: 5%;
+    grid: auto / 90% 5%;
     align-items: center;
-    gap: 15px;
 }
 
-/* Keep focus styling even if click out of window if dropdown-options are shown */
-#account-dropdown-button:focus,
-#account-dropdown-button:has(~.show) {
-    background-color: #3B6000;
-    border-color: #3B6000;
+.tag-text {
+    max-width: 100%;
+    overflow-wrap: break-word;
     color: white;
+    font-size: 1rem;
+    text-align: left;
+    float:left;
 }
 
-.fa-user-circle {
-    color: #3B6000;
-    background-color: white;
-    border: solid 1px #F7F7F7;
-    border-radius: 50%;
-    font-size: 1.7em;
+.tag:hover {
+    transform: scale(1.05);
 }
 
-#account-dropdown-options a {
-    font-size: 0.8em;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
+.tag:before {
+    content: "";
+    position: absolute;
+    height: 200%;
+    width: 50px;
+    transform: rotate(20deg);
+    /*background-color: rgba(193, 174, 1, 0.2);*/ /* TODO: Figure out which color it should be */
+    background-color: rgba(255, 255, 255, 0.2);
+    /*background-color: #F7F7F7;*/
+    left: -100px;
+    top: -25px;
 }
 
-#account-dropdown-options a:hover {
-    text-decoration: none;
-    color: black;
-}
-
-#account-dropdown-options i {
-    color: #537A00;
-    font-size: 1.2em;
+.tag:hover:before {
+    transition: left 0.7s ease;
+    left: 110%;
 }
 
 /**********************************************************************************************************************/
-/* DROPDOWN MENUS (GENERAL - CAN BE OVERWRITTEN FOR SPECIFIC MENUS */
-
+/* DROPDOWN MENUS (GENERAL - CAN BE OVERWRITTEN FOR SPECIFIC MENUS) */
 .dropdown-button {
     background-color: #537A00;
     color: white;
@@ -162,6 +137,144 @@ body {
 /* Show the dropdown menu ("show" class added to .dropdown-options using JavaScript */
 .show {
     display:block;
+}
+
+/**********************************************************************************************************************/
+/* TOP BAR */
+#top-bar {
+    height: 80px;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row; /* Main axis = Horizontal */
+    justify-content: space-between; /* Alignment on horizontal (main) axis */
+    align-items: center; /* Alignment on vertical (cross) axis */
+    padding: 1vh 1vw;
+    gap: 3%;
+}
+
+/********************************************/
+/* TOP BAR - LOGO */
+#return-to-homepage {
+    height: 100%;
+}
+
+#top-bar-logo {
+    height: 90%;
+}
+
+/********************************************/
+/* TOP BAR - SEARCH BAR */
+/* Some attributes overwritten in homepage.css */
+#search-bar {
+    height: 40px;
+    display: flex;
+    flex-direction: row; /* Main axis = Horizontal */
+    justify-content: start; /* Alignment on horizontal (main) axis */
+    align-items: stretch; /* Alignment on vertical (cross) axis */
+    column-gap: 10px;
+    width: 100%;
+}
+
+#search-dropdown {
+    width: 150px;
+}
+
+#search-dropdown-button {
+    font-size: 1.1em;
+}
+
+.search-dropdown-item {
+    font-size: 1em;
+}
+
+#search-type-select {
+    display: none;
+}
+
+div:has(>#search-input) { /* Because Django puts every field in its own div... */
+    width: 40%;
+    display: flex;
+}
+
+#search-input {  /* Text input field */
+    width: 100%;
+    border: solid black 1px;
+    border-radius: 10px;
+    font-size: 1.1em;
+    padding: 10px;
+}
+
+#search-button {
+    width: 40px;
+    font-size: 1.3em;
+    border-radius: 10px;
+    border: solid black 1px;
+}
+
+/********************************************/
+/* TOP BAR - SIGNUP/LOGIN LINKS || ACCOUNT DROPDOWN */
+#signup-login-block, #account-dropdown {
+    margin-right: 25px;
+    margin-left: auto; /* Aligns to far right of top-bar */
+    font-size: 1.5em;
+    white-space: nowrap;
+    text-align: right;
+}
+
+#signup-login-block a {
+    text-decoration: none;
+}
+
+#signup-login-block a:hover {
+    color: #537A00;
+    text-decoration: underline;
+}
+
+#account-dropdown-button {
+    background-color: transparent;
+    border-color: transparent;
+    color: #3B6000;
+    font-size: 1em;
+    min-width: 215px;
+    padding: 5px 30px 5px 20px;
+    display: flex;
+    flex-direction: row; /* Main axis = Horizontal */
+    align-items: center;
+    gap: 15px;
+}
+
+/* Keep focus styling even if click out of window if dropdown-options are shown */
+#account-dropdown-button:focus,
+#account-dropdown-button:has(~.show) {
+    background-color: #3B6000;
+    border-color: #3B6000;
+    color: white;
+}
+
+.fa-user-circle {
+    color: #3B6000;
+    background-color: white;
+    border: solid 1px #F7F7F7;
+    border-radius: 50%;
+    font-size: 1.7em;
+}
+
+#account-dropdown-options a {
+    font-size: 0.8em;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+#account-dropdown-options a:hover {
+    text-decoration: none;
+    color: black;
+}
+
+#account-dropdown-options i {
+    color: #537A00;
+    font-size: 1.2em;
 }
 
 /**********************************************************************************************************************/
