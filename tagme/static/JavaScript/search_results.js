@@ -31,4 +31,3 @@ number_inputs.forEach(input => {
         }
     });
 });
-

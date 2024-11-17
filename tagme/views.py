@@ -94,7 +94,23 @@ def search_results(request, requested_page_number):
         case _:
             raise Http404("Invalid search type")
 
+    # Store results in session
+    request.session['results_on_page'] = {item['item_id']: item for item in results_on_page}
+
     return render(request, 'search_results.html', {
         'current_page': results_on_page,
         'pagination': pagination,
         'forms': page_forms})
+
+
+def item_page(request, item_id):
+    """View for Item pages"""
+    page_forms = {"search_form": SearchForm()}
+    results_on_search_page = request.session.get('results_on_page', {})  # Retrieve search results from the session
+    item = results_on_search_page.get(str(item_id))  # Get the specific item using the item ID
+    if not item:
+        raise Http404("Item not found")
+    return render(request, 'item_page.html', {'item': item, 'forms': page_forms})
+
+
+

@@ -24,5 +24,6 @@ urlpatterns = [
     path('signup-login', signup_login),
     path('logout', logout_view),
     path('search/<str:requested_page_number>/', search_results, name="search_results"),
+    path('item/<str:item_id>/', item_page, name="item_page"),
     path('about', about)
 ]

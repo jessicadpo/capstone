@@ -29,7 +29,7 @@ def query_loc_subject(search_string, requested_page_number):
 
 
 def _query_loc_api(params, requested_page_number):
-    params["fa"] = "partof:general collections"
+    params["fa"] = "partof:catalog"
     params["fo"] = "json"
     params["c"] = 15  # Return max. 15 items per query (makes results load faster)
     params["sp"] = requested_page_number
@@ -48,12 +48,12 @@ def _query_loc_api(params, requested_page_number):
 
         results_on_page = []
         for item in data.get("results", []):
-            id_url = item.get('url')
-            title = decode_unicode(strip_punctuation(item.get('title', 'No title available')))
+            item_id = item.get('number_lccn')[0]
+            title = decode_unicode(strip_punctuation(item.get("item").get('title', 'No title available')))
             publication_date = decode_unicode(item.get('date', 'No publication date available'))
-            description = decode_unicode(item.get('description', 'No description available'))
+            description = decode_unicode('\n'.join(item.get('description', 'No description available')))
 
-            authors = item.get('contributor', ['No authors listed'])
+            authors = item.get('contributor', ['Unknown'])
             for i in range(len(authors)):
                 authors[i] = decode_unicode(to_firstname_lastname(authors[i]))
 
@@ -61,7 +61,7 @@ def _query_loc_api(params, requested_page_number):
             cover = covers[0] if covers else None
 
             results_on_page.append({
-                'id': id_url,
+                'item_id': item_id,
                 'title': to_title_case(title),
                 'authors': to_title_case('; '.join(authors)),  # Combine authors into a single string
                 'publication_date': publication_date,

@@ -155,8 +155,6 @@ main {
     background-color: #D9D9D9;
 }
 
-
-
 /* -----------MAIN LIST--------------*/
 #results-list {
     width: 100%;
@@ -198,25 +196,29 @@ main {
     height: 20%;
     min-width: 210px;
     margin: 20px;
-    padding: 20px 30px 20px 25px;
-    font-size: 1.5em;
+    padding: 25px 30px 25px 25px;
     background-color: white;
     border: solid 1px #B52801;
-    border-radius: 12px;
+    border-radius: 15px;
     display: flex;
     flex-direction: row; /* Main axis = Horizontal */
     align-items: center;
-    gap: 15px;
+    gap: 5px;
     cursor: pointer;
 }
 
-.save-item-button * {
+.save-item-button i {
     color: #B52801;
+    font-size: 2.2em;
+    transform: rotate(45deg);
 }
 
 .save-item-button span {
     flex-grow: 1;
+    color: #B52801;
     text-align: center;
+    font-weight: 400;
+    font-size: 1.8em;
 }
 
 .result-text-info {

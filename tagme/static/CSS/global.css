@@ -30,10 +30,8 @@ b, strong {
     background-repeat: no-repeat;
     background-size: 100% 100%;
     border: none;
-
     margin: 5px 5px;
-    padding: 5% 13% 5% 5%;
-
+    padding: 10px 25px 10px 10px;
     cursor: pointer;
     position: relative;
     overflow: hidden;
@@ -47,10 +45,11 @@ b, strong {
 }
 
 .tag-text {
-    max-width: 100%;
+    min-width: 95%;
+    width: 100%;
     overflow-wrap: break-word;
     color: white;
-    font-size: 1rem;
+    font-size: 1.1rem;
     text-align: left;
     float:left;
 }
@@ -65,9 +64,7 @@ b, strong {
     height: 200%;
     width: 50px;
     transform: rotate(20deg);
-    /*background-color: rgba(193, 174, 1, 0.2);*/ /* TODO: Figure out which color it should be */
     background-color: rgba(255, 255, 255, 0.2);
-    /*background-color: #F7F7F7;*/
     left: -100px;
     top: -25px;
 }

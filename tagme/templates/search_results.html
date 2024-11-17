@@ -26,19 +26,19 @@
             <h2><b>Synonymous Tags</b></h2>
             <div class="tag-container">
                 <!-- TODO: Insert for loops for synonymous tags here -->
-                <button href="#" class="tag"><div class="tag-text">[[Sample]]</div></button>
+                <button class="tag" aria-label="[[Sample]]"><span class="tag-text">[[Sample]]</span></button>
             </div>
 
             <h2><b>Related Tags</b></h2>
             <div class="tag-container">
                 <!-- TODO: Insert for loops for related tags here -->
-                <button href="#" class="tag"><div class="tag-text">[[Sample]]</div></button>
+                <button class="tag" aria-label="[[Sample]]"><span class="tag-text">[[Sample]]</span></button>
             </div>
         </div>
 
         <div id="results-section">
             <div id="results-header">
-                <h1>Results for <b>"{{ request.GET.search_string }}"</b></h1>
+                <h1>{{ request.GET.search_type}} results for: <b>"{{ request.GET.search_string }}"</b></h1>
                 <p> {{ pagination.from }} to {{ pagination.to }} of {{ pagination.of }} results</p>
 
                 {% if pagination.current == 1 %}
@@ -72,7 +72,7 @@
 
                         <div class="result-text-info">
                             <div class="media-type"><i class="fa fa-book" aria-hidden="true"></i>Book</div>
-                            <a href="#" class="result-title"
+                            <a href="{% url 'item_page' item.item_id %}" class="result-title"
                                title="{{ item.title }} ({{ item.publication_date }}) by {{ item.authors }}"
                                aria-label="{{ item.title }} ({{ item.publication_date }}) by {{ item.authors }}">
                                 {{ item.title }}
