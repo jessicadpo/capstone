@@ -35,7 +35,7 @@ def signup_login(request):
             next_url = request.POST.get('next', request.GET.get('next', '/'))
             parsed_url = urlparse(next_url)
             if not parsed_url.netloc and is_valid_path(next_url):
-                return redirect(next_url)
+                return redirect(next_url)  # TODO: This isn't working
             return redirect("/")
         page_forms = {"signup_form": signup_form, "login_form": LoginForm()}  # If login_form is invalid
 
@@ -51,7 +51,7 @@ def signup_login(request):
             next_url = request.POST.get('next', request.GET.get('next', '/'))
             parsed_url = urlparse(next_url)
             if not parsed_url.netloc and is_valid_path(next_url):
-                return redirect(next_url)
+                return redirect(next_url)  # TODO: This isn't working
             return redirect("/")
         page_forms = {"signup_form": SignUpForm(), "login_form": login_form}  # If login_form is invalid
 
@@ -105,7 +105,7 @@ def search_results(request, requested_page_number):
 
 def item_page(request, item_id):
     """View for Item pages"""
-    page_forms = {"search_form": SearchForm()}
+    page_forms = {"search_form": SearchForm(), "report_form": ReportForm()}
     results_on_search_page = request.session.get('results_on_page', {})  # Retrieve search results from the session
     item = results_on_search_page.get(str(item_id))  # Get the specific item using the item ID
     if not item:

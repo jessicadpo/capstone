@@ -92,9 +92,9 @@
     <div id="overlay"></div>
 
     <aside id="tag-sidebar">
-        <div id="sidebar-header">
+        <div class="header-with-x-button">
             <h1>Tags</h1>
-            <button id="close-sidebar-button" aria-label="Close tag panel"><i class="fa fa-times" aria-hidden="true"></i></button>
+            <button id="close-sidebar-button" class="close-x-button" aria-label="Close tag panel">✖</button>
         </div>
 
         <div id="sidebar-main-content">
@@ -104,17 +104,41 @@
                     <button class="tag" aria-label="[[Sample]]"><span class="tag-text">[[Sample]]</span></button>
                 </div>
                 <p class="tag-count">x 99,999,999,999</p>
-                <button class="report-button" aria-label="Report [[Sample]] tag"><i class="fa fa-flag-o" aria-hidden="true"></i></button>
+                <div class="report-button-container"> <!-- Need this for consistency when user is logged in & logged out -->
+                    {% if user.is_authenticated %}
+                      <button class="report-button" aria-label="Report [[Sample]] tag"><i class="fa fa-flag-o" aria-hidden="true"></i></button>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </aside>
 
-    <dialog id="report-tag-modal">
-
-
-
+    <dialog id="report-tag-dialog">
+        <form id="report-tag-form" method="POST">
+            <div class="header-with-x-button">
+                <h1>Report Tag</h1>
+                <button formmethod="dialog" id="close-report-modal-button" class="close-x-button" aria-label="Close Report Tag form">✖</button>
+            </div>
+            <button class="tag" aria-label="[[Sample]]" disabled><span id="reported-tag-text" class="tag-text"></span></button>
+            <h2>What is wrong with this tag?</h2>
+            {% csrf_token %}
+            {% for field in forms.report_form %}
+                <div>
+                    {{ field }}
+                    {% if field.label != False %}
+                        <label for="{{ field.id_for_label }}">
+                            <span class="fake-checkbox"></span> <!-- Because actual checkboxes can't be styled as easily -->
+                            {{ field.label }}
+                        </label>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <div id="report-form-footer">
+                <button id="cancel-tag-report-button" class="form-footer-button" formmethod="dialog">Cancel</button>
+                <input id="submit-tag-report-button" class="form-footer-button" type="submit" value="Report">
+            </div>
+        </form>
     </dialog>
-
 
 
     <dialog id="add-tag-modal"> <!-- TODO -->

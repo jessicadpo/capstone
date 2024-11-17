@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
+from django.core.validators import EMPTY_VALUES
 
 SEARCH_TYPES = (
     ("Keyword", "Keyword"),
@@ -20,6 +21,28 @@ class SearchForm(forms.Form):
         attrs={'id': 'search-type-select'}))
     search_string = forms.CharField(label=False, min_length=1, max_length=999, widget=forms.TextInput(
         attrs={'id': 'search-input', 'placeholder': 'Search', 'label': 'Search'}))
+
+
+class ReportForm(forms.Form):
+    """ Form for reporting a tag """
+    reported_tag = forms.CharField(label=False, required=True,  widget=forms.TextInput(
+        attrs={'id': 'reported-tag-input'}))
+    is_irrelevant = forms.BooleanField(label="Irrelevant", required=False)  # Default to checkbox input field
+    is_vulgar = forms.BooleanField(label="Vulgar", required=False)
+    is_offensive = forms.BooleanField(label="Offensive", required=False)
+    is_misinformation = forms.BooleanField(label="Misinformation / Disinformation", required=False)
+    is_other = forms.BooleanField(label="Other", required=False)
+    other_text = forms.CharField(label=False, required=False, min_length=1, max_length=999, widget=forms.TextInput(
+        attrs={'id': 'other-input', 'placeholder': 'Please specify', 'label': 'If other, please specify'}))
+
+    def clean(self):  # TODO: This isn't working
+        """If other is checked, something must be entered in the other_text field"""
+        cleaned_data = super().clean()
+        is_other = cleaned_data.get('is_other', False)
+        other_text = cleaned_data.get('other_text', None)
+        if is_other and (other_text in EMPTY_VALUES):
+            self.add_error("other_text", "Please fill out this field.")
+        return cleaned_data
 
 
 class SignUpForm(UserCreationForm):  # pylint: disable=too-many-ancestors

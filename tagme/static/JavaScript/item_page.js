@@ -7,8 +7,12 @@ const footer = document.getElementById('footer');
 
 const openSidebarButtons = document.querySelectorAll('.open-sidebar-button');
 const closeSidebarButton = document.getElementById('close-sidebar-button');
-const sidebar = document.getElementById('tag-sidebar');
 const overlay = document.getElementById('overlay');
+const sidebar = document.getElementById('tag-sidebar');
+
+const reportButtons = document.querySelectorAll('.report-button');
+const reportTagDialog = document.getElementById('report-tag-dialog');
+const reportTagForm = document.getElementById('report-tag-form');
 
 function checkOverflow(container) {
     return container.scrollHeight > container.clientHeight || container.scrollWidth > container.clientWidth;
@@ -35,6 +39,7 @@ function openSidebar() {
 function closeSidebar() {
     sidebar.classList.remove('active');
     overlay.classList.remove('active');
+    reportTagDialog.close();
     document.body.style.overflow = ''; // Re-enable scrolling on the main content
     topBar.removeAttribute('inert');
     mainContent.removeAttribute('inert');
@@ -65,6 +70,8 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Set href of "Back to Search Results" link
+    // TODO: If user submits a POST form --> referrer becomes the page itself (can no longer go back to prev page)
+    // TODO: Fix --> prevent POST forms from reloading page? (possible?)
     const backLink = document.getElementById('back-link');
     backLink.href = document.referrer;
 
@@ -77,6 +84,29 @@ document.addEventListener("DOMContentLoaded", function () {
     closeSidebarButton.addEventListener('click', closeSidebar);
     overlay.addEventListener('click', closeSidebar);
 
+    // Set report button behaviour
+    let lastButton = null; // keep track of the last Report button that was clicked
+    reportButtons.forEach(reportButton => {
+        reportButton.addEventListener('click', function() {
+            const tagEntry = this.closest('.tag-entry');
+            const reportedTagValue = tagEntry.querySelector('.tag-text').textContent;
+
+            // Reset form if open for a different tag
+            if (reportButton != lastButton) {
+                reportTagForm.reset();
+                lastButton = reportButton;
+            }
+
+            // Pre-fill <span> inside tag button (visible)
+            document.getElementById('reported-tag-text').textContent = reportedTagValue;
+
+            // Pre-fill reported-tag-input text field (invisible)
+            document.getElementById('reported-tag-input').value = reportedTagValue;
+
+            // Open dialog
+            reportTagDialog.show();
+        });
+    });
 });
 
 window.onload = setMaxHeight;
