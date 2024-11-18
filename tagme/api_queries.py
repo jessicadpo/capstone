@@ -5,7 +5,7 @@ RATE LIMIT FOR LIBRARY OF CONGRESS API: 20 queries per 10 seconds && 80 queries 
 
 """
 from urllib.parse import quote
-import requests  # pylint: disable=import-error
+import requests
 from .helper_functions import *
 
 
