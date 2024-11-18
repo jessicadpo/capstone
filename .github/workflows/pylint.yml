@@ -20,4 +20,4 @@ jobs:
         pip install django pylint
     - name: Analysing the code with pylint
       run: |
-        pylint -d W0511,C0301,W0401,C0200,RO914 $(git ls-files '*.py')
+        pylint -d W0511,C0301,W0401,C0200,R0914 $(git ls-files '*.py')
