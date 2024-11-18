@@ -79,9 +79,7 @@ def search_results(request, requested_page_number):
     # TODO: Insert search system code here
     results_on_page = []  # Replace with API calls / Django query
     pagination: None
-
-    # Pylint doesn't know match (because match is new and pylint is old)
-    match search_type:  # pylint: disable=syntax-error
+    match search_type:
         case "Keyword":
             results_on_page, pagination = query_loc_keyword(search_string, requested_page_number)
             # TODO: Need to also search our UserContribution model
