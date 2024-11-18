@@ -1,0 +1,170 @@
+main {
+    flex-grow: 1; /* Take up all available space between top bar and footer */
+    display: flex;
+    flex-direction: row; /* Main axis = Horizontal */
+    padding: 10vh 2vw;
+}
+
+#divider {
+    border: solid #8A8A8A 1px;
+    height: 90%;
+}
+
+form {
+    width: 50%;
+    height: 500px;
+    display: flex;
+    flex-direction: column; /* Main axis = Vertical */
+    align-items: center;
+}
+
+h1 {
+    text-align: center;
+    font-weight: 400;
+    font-size: 3em;
+}
+
+.form-inputs-section {
+    flex-grow: 1; /* Take up all remaining available VERTICAL space between heading and submit button */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.form-inputs-section input {
+    width: 20vw;
+    border: solid black 1px;
+    border-radius: 8px;
+    font-size: 1em;
+    padding: 10px;
+    margin: 15px;
+}
+
+.submit-buttons {
+    color: white;
+    background-color: #537A00;
+    border: solid #3B6000 1px;
+    border-radius: 8px;
+    padding: 10px 3vw;
+    margin: 10px;
+    font-size: 1.3em;
+    border-radius: 10px;
+    cursor: pointer;
+    min-width: 20%;
+}
+
+.submit-buttons:hover {
+    background-color: #3B6000;
+}
+
+/*--------------------------------------------------------------------------------------------------------------------*/
+/* All divs followed by an errorlist (ul) */
+div:has(.errorlist) {
+    position: relative; /* Position the div to non-static so that the errorlists inside it can be absolute positioned */
+    display: flex; /* To vertical align the error list */
+    flex-direction: column; /* Main axis = Vertical */
+    justify-content: center;
+}
+
+.fa-exclamation-triangle {
+    position: absolute;
+    font-size: 1.5em;
+    color: #B52801;
+    cursor: pointer;
+}
+
+.fa-exclamation-triangle.sign-up {
+    left: 100%;
+}
+
+.fa-exclamation-triangle.login {
+    right: 100%;
+}
+
+.fa-exclamation-triangle:focus,
+.fa-exclamation-triangle:focus-visible {
+   border: solid 5px -webkit-focus-ring-color;
+} /* TODO: Add JavaScript to make icon focus on click */
+
+.fa-exclamation-triangle:hover~ul,
+.fa-exclamation-triangle:hover~.triangle-outline,
+.fa-exclamation-triangle:hover~.triangle,
+.fa-exclamation-triangle:focus~ul,
+.fa-exclamation-triangle:focus~.triangle-outline,
+.fa-exclamation-triangle:focus~.triangle {
+    display: block;
+}
+
+.errorlist { /* Speech bubble shape (main bubble) */
+    display: none;
+    position: absolute;
+    width: 15vw;
+    margin: 0;
+    padding: 10px;
+    background-color: #FEEBE8;
+    border: solid #B52801 1px;
+    border-radius: 5px;
+    list-style-type: none;
+}
+
+.sign-up~.errorlist { /* All errorlists preceded by .sign-up element */
+    left: 110%;
+}
+
+.login~.errorlist { /* All errorlists preceded by .login element */
+    right: 110%;
+}
+
+.errorlist li {
+    margin: 0 0 10px 0;
+}
+
+.errorlist li:last-child {
+    margin: 10px 0px 0px 0px;
+}
+
+.errorlist li:only-child {
+    margin: 0;
+}
+
+.triangle-outline { /* Triangle BORDER part of speech bubble shape */
+    content:"";
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-top: 13px solid transparent;
+    border-bottom: 13px solid transparent;
+    margin: auto 0px auto -15px;
+    display: none;
+}
+
+.triangle-outline.sign-up {
+    border-right: 26px solid #B52801;
+    left: 110%;
+}
+
+.triangle-outline.login {
+    border-left: 26px solid #B52801;
+    right: 106%;
+}
+
+.triangle { /* Triangle part of speech bubble shape */
+    content:"";
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-top: 13px solid transparent;
+    border-bottom: 13px solid transparent;
+    margin: auto 0px auto -15px;
+    display: none;
+}
+
+.triangle.sign-up {
+    border-right: 26px solid #FEEBE8;
+    left: calc(110% + 2px);
+}
+
+.triangle.login {
+    border-left: 26px solid #FEEBE8;
+    right: calc(106% + 2px);
+}

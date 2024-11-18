@@ -1,0 +1,16 @@
+<form id="search-bar" method="GET" action="{% url 'search_results' 1 %}">
+    <div id="search-dropdown" class="dropdown">
+        <button type="button" onclick="openSearchDropdown()" id="search-dropdown-button" class="dropdown-button">
+            Keyword
+        </button>
+        <div id="search-dropdown-options" class="dropdown-options">
+            <a href="#" class="search-dropdown-item" data-value="Keyword">Keyword</a>
+            <a href="#" class="search-dropdown-item" data-value="Tag">Tag</a>
+            <a href="#" class="search-dropdown-item" data-value="Title">Title</a>
+            <a href="#" class="search-dropdown-item" data-value="Author">Author</a>
+            <a href="#" class="search-dropdown-item" data-value="Subject">Subject</a>
+        </div>
+    </div>
+    {{ forms.search_form }}
+    <button type="submit" id="search-button"><i class="fa fa-search"></i></button>
+</form>

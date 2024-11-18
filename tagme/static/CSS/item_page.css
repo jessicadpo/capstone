@@ -1,0 +1,563 @@
+html {
+    overflow-y: scroll; /* Scrollbar always shown to prevent column3 moving when sidebar opens */
+}
+
+main {
+    flex-grow: 1; /* Take up all available space between top bar and footer */
+    display: flex;
+    flex-direction: column; /* Main axis = Vertical */
+    padding: 0px 3vw;
+    border-top: solid 1px #8A8A8A;
+}
+
+/* -------------------------------------------------------------------------------------------------------------------*/
+/* GENERAL */
+h1 {
+    margin: 0;
+    font-size: 2.2rem;
+    font-weight: 500;
+}
+
+.header-with-x-button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+    border-bottom: solid 1px #8A8A8A;
+    & h1 {
+        flex-grow: 1;
+    }
+}
+
+.close-x-button {
+    font-size: 2.5rem;
+    color: black;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.close-x-button:hover {
+    color: #537A00;
+}
+
+@keyframes bobbing-up {
+    0%   {transform: translate(0, 0);}
+    50%  {transform: translate(0, -3px);}
+    100% {transform: translate(0, 0);}
+}
+
+@keyframes bobbing-down {
+    0%   {transform: translate(0, 0);}
+    50%  {transform: translate(0, 3px);}
+    100% {transform: translate(0, 0);}
+}
+
+@keyframes bobbing-left {
+    0%   {transform: translate(0, 0);}
+    50%  {transform: translate(-5px, 0);}
+    100% {transform: translate(0, 0);}
+}
+
+@keyframes bobbing-right {
+    0%   {transform: translate(0, 0);}
+    50%  {transform: translate(5px, 0);}
+    100% {transform: translate(0, 0);}
+}
+
+/* -------------------------------------------------------------------------------------------------------------------*/
+/* BACK LINK */
+#back-link {
+    width: fit-content;
+    margin-top: 10px;
+    padding: 0px 10px;
+    font-size: 1.3rem;
+    text-decoration: none;
+    vertical-align: middle;
+    display: flex;
+    flex-direction: row; /* Main axis = Horizontal */
+    align-items: center;
+    gap: 20px;
+    & i {
+        font-size: 2.5rem;
+    }
+}
+
+#back-link:hover {
+    color: #3B6000;
+    & i {
+        color: #3B6000;
+        animation-name: bobbing-left;
+        animation-duration: 1.2s;
+        animation-iteration-count: infinite;
+    }
+}
+
+/* -------------------------------------------------------------------------------------------------------------------*/
+/* ITEM INFO SECTION */
+#item-info-section {
+    max-height: 55vh; /* Changes to fit-content on "Read More" button click */
+    display: flex;
+    flex-direction: row; /* Main axis = Horizontal */
+    align-items: start;
+    padding: 2vh 0;
+    gap: 30px;
+}
+
+/* -----------COLUMN 1-------------*/
+.column1 {
+    height: 510px;
+    max-height: 100%;
+    width: 360px;
+    max-width: 20%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: solid 1px black;
+    border-radius: 8px;
+}
+
+#item-cover {
+    height: 100%;
+    width: 100%;
+    color: #8A8A8A; /* Text color if no cover found */
+}
+
+/* -----------COLUMN 2-------------*/
+.column2 {
+    height: 100%;
+    width: 50%;
+    font-size: 1.6em;
+    display: flex;
+    flex-direction: column; /* Main axis = Vertical */
+    justify-content: space-between;
+    align-items: center;
+}
+
+#column2-main-content {
+    width: 100%;
+    margin: 0;
+    overflow: hidden;
+    -webkit-mask-image: none;
+    mask-image: none;
+}
+
+#column2-main-content.reading-less {  /* "Read More" button is visible + currently saying "Read More" */
+    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+}
+
+#column2-main-content * {
+    margin: 0;
+}
+
+#media-type {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin: 15px 0px;
+}
+
+#media-type i {
+    font-size: 2rem;
+}
+
+#item-title {
+    font-size: 4rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+#item-authors {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+}
+
+#description-header {
+    margin-top: 5%;
+}
+
+#item-description {
+    font-size: 1.3rem;
+}
+
+#column2-read-more-button {
+    width: fit-content;
+    padding: 5px 20px;
+    margin-top: 5px;
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: #537A00;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    & i {
+        font-size: 1.4rem;
+        color: #537A00;
+    }
+}
+
+#column2-read-more-button:hover {
+    color: #3B6000;
+    & i.fa-angle-down {
+        color: #3B6000;
+        animation-name: bobbing-down;
+        animation-duration: 1.1s;
+        animation-iteration-count: infinite;
+    }
+
+    & i.fa-angle-up {
+        color: #3B6000;
+        animation-name: bobbing-up;
+        animation-duration: 1.1s;
+        animation-iteration-count: infinite;
+    }
+}
+
+/* -----------COLUMN 3-------------*/
+.column3 {
+    max-height: 100%;
+    height: 510px;
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+}
+
+#save-item-button {
+    width: 100%;
+    min-width: 210px;
+    padding: 12px 0;
+    margin: 2vh 0;
+    background-color: white;
+    border: solid 1px #B52801;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: row; /* Main axis = Horizontal */
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    cursor: pointer;
+}
+
+#save-item-button i {
+    color: #B52801;
+    font-size: 2.2em;
+    transform: rotate(45deg);
+}
+
+#save-item-button span {
+    text-align: center;
+    color: #B52801;
+    font-weight: 400;
+    font-size: 1.8em;
+}
+
+#tags-header {
+    display: flex;
+    flex-direction: row; /* Main axis = Horizontal */
+    align-items: center;
+    & h1 {
+        flex-grow: 1;
+    }
+}
+
+#report-tag-button {
+    font-size: 1.3rem;
+    padding: 5px 10px;
+    background-color: transparent;
+    border: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+
+    & i, span {
+        color: #3B6000;
+    }
+}
+
+#report-tag-button:hover > span {
+    text-decoration: underline;
+}
+
+#tags-container {
+    flex-grow: 1;
+}
+
+#all-tags-button {
+    align-self: end; /* align to right edge of container */
+    width: fit-content;
+    font-size: 1.3rem;
+    padding: 5px 15px;
+    color: #537A00;
+    font-weight: 400;
+    background-color: transparent;
+    border: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+
+    & i {
+        font-size: 1.8rem;
+        color: #537A00;
+    }
+}
+
+#all-tags-button:hover {
+    color: #3B6000;
+    & i {
+        color: #3B6000;
+        animation-name: bobbing-right;
+        animation-duration: 1.1s;
+        animation-iteration-count: infinite;
+    }
+}
+
+/* -------------------------------------------------------------------------------------------------------------------*/
+/* COMMENTS SECTION */
+#comments-section {
+    border-top: solid 1px #8A8A8A;
+    display: flex;
+    flex-direction: row; /* Main axis = Horizontal */
+}
+
+#comments-section h1 {
+    width: 20%;
+}
+
+#comments-pane {
+    flex-grow: 1;
+}
+
+/* -------------------------------------------------------------------------------------------------------------------*/
+/* REPORT LAYER (SIDEBAR & DIALOG) */
+
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    opacity: 0;
+    visibility: hidden; /* Like display: none, but transitionable */
+    transition: opacity 0.3s ease-in-out, visibility 0s linear 0.5s;
+}
+
+#overlay.active {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease-in-out, visibility 0s linear 0s;
+    pointer-events: auto; /* Make visible overlay section clickable */
+}
+
+/* -----------TAG SIDEBAR-------------*/
+#tag-sidebar {
+    width: 30vw;
+    height: 100%;
+    padding: 20px 30px;
+    position: fixed;
+    top: 0;
+    right: calc(-30vw - 60px); /* Hidden by default */
+    transition: right 0.3s ease-in-out;
+    z-index: 1000;
+    background-color: #F7F7F7;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#tag-sidebar.active {
+    right: 0;
+}
+
+.tag-entry {
+    display: flex;
+    flex-direction: row;
+    justify-content: end;
+    align-items: center;
+    gap: 5%;
+}
+
+.single-tag-container {
+    flex-grow: 1;
+    max-width: 50%;
+}
+
+.tag-count {
+    width: 30%;
+    text-align: left;
+    font-size: 1.1em;
+}
+
+.report-button-container{
+    width: 10%;
+}
+
+.report-button {
+    width: 100%;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    & i {
+        font-size: 2.3rem;
+        color: #537A00;
+        transform: rotate(20deg);
+    }
+}
+
+.report-button:hover > i {
+    color: #3B6000;
+}
+
+/* -----------REPORT TAG MODAL-------------*/
+#report-tag-dialog {
+    /* REMINDER: Sidebar takes up 30vw + 60px of the viewport's width */
+    width: 30%;
+    height: fit-content;
+    margin: 0px;
+    padding: 20px 25px;
+    position: absolute;
+    z-index: 1000;
+    top: 50%;
+    transform: translate(50%, -50%); /* Horizontal-align to visible overlay, Vertical align dialog */
+    background-color: #F7F7F7;
+    border: none;
+    border-radius: 20px;
+    & h2 {
+        font-weight: 400;
+    }
+    & form {
+        height: 100%; /* So can size divs containing checkboxes using percentage */
+    }
+    & label {
+        font-size: 1.4em;
+    }
+}
+
+#reported-tag-input {
+    display: none;
+}
+
+#report-tag-dialog div:has(>input[type='checkbox']) {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0px;
+    padding: 0px 20px;
+}
+
+input[type='checkbox'] {
+    -webkit-appearance: none; /* Remove default browser styling */
+    -moz-appearance: none; /* Remove default browser styling */
+    appearance: none; /* Remove default browser styling */
+    min-height: 35px;
+    min-width: 35px;
+    position: relative;
+    border: solid 3px #3B6000;
+    border-radius: 5px;
+    font-size: 1.3em;
+    display: flex;  /* Need this to get center x/checkmark inside the checkbox */
+    justify-content: center;
+    cursor: pointer;
+
+    color: #959595;
+    background-color: #FDFDFD;
+    transition: all 0.2s ease;
+
+    &::before {
+        content: "✖";
+        position: absolute;
+        opacity: 1;
+        transform: scale(1);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    &::after {
+        content: "✔";
+        position: absolute;
+        opacity: 0;
+        transform: scale(0.5);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+}
+
+input[type='checkbox']:checked {
+    background-color: #537A00;
+    color: white;
+
+    &::before {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    &::after {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+#other-input {
+    font-size: 1.3em;
+    border: solid 1px black;
+    border-radius: 5px;
+    padding: 8px 10px;
+    margin-left: 70px; /* (20px padding + 35px width + 10px gap) - 5px (looks off without it) */
+    width: calc(100% - 70px - 20px - 22px); /* -70px margin-left - 20px padding - 25px padding */
+}
+
+#report-form-footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10%;
+    padding-top: 15px;
+    margin-top: 15px;
+    border-top: solid 1px #8A8A8A;
+}
+
+.form-footer-button {
+    width: 30%;
+    min-width: 120px;
+    padding: 10px 0px;
+    font-size: 1.3em;
+    font-weight: 400;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+#cancel-tag-report-button {
+    border: solid 2px #537A00;
+    color: #537A00;
+    background-color: transparent;
+
+    &:hover {
+        border-color: #3B6000;
+        color: white;
+        background-color: #3B6000;
+    }
+}
+
+#submit-tag-report-button {
+    border: solid 2px #537A00;
+    color: white;
+    background-color: #537A00;
+
+    &:hover {
+        border-color: #3B6000;
+        background-color: #3B6000;
+    }
+}

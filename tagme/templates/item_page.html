@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en ">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TagMe: {{ item.title }}</title>
+
+    <!-- Roboto font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="../../static/CSS/global.css">
+    <link rel="stylesheet" href="../../static/CSS/item_page.css">
+</head>
+
+<body>
+    {% include "global_top_bar.html" %}
+
+    <main id="main-content"> <!-- Need the main-content id for JavaScript -->
+        <a id="back-link" href="#" aria-label="Back to search results"><i class="fa fa-angle-left" aria-hidden="true"></i>Back to Search Results</a>
+
+        <div id="item-info-section">
+            <div class="column1 cover-container"> <!-- Div container necessary for consistent sizing -->
+                <img id="item-cover" src="{{ item.cover }}" alt="{% if item.cover != None %} {{ item.title }} cover {% else %} Cover not found {% endif %}">
+            </div>
+
+            <div class="column2">
+                <div id="column2-main-content">
+                    <div id="media-type"><i class="fa fa-book" aria-hidden="true"></i>Book</div>
+                    <p id="item-title"> {{ item.title }}</p>
+                    <p id="item-authors">by <b>{{ item.authors }}</b></p>
+                    <p id="item-pub-date">{{ item.publication_date }}</p>
+
+                    <h1 id="description-header">Description</h1>
+                    <p id="item-description">{{ item.description }}</p>
+                </div>
+                <button id="column2-read-more-button">Read more <i class="fa fa-angle-down" aria-hidden="true"></i></button>
+            </div>
+
+            <div class="column3">
+                {% if request.user.is_authenticated %}
+                    <button id="save-item-button">
+                        <i class="fa fa-thumb-tack" aria-hidden="true"></i>
+                        <span>Save Item</span>
+                    </button>
+                {% endif %}
+
+                <div id="tags-header">
+                    <h1>Tags</h1>
+                    <button id="report-tag-button" class="open-sidebar-button" aria-label="Report a tag">
+                        <i class="fa fa-flag-o" aria-hidden="true"></i>
+                        <span>Report a tag</span>
+                    </button>
+                </div>
+
+                <div id="tags-container">
+                    <!-- TODO: For loop for as many tags for the item can fit in the section -->
+                    <button class="tag" aria-label="[[Sample]]"><span class="tag-text">[[Sample]]</span></button>
+                </div>
+                <button id="all-tags-button" class="open-sidebar-button" aria-label="See all tags">See all tags <i class="fa fa-angle-right" aria-hidden="true"></i></button>
+            </div>
+        </div>
+
+        <div id="comments-section">
+            <h1>Comments</h1>
+            <div id="comments-pane">
+                <textarea placeholder="Add comment..."></textarea>
+
+                <!-- TODO: For loop for each comment on current page -->
+                <div class="comment">
+                    <div class="comment-header">
+                        <p>Username</p>
+                        <p><i class="fa fa-star" aria-hidden="true"></i>Reward Title 1</p>
+                        <p><i class="fa fa-star" aria-hidden="true"></i>Reward Title 2</p>
+                        <button><i class="fa fa-pencil-square-o" aria-hidden="true"></i>Edit comment</button>
+                    </div>
+                    <p>Date</p>
+                    <p>Comment</p>
+                    <button>Read more <i class="fa fa-angle-down" aria-hidden="true"></i></button>
+                </div>
+
+                <p>1 to 15 of 999,999,999 comments</p>
+                <!-- TODO: Paste similar pagination as in search results page -->
+            </div>
+        </div>
+    </main>
+
+    <div id="overlay"></div>
+
+    <aside id="tag-sidebar">
+        <div class="header-with-x-button">
+            <h1>Tags</h1>
+            <button id="close-sidebar-button" class="close-x-button" aria-label="Close tag panel">✖</button>
+        </div>
+
+        <div id="sidebar-main-content">
+            <!-- TODO: For loop for ALL item's tags -->
+            <div class="tag-entry">
+                <div class="single-tag-container"> <!-- div is necessary to left-align tag without stretching shape -->
+                    <button class="tag" aria-label="[[Sample]]"><span class="tag-text">[[Sample]]</span></button>
+                </div>
+                <p class="tag-count">x 99,999,999,999</p>
+                <div class="report-button-container"> <!-- Need this for consistency when user is logged in & logged out -->
+                    {% if user.is_authenticated %}
+                      <button class="report-button" aria-label="Report [[Sample]] tag"><i class="fa fa-flag-o" aria-hidden="true"></i></button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <dialog id="report-tag-dialog">
+        <form id="report-tag-form" method="POST">
+            <div class="header-with-x-button">
+                <h1>Report Tag</h1>
+                <button formmethod="dialog" id="close-report-modal-button" class="close-x-button" aria-label="Close Report Tag form">✖</button>
+            </div>
+            <button class="tag" aria-label="[[Sample]]" disabled><span id="reported-tag-text" class="tag-text"></span></button>
+            <h2>What is wrong with this tag?</h2>
+            {% csrf_token %}
+            {% for field in forms.report_form %}
+                <div>
+                    {{ field }}
+                    {% if field.label != False %}
+                        <label for="{{ field.id_for_label }}">
+                            <span class="fake-checkbox"></span> <!-- Because actual checkboxes can't be styled as easily -->
+                            {{ field.label }}
+                        </label>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <div id="report-form-footer">
+                <button id="cancel-tag-report-button" class="form-footer-button" formmethod="dialog">Cancel</button>
+                <input id="submit-tag-report-button" class="form-footer-button" type="submit" value="Report">
+            </div>
+        </form>
+    </dialog>
+
+
+    <dialog id="add-tag-modal"> <!-- TODO -->
+    </dialog>
+
+    {% include "global_footer.html" %}
+
+    <!-- JavaScript -->
+    <script type="text/javascript" src="../../static/JavaScript/global.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/item_page.js"></script>
+</body>
+</html>

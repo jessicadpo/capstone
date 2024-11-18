@@ -1,48 +1,46 @@
-body {
+main {
+    flex-grow: 1; /* Take up all available space between top bar and footer */
     display: flex;
     flex-direction: column; /* Main axis = Vertical */
-    justify-content: /*TODO*/; /* Alignment on vertical (main) axis */
+    padding: 10vh 0px;
 }
 
 #logo {
-    width: 400px;
-    display: block;
-    margin: auto;
+    width: 60vw;
+    max-width: 400px;
+    align-self: center;
 }
 
 #slogan {
     text-align: center;
     font-size: 2em;
-    margin: 0;
+    margin: 20px 20px 5vh 20px;
 }
 
 #search-bar {
     height: 50px;
-    display: flex;
-    flex-direction: row; /* Main axis = Horizontal */
-    justify-content: center; /* Alignment on horizontal (main) axis */
-    align-items: stretch; /* Alignment on vertical (cross) axis */
-    column-gap: 10px;
+    justify-content: center;
 }
 
 #search-dropdown {
     width: 165px;
+}
 
+#search-dropdown-button {
+    font-size: 1.3em;
+}
+
+.search-dropdown-item {
+    font-size: 1.1em;
 }
 
 #search-input {
-    width: 40%;
-    border: solid black 1px;
-    border-radius: 10px;
     font-size: 1.3em;
-    padding: 10px;
 }
 
 #search-button {
     width: 50px;
     font-size: 1.5em;
-    border-radius: 10px;
-    border: solid black 1px;
 }
 
 
