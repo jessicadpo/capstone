@@ -1,3 +1,4 @@
+"""Module for implementing functions in HTML Django tags"""
 from django import template
 register = template.Library()
 
