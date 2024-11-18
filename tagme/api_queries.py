@@ -4,8 +4,8 @@ Module for querying Library of Congress & Datamuse APIs
 RATE LIMIT FOR LIBRARY OF CONGRESS API: 20 queries per 10 seconds && 80 queries per 1 minute
 
 """
-import requests  # pylint: disable=import-error
 from urllib.parse import quote
+import requests  # pylint: disable=import-error
 from .helper_functions import *
 
 
@@ -81,5 +81,6 @@ def _query_loc_api(params, requested_page_number):
         return [], 0
 
 
-__all__ = [name for name in globals()]
+# Comprehension is actually necessary, or Django crashes
+__all__ = [name for name in globals()]  # pylint: disable=unnecessary-comprehension
 __all__.remove('_query_loc_api')  # Remove _query_loc_api from exportable functions (i.e., make function private)
