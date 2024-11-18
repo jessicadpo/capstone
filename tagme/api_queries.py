@@ -10,6 +10,7 @@ from .helper_functions import *
 
 
 def query_loc_keyword(search_string, requested_page_number):
+    """Keyword search to LOC API"""
     params = {
         "q": search_string,  # Default parameters set in _query_loc_api() function
     }
@@ -17,18 +18,22 @@ def query_loc_keyword(search_string, requested_page_number):
 
 
 def query_loc_title(search_string, requested_page_number):
-    print("TODO (placeholder code)")
+    """Title search to LOC API"""
+    print(f"TODO (placeholder code) {search_string} {requested_page_number}")
 
 
 def query_loc_author(search_string, requested_page_number):
-    print("TODO (placeholder code)")
+    """Author search to LOC API"""
+    print(f"TODO (placeholder code) {search_string} {requested_page_number}")
 
 
 def query_loc_subject(search_string, requested_page_number):
-    print("TODO (placeholder code)")
+    """Subject search to LOC API"""
+    print(f"TODO (placeholder code) {search_string} {requested_page_number}")
 
 
 def _query_loc_api(params, requested_page_number):
+    """Actual query to LOC API (PRIVATE FUNCTION)"""
     params["fa"] = "partof:catalog"
     params["fo"] = "json"
     params["c"] = 15  # Return max. 15 items per query (makes results load faster)

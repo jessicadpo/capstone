@@ -5,10 +5,12 @@ import string
 
 
 def decode_unicode(text_string):
+    """Convert any unicode to actual characters"""
     return html.unescape(text_string)
 
 
 def strip_punctuation(word):
+    """Remove punctuation from start and end of a string"""
     word = decode_unicode(word)
     word = word.strip("“")
     word = word.strip("”")
@@ -16,12 +18,13 @@ def strip_punctuation(word):
 
 
 def is_roman_numeral(word):
-    # Regex pattern to match Roman numerals (uppercase or lowercase)
+    """Regex pattern to match Roman numerals (uppercase or lowercase)"""
     roman_pattern = r"^[IVXLCDMivxlcdm]+$"
     return bool(re.match(roman_pattern, word))
 
 
 def to_title_case(text):
+    """Convert text to title case"""
     small_words = {"and", "or", "the", "in", "of", "a", "an", "to", "for", "nor", "but", "on", "at", "by", "with"}
     words = text.split()
 
@@ -40,6 +43,7 @@ def to_title_case(text):
 
 
 def to_firstname_lastname(name):
+    """Convert names containing 1 comma (Lastname, Firstname) to Firstname Lastname format"""
     if name.count(',') == 1:
         # Split the name by comma, then strip any extra spaces
         lastname, firstname = [name_part.strip() for name_part in name.split(',')]
