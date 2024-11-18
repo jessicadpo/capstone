@@ -1,10 +1,9 @@
 """Module for TagMe views"""
+from urllib.parse import urlparse
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import login, logout
 from django.urls import is_valid_path
 from django.http import Http404
-from django.core.paginator import Paginator
-from urllib.parse import urlparse, quote
 from .forms import *
 from .api_queries import *
 
@@ -111,6 +110,3 @@ def item_page(request, item_id):
     if not item:
         raise Http404("Item not found")
     return render(request, 'item_page.html', {'item': item, 'forms': page_forms})
-
-
-
