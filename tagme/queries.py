@@ -1,3 +1,4 @@
+# pylint: disable=no-member
 """
 Module for querying models AND Library of Congress & Datamuse APIs
 
@@ -13,7 +14,6 @@ from .models import *
 
 ########################################################################################################################
 # DJANGO DATABASE QUERIES
-# pylint: disable:no-member
 
 #######################################################
 # GETTERS
@@ -153,7 +153,7 @@ def set_user_tags_for_item(user, tags_data):
         user_contrib.public_tags.add(*new_public_tags)
         user_contrib.private_tags.add(*new_private_tags)
 
-# pylint: enable:no-member
+# pylint: enable=no-member
 
 ########################################################################################################################
 # DATAMUSE API QUERIES
