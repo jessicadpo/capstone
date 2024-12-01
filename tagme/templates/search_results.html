@@ -14,25 +14,28 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <link rel="stylesheet" href="../../static/CSS/global.css">
+    <link rel="stylesheet" href="../../static/CSS/tag_modal.css">
     <link rel="stylesheet" href="../../static/CSS/search_results.css">
 </head>
 
 <body>
-    {% include "global_top_bar.html" %}
+    {% include "components/top_bar.html" %}
     {% load html_math %}
 
     <main>
         <div id="sidebar">
             <h2><b>Synonymous Tags</b></h2>
             <div class="tag-container">
-                <!-- TODO: Insert for loops for synonymous tags here -->
-                <button class="tag" aria-label="[[Sample]]"><span class="tag-text">[[Sample]]</span></button>
+                {% for tag in synonymous_tags %}
+                    {% include 'components/tag.html' %}
+                {% endfor %}
             </div>
 
             <h2><b>Related Tags</b></h2>
             <div class="tag-container">
-                <!-- TODO: Insert for loops for related tags here -->
-                <button class="tag" aria-label="[[Sample]]"><span class="tag-text">[[Sample]]</span></button>
+                {% for tag in related_tags %}
+                    {% include 'components/tag.html' %}
+                {% endfor %}
             </div>
         </div>
 
@@ -72,7 +75,9 @@
 
                         <div class="result-text-info">
                             <div class="media-type"><i class="fa fa-book" aria-hidden="true"></i>Book</div>
-                            <a href="{% url 'item_page' item.item_id %}" class="result-title"
+
+                            <!-- Need <a> item-title class for "Pin Item" button JavaScript behaviour (tag_modal.js) -->
+                            <a href="{% url 'item_page' item.item_id %}" class="result-title item-title"
                                title="{{ item.title }} ({{ item.publication_date }}) by {{ item.authors }}"
                                aria-label="{{ item.title }} ({{ item.publication_date }}) by {{ item.authors }}">
                                 {{ item.title }}
@@ -81,13 +86,11 @@
                             <p class="result-pub-date">{{ item.publication_date }}</p>
                         </div>
 
-                        <!-- TODO: Check if item already saved or not (and change "Save" / "Saved") -->
                         {% if request.user.is_authenticated %}
-                            <button class="save-item-button">
-                                <i class="fa fa-thumb-tack" aria-hidden="true"></i>
-                                <span>Save Item</span>
-                            </button>
+                            {% include "components/pin_item_button.html" %}
                         {% endif %}
+
+
                     </div>
                 {% empty %}
                     <p>No results found.</p>
@@ -160,10 +163,13 @@
         </div>
     </main>
 
-    {% include "global_footer.html" %}
+    {% include "components/tag_modal.html" %}
+
+    {% include "components/footer.html" %}
 
     <!-- JavaScript -->
     <script type="text/javascript" src="../../static/JavaScript/global.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/tag_modal.js"></script>
     <script type="text/javascript" src="../../static/JavaScript/search_results.js"></script>
 </body>
 </html>

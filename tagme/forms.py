@@ -23,6 +23,14 @@ class SearchForm(forms.Form):
         attrs={'id': 'search-input', 'placeholder': 'Search', 'label': 'Search'}))
 
 
+class TagsForm(forms.Form):
+    """ Form for add/edit tags modal """
+    tagged_item = forms.CharField(label=False, required=True, widget=forms.TextInput(attrs={'id': 'item-id-input'}))
+    public_tags = forms.CharField(label=False, required=False, initial="\\n", widget=forms.Textarea(attrs={'id': 'public-tags-form-field'}))
+    private_tags = forms.CharField(label=False, required=False, initial="\\n", widget=forms.Textarea(attrs={'id': 'private-tags-form-field'}))
+    # Need initial for the isAlreadyAdded function in tag_modal.js
+
+
 class ReportForm(forms.Form):
     """ Form for reporting a tag """
     reported_tag = forms.CharField(label=False, required=True,  widget=forms.TextInput(

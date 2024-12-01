@@ -8,7 +8,7 @@
 
     <!--Do not show search bar if on homepage or on signup-login page -->
     {% if request.get_full_path != "/" and request.get_full_path != "/signup-login" %}
-        {% include "global_search_bar.html" %}
+        {% include "components/search_bar.html" %}
     {% endif %}
 
     <!--Do not show signup/login/account menu in top-right if on signup-login page-->
@@ -18,7 +18,7 @@
             <div class="dropdown" id="account-dropdown">
                 <button onclick="openAccountDropdown()" id="account-dropdown-button" class="dropdown-button">
                     <i class="fa fa-user-circle" aria-hidden="true"></i>
-                    {{ request.user.username }}
+                    <span>{{ request.user.username }}</span>
                 </button>
                 <div id="account-dropdown-options" class="dropdown-options">
                     <a href="/user"><i class="fa fa-user-o" aria-hidden="true"></i>My Profile</a>

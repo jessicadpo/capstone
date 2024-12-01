@@ -14,16 +14,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <link rel="stylesheet" href="../../static/CSS/global.css">
+    <link rel="stylesheet" href="../../static/CSS/tag_modal.css">
     <link rel="stylesheet" href="../../static/CSS/item_page.css">
 </head>
 
 <body>
-    {% include "global_top_bar.html" %}
+    {% include "components/top_bar.html" %}
 
     <main id="main-content"> <!-- Need the main-content id for JavaScript -->
         <a id="back-link" href="#" aria-label="Back to search results"><i class="fa fa-angle-left" aria-hidden="true"></i>Back to Search Results</a>
 
-        <div id="item-info-section">
+        <!-- Need <div> result-item class for "Save Item" button JavaScript behaviour (tag_modal.js) -->
+        <div id="item-info-section" class="result-item">
             <div class="column1 cover-container"> <!-- Div container necessary for consistent sizing -->
                 <img id="item-cover" src="{{ item.cover }}" alt="{% if item.cover != None %} {{ item.title }} cover {% else %} Cover not found {% endif %}">
             </div>
@@ -31,7 +33,8 @@
             <div class="column2">
                 <div id="column2-main-content">
                     <div id="media-type"><i class="fa fa-book" aria-hidden="true"></i>Book</div>
-                    <p id="item-title"> {{ item.title }}</p>
+                    <!-- Need <p> item-title class for "Save Item" button JavaScript behaviour (tag_modal.js) -->
+                    <p id="item-title" class="item-title"> {{ item.title }}</p>
                     <p id="item-authors">by <b>{{ item.authors }}</b></p>
                     <p id="item-pub-date">{{ item.publication_date }}</p>
 
@@ -43,23 +46,23 @@
 
             <div class="column3">
                 {% if request.user.is_authenticated %}
-                    <button id="save-item-button">
-                        <i class="fa fa-thumb-tack" aria-hidden="true"></i>
-                        <span>Save Item</span>
-                    </button>
+                    {% include 'components/pin_item_button.html' %}
                 {% endif %}
 
                 <div id="tags-header">
                     <h1>Tags</h1>
-                    <button id="report-tag-button" class="open-sidebar-button" aria-label="Report a tag">
-                        <i class="fa fa-flag-o" aria-hidden="true"></i>
-                        <span>Report a tag</span>
-                    </button>
+                    {% if user.is_authenticated %}
+                        <button id="report-tag-button" class="open-sidebar-button" aria-label="Report a tag">
+                            <i class="fa fa-flag-o" aria-hidden="true"></i>
+                            <span>Report a tag</span>
+                        </button>
+                    {% endif %}
                 </div>
 
                 <div id="tags-container">
-                    <!-- TODO: For loop for as many tags for the item can fit in the section -->
-                    <button class="tag" aria-label="[[Sample]]"><span class="tag-text">[[Sample]]</span></button>
+                    {% for tag in item.tags %}
+                        {% include "components/tag.html" %}
+                    {% endfor %}
                 </div>
                 <button id="all-tags-button" class="open-sidebar-button" aria-label="See all tags">See all tags <i class="fa fa-angle-right" aria-hidden="true"></i></button>
             </div>
@@ -89,7 +92,7 @@
         </div>
     </main>
 
-    <div id="overlay"></div>
+    <div id="report-tag-overlay"></div> <!-- id so overlay behaves differently from add-tags-overlay -->
 
     <aside id="tag-sidebar">
         <div class="header-with-x-button">
@@ -99,17 +102,21 @@
 
         <div id="sidebar-main-content">
             <!-- TODO: For loop for ALL item's tags -->
-            <div class="tag-entry">
-                <div class="single-tag-container"> <!-- div is necessary to left-align tag without stretching shape -->
-                    <button class="tag" aria-label="[[Sample]]"><span class="tag-text">[[Sample]]</span></button>
+            {% for tag in item.tags %}
+                <div class="tag-entry">
+                    <div class="single-tag-container"> <!-- div is necessary to left-align tag without stretching shape -->
+                        {% include "components/tag.html" %}
+                    </div>
+                    <p class="tag-count">x {{ tag.count }}</p>
+                    <div class="report-button-container"> <!-- Need this for consistency when user is logged in & logged out -->
+                        {% if user.is_authenticated %}
+                          <button class="report-button" aria-label="Report {{ tag.tag }} tag">
+                              <i class="fa fa-flag-o" aria-hidden="true"></i>
+                          </button>
+                        {% endif %}
+                    </div>
                 </div>
-                <p class="tag-count">x 99,999,999,999</p>
-                <div class="report-button-container"> <!-- Need this for consistency when user is logged in & logged out -->
-                    {% if user.is_authenticated %}
-                      <button class="report-button" aria-label="Report [[Sample]] tag"><i class="fa fa-flag-o" aria-hidden="true"></i></button>
-                    {% endif %}
-                </div>
-            </div>
+            {% endfor %}
         </div>
     </aside>
 
@@ -119,7 +126,9 @@
                 <h1>Report Tag</h1>
                 <button formmethod="dialog" id="close-report-modal-button" class="close-x-button" aria-label="Close Report Tag form">✖</button>
             </div>
-            <button class="tag" aria-label="[[Sample]]" disabled><span id="reported-tag-text" class="tag-text"></span></button>
+
+            {% include "components/tag.html" %}
+
             <h2>What is wrong with this tag?</h2>
             {% csrf_token %}
             {% for field in forms.report_form %}
@@ -140,14 +149,13 @@
         </form>
     </dialog>
 
+    {% include "components/tag_modal.html" %}
 
-    <dialog id="add-tag-modal"> <!-- TODO -->
-    </dialog>
-
-    {% include "global_footer.html" %}
+    {% include "components/footer.html" %}
 
     <!-- JavaScript -->
     <script type="text/javascript" src="../../static/JavaScript/global.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/tag_modal.js"></script>
     <script type="text/javascript" src="../../static/JavaScript/item_page.js"></script>
 </body>
 </html>
