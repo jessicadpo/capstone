@@ -9,7 +9,7 @@ class Item(models.Model):
     item_id = models.TextField(primary_key=True, blank=False, null=False)  # The LOC API's item id
 
     def __str__(self):
-        return self.item_id  # For proper display on admin site
+        return str(self.item_id) # For proper display on admin site
 
 
 class Tag(models.Model):
@@ -21,7 +21,7 @@ class Tag(models.Model):
     item_whitelist = models.ManyToManyField(Item, blank=True, related_name="whitelisted_for_items")
 
     def __str__(self):
-        return self.tag  # For proper display on admin site
+        return str(self.tag)  # For proper display on admin site
 
 
 class Reward(models.Model):
@@ -31,7 +31,7 @@ class Reward(models.Model):
     points_required = models.PositiveBigIntegerField(blank=False, null=False)
 
     def __str__(self):
-        return self.title  # For proper display on admin site
+        return str(self.title)  # For proper display on admin site
 
 
 class UserProfile(models.Model):
@@ -45,7 +45,7 @@ class UserProfile(models.Model):
     equipped_title_2 = models.ForeignKey(Reward, blank=True, null=True, related_name="title_2", on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.user.username  # For proper display on admin site
+        return str(self.user)  # For proper display on admin site
 
 
 class UserContribution(models.Model):
@@ -54,6 +54,7 @@ class UserContribution(models.Model):
     Automatic "id" attribute is created as the table's primary key.
     """
     class Meta:
+        """Meta class for UserContribution model"""
         # Ensure no duplicate entries for the same user on the same item
         constraints = [models.UniqueConstraint(fields=['user_id', 'item_id'], name='unique_user_contribution')]
 
@@ -74,16 +75,16 @@ class UserContribution(models.Model):
     def save_comment(self, *args, **kwargs):
         """Update timestamp when comment is added/edited"""
         self.comment_datetime = timezone.now()
-        return super(UserContribution, self).save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
     def __str__(self):
-        username = User.objects.get(id=self.user_id).username
-        return "User: " + username + ", Item: " + str(self.item_id)  # For proper display on admin site
+        return "User: " + str(self.user) + ", Item: " + str(self.item)  # For proper display on admin site
 
 
 class Report(models.Model):
     """Class for TagReports database table"""
     class ReportDecision(models.TextChoices):
+        """Admin decision options for tag reports"""
         GLOBAL_BLACKLIST = "global_blacklist"
         ITEM_BLACKLIST = "item_blacklist"
         GLOBAL_WHITELIST = "global_whitelist"
@@ -103,7 +104,7 @@ class Report(models.Model):
     def save_decision(self, *args, **kwargs):
         """Update timestamp when decision is added/edited"""
         self.decision_datetime = timezone.now()
-        return super(Report, self).save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return str(self.report_id)

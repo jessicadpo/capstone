@@ -2,10 +2,10 @@
 Module for querying models AND Library of Congress & Datamuse APIs
 
 RATE LIMIT FOR LIBRARY OF CONGRESS API: 20 queries per 10 seconds && 80 queries per 1 minute
-
 """
 from urllib.parse import quote
 from django.db.models import Count
+from django.contrib.auth import PermissionDenied
 import requests
 from .helper_functions import *
 from .models import *
@@ -13,6 +13,7 @@ from .models import *
 
 ########################################################################################################################
 # DJANGO DATABASE QUERIES
+# pylint: disable:no-member
 
 #######################################################
 # GETTERS
@@ -27,7 +28,7 @@ def get_is_item_pinned(user, item_id):
 
 def get_all_tags_for_user(user):
     """Function for getting all tags added by a particular user (on any PINNED item)"""
-    print('placeholder code')
+    print(f'placeholder code {user}')
 
 
 def get_all_tags_for_item(item_id):
@@ -54,7 +55,7 @@ def get_all_tags_for_item(item_id):
 def get_user_tags_for_item(user, item_id):
     """Function for retrieving a user's tags for a particular item"""
     if not user.is_authenticated:
-        raise Exception("User must be logged in")
+        raise PermissionDenied("User must be logged in")
 
     # Returns a list of dicts (each tag in its own dict)
     user_contrib = UserContribution.objects.filter(user_id=user.id, item_id=item_id)
@@ -152,17 +153,19 @@ def set_user_tags_for_item(user, tags_data):
         user_contrib.public_tags.add(*new_public_tags)
         user_contrib.private_tags.add(*new_private_tags)
 
+# pylint: enable:no-member
+
 ########################################################################################################################
 # DATAMUSE API QUERIES
 
 def query_datamuse_synonyms(word):
     """Function for synonyms of a given word (may or may NOT exist as tags in our database)"""
-    return list("placeholder code")
+    return list(f"placeholder code {word}")
 
 
 def query_datamuse_related_words(word):
     """Function for words related to a given word (may or may NOT exist as tags in our database)"""
-    return list("placeholder code")
+    return list(f"placeholder code {word}")
 
 
 ########################################################################################################################
@@ -178,17 +181,17 @@ def query_loc_keyword(request, requested_page_number):
 
 def query_loc_title(request, requested_page_number):
     """Title search to LOC API"""
-    print(f"TODO (placeholder code)")
+    print(f"TODO (placeholder code) {request} {requested_page_number}")
 
 
 def query_loc_author(request, requested_page_number):
     """Author search to LOC API"""
-    print(f"TODO (placeholder code)")
+    print(f"TODO (placeholder code) {request} {requested_page_number}")
 
 
 def query_loc_subject(request, requested_page_number):
     """Subject search to LOC API"""
-    print(f"TODO (placeholder code))")
+    print(f"TODO (placeholder code)) {request} {requested_page_number}")
 
 
 def _query_loc_api(request, params, requested_page_number):
