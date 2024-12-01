@@ -9,7 +9,7 @@ function openAccountDropdown() {
 
 // Close the dropdown menu if the user clicks outside of it
 window.onclick = function(event) {
-  if (!event.target.matches('.dropdown-button')) {
+  if (!event.target.matches('.dropdown-button') && !event.target.matches('.dropdown-button *')) {
     var dropdowns = document.getElementsByClassName("dropdown-options");
     var i;
     for (i = 0; i < dropdowns.length; i++) {
@@ -25,12 +25,14 @@ window.onclick = function(event) {
 // Set the hidden Select element (from Django form) to the selected value
 // Doing it this way because Select HTML elements can't be formatted/styled properly
 const dropdownButton = document.getElementById("search-dropdown-button");
+const dropdownButtonSpan = document.getElementById("search-dropdown-button-text");
 const dropdownItems = document.querySelectorAll(".search-dropdown-item");
+const dropdownFormSelect = document.getElementById('search-type-select');
 dropdownItems.forEach(item => {
     item.addEventListener("click", function(event) {
         event.preventDefault(); // Prevent page from jumping
-        dropdownButton.textContent = this.textContent; // Change the button text to the clicked item's text
+        dropdownButtonSpan.textContent = this.textContent; // Change the button text to the clicked item's text
         const selectedValue = this.getAttribute('data-value');
-        document.getElementById('search-type-select').value = selectedValue;
+        dropdownFormSelect.value = selectedValue;
     });
 });

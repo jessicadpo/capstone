@@ -13,7 +13,16 @@ main {
     padding: 1vh 1vw;
     border-right: solid 1px #8A8A8A;
     overflow: hidden; /* TODO: Figure out how to adapt this when browser width is small */
+
+    & .tag-container {
+        display: flex;
+        flex-direction: column; /* Main axis = Vertical */
+        align-items: left;
+        gap: 10px;
+    }
 }
+
+
 
 /* -------------------------------------------------------------------------------------------------------------------*/
 /* RESULTS SECTION */
@@ -26,7 +35,7 @@ main {
     gap: 20px;
 }
 
-/* -----------HEADER--------------*/
+/* -----------(RESULTS) HEADER--------------*/
 #results-header {
     width: 100%;
     display: flex;
@@ -75,7 +84,7 @@ main {
     border-radius: 0px 5px 5px 0px;
 }
 
-/* -----------FOOTER--------------*/
+/* ----------- (RESULTS) FOOTER--------------*/
 #results-footer {
     position: relative; /* So can position bottom-to-of-results */
     display: flex;
@@ -192,33 +201,14 @@ main {
     color: #8A8A8A; /* Text color if no cover found */
 }
 
-.save-item-button {
+.pin-item-button { /* Partially overrides styling in global.css */
+    width: 16%;
     height: 20%;
-    min-width: 210px;
     margin: 20px;
     padding: 25px 30px 25px 25px;
-    background-color: white;
-    border: solid 1px #B52801;
-    border-radius: 15px;
-    display: flex;
-    flex-direction: row; /* Main axis = Horizontal */
-    align-items: center;
-    gap: 5px;
-    cursor: pointer;
-}
-
-.save-item-button i {
-    color: #B52801;
-    font-size: 2.2em;
-    transform: rotate(45deg);
-}
-
-.save-item-button span {
-    flex-grow: 1;
-    color: #B52801;
-    text-align: center;
-    font-weight: 400;
-    font-size: 1.8em;
+    & span {
+        flex-grow: 1;
+    }
 }
 
 .result-text-info {

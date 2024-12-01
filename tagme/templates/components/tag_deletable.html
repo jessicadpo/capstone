@@ -1,0 +1,10 @@
+<div class="tag deletable-tag">
+    <div class="tag-content">
+        <img src="../../static/icons/tag-bg-light.svg"/>
+        <!-- Disable keyboard navigation of tag link if tag is deletable -->
+        <!-- Need the "tag-value" class for JavaScript code -->
+        <a class="tag-value" href="#" tabindex="-1" aria-disabled="true">{{ tag }}</a>
+        <button onclick="removeTag(this)" class="remove-tag-button" aria-label="Remove {{ tag }} tag">✖</button>
+    </div>
+    <img src="../../static/icons/tag-bg-triangle.svg"/>
+</div>

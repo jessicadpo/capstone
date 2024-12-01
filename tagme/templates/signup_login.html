@@ -18,7 +18,7 @@
 </head>
 
 <body>
-    {% include "global_top_bar.html" %}
+    {% include "components/top_bar.html" %}
 
     <main>
         <form id="signup-form" method="post">
@@ -29,10 +29,18 @@
                     <div>
                         {{ field }}
                         {% if field.errors %}
-                            <i class="fa fa-exclamation-triangle sign-up" aria-label="Form input error" tabindex="0"></i>
-                            <div class="triangle-outline sign-up"></div>
-                            {{ field.errors }}
-                            <div class="triangle sign-up"></div>
+                            <div class="tooltip">
+                                <i class="fa fa-exclamation-triangle" aria-label="Form input error" tabindex="0"></i>
+                                <div class="tooltip-bubble red-bubble bubble-on-right">
+                                    <div class="bubble-tail-outline"></div>
+                                    <div class="bubble-tail"></div>
+                                    <ul class="bubble-content">
+                                        {% for error in field.errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
                         {% endif %}
                     </div>
                 {% endfor %}
@@ -49,10 +57,18 @@
                 {% for field in forms.login_form %}
                     <div>
                         {% if field.errors %}
-                            <i class="fa fa-exclamation-triangle login" aria-label="Form input error" tabindex="0"></i>
-                            <div class="triangle-outline login"></div>
-                            {{ field.errors }}
-                            <div class="triangle login"></div>
+                            <div class="tooltip">
+                                <i class="fa fa-exclamation-triangle" aria-label="Form input error" tabindex="0"></i>
+                                <div class="tooltip-bubble red-bubble bubble-on-left">
+                                    <ul class="bubble-content">
+                                        {% for error in field.errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    <div class="bubble-tail-outline"></div>
+                                    <div class="bubble-tail"></div>
+                                </div>
+                            </div>
                         {% endif %}
                         {{ field }}
                     </div>
@@ -63,6 +79,6 @@
 
     </main>
 
-    {% include "global_footer.html" %}
+    {% include "components/footer.html" %}
 </body>
 </html>

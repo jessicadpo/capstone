@@ -58,113 +58,41 @@ h1 {
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
-/* All divs followed by an errorlist (ul) */
-div:has(.errorlist) {
-    position: relative; /* Position the div to non-static so that the errorlists inside it can be absolute positioned */
-    display: flex; /* To vertical align the error list */
-    flex-direction: column; /* Main axis = Vertical */
-    justify-content: center;
+/* All django form input divs followed with direct .tooltip child */
+div:has(>.tooltip) {
+    position: relative;  /* So can absolution position .tooltip */
+    display: flex; /* To vertical align the tooltip icons */
+    flex-direction: row; /* Main axis = Horizontal */
+    align-items: center;
+}
+
+.tooltip {
+    position: absolute; /* Override position: relative (global.css) */
+    &:has(.bubble-on-left) {
+        left: -5%;
+    }
+    &:has(.bubble-on-right) {
+        right: -5%;
+    }
 }
 
 .fa-exclamation-triangle {
-    position: absolute;
     font-size: 1.5em;
     color: #B52801;
-    cursor: pointer;
 }
 
-.fa-exclamation-triangle.sign-up {
-    left: 100%;
-}
-
-.fa-exclamation-triangle.login {
-    right: 100%;
-}
-
-.fa-exclamation-triangle:focus,
-.fa-exclamation-triangle:focus-visible {
-   border: solid 5px -webkit-focus-ring-color;
-} /* TODO: Add JavaScript to make icon focus on click */
-
-.fa-exclamation-triangle:hover~ul,
-.fa-exclamation-triangle:hover~.triangle-outline,
-.fa-exclamation-triangle:hover~.triangle,
-.fa-exclamation-triangle:focus~ul,
-.fa-exclamation-triangle:focus~.triangle-outline,
-.fa-exclamation-triangle:focus~.triangle {
-    display: block;
-}
-
-.errorlist { /* Speech bubble shape (main bubble) */
-    display: none;
-    position: absolute;
-    width: 15vw;
-    margin: 0;
-    padding: 10px;
-    background-color: #FEEBE8;
-    border: solid #B52801 1px;
-    border-radius: 5px;
+ul.bubble-content { /* ul content of tooltip bubble */
     list-style-type: none;
-}
 
-.sign-up~.errorlist { /* All errorlists preceded by .sign-up element */
-    left: 110%;
-}
+    & li {
+        margin: 0 0 10px 0;
+    }
 
-.login~.errorlist { /* All errorlists preceded by .login element */
-    right: 110%;
-}
+    & li:last-child {
+        margin: 10px 0px 0px 0px;
+    }
 
-.errorlist li {
-    margin: 0 0 10px 0;
-}
-
-.errorlist li:last-child {
-    margin: 10px 0px 0px 0px;
-}
-
-.errorlist li:only-child {
-    margin: 0;
-}
-
-.triangle-outline { /* Triangle BORDER part of speech bubble shape */
-    content:"";
-    position: absolute;
-    width: 0;
-    height: 0;
-    border-top: 13px solid transparent;
-    border-bottom: 13px solid transparent;
-    margin: auto 0px auto -15px;
-    display: none;
-}
-
-.triangle-outline.sign-up {
-    border-right: 26px solid #B52801;
-    left: 110%;
-}
-
-.triangle-outline.login {
-    border-left: 26px solid #B52801;
-    right: 106%;
-}
-
-.triangle { /* Triangle part of speech bubble shape */
-    content:"";
-    position: absolute;
-    width: 0;
-    height: 0;
-    border-top: 13px solid transparent;
-    border-bottom: 13px solid transparent;
-    margin: auto 0px auto -15px;
-    display: none;
-}
-
-.triangle.sign-up {
-    border-right: 26px solid #FEEBE8;
-    left: calc(110% + 2px);
-}
-
-.triangle.login {
-    border-left: 26px solid #FEEBE8;
-    right: calc(106% + 2px);
+    & li:only-child {
+        margin: 0;
+    }
 }
