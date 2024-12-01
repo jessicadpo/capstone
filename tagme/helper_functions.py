@@ -49,5 +49,3 @@ def to_firstname_lastname(name):
         lastname, firstname = [name_part.strip() for name_part in name.split(',')]
         return f"{firstname} {lastname}"
     return name
-
-
