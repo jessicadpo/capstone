@@ -83,11 +83,12 @@ def search_results(request, requested_page_number):
 
     # TODO: Code for parsing AND/OR/NOT/*/? --> Investigate pyparsing & Shunting Yard algorithm
 
+    search_string = request.GET.get('search_string')
     results_on_page = []
     pagination: None
     match request.GET.get('search_type'):
         case "Keyword":
-            results_on_page, pagination = query_loc_keyword(request, requested_page_number)
+            results_on_page, pagination = query_loc_keyword(search_string, requested_page_number)
             # TODO: Need to also search our UserContribution model
         case "Tag":
             print("placeholder code")  # Replace with Django queries

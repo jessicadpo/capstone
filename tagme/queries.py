@@ -171,30 +171,30 @@ def query_datamuse_related_words(word):
 ########################################################################################################################
 # LOC API QUERIES
 
-def query_loc_keyword(request, requested_page_number):
+def query_loc_keyword(search_string, requested_page_number):
     """Keyword search to LOC API"""
     params = {
-        "q": request.GET.get('search_string'),  # Default parameters set in _query_loc_api() function
+        "q": search_string,  # Default parameters set in _query_loc_api() function
     }
-    return _query_loc_api(request, params, requested_page_number)
+    return _query_loc_api(params, requested_page_number)
 
 
-def query_loc_title(request, requested_page_number):
+def query_loc_title(search_string, requested_page_number):
     """Title search to LOC API"""
-    print(f"TODO (placeholder code) {request} {requested_page_number}")
+    print(f"TODO (placeholder code) {search_string} {requested_page_number}")
 
 
-def query_loc_author(request, requested_page_number):
+def query_loc_author(search_string, requested_page_number):
     """Author search to LOC API"""
-    print(f"TODO (placeholder code) {request} {requested_page_number}")
+    print(f"TODO (placeholder code) {search_string} {requested_page_number}")
 
 
-def query_loc_subject(request, requested_page_number):
+def query_loc_subject(search_string, requested_page_number):
     """Subject search to LOC API"""
-    print(f"TODO (placeholder code)) {request} {requested_page_number}")
+    print(f"TODO (placeholder code)) {search_string} {requested_page_number}")
 
 
-def _query_loc_api(request, params, requested_page_number):
+def _query_loc_api(params, requested_page_number):
     """Actual query to LOC API (PRIVATE FUNCTION)"""
     params["fa"] = "partof:catalog"
     params["fo"] = "json"
