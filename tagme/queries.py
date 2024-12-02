@@ -105,6 +105,7 @@ def get_related_tags(search_string):
 
     return related_tags
 
+
 #######################################################
 # SETTERS
 
@@ -132,28 +133,35 @@ def set_user_tags_for_item(user, tags_data):
     user_contrib = UserContribution.objects.filter(user=user, item=item)
     if user_contrib.exists():
         user_contrib = user_contrib[0]
+
         existing_public_tags = set(user_contrib.public_tags.all())
         existing_private_tags = set(user_contrib.private_tags.all())
 
         public_tags_to_add = new_public_tags - existing_public_tags
-        public_tags_to_remove = existing_public_tags - new_public_tags
         private_tags_to_add = new_private_tags - existing_private_tags
-        private_tags_to_remove = existing_private_tags - new_private_tags
-
         user_contrib.public_tags.add(*public_tags_to_add)
-        user_contrib.public_tags.remove(*public_tags_to_remove)
         user_contrib.private_tags.add(*private_tags_to_add)
-        user_contrib.private_tags.remove(*private_tags_to_remove)
 
-        user_contrib.is_pinned = True
+        # If user already has tags, but the item is being unpinned or is CURRENTLY unpinned
+        # (meaning user is re-pinning an item that they previously tagged)
+        # Do NOT override previous tags --> Only override if user is changing the tags on an item that's already pinned
+        # + they are NOT unpinning the item
+        if user_contrib.is_pinned and eval(tags_data.get('is_pinned')):
+            public_tags_to_remove = existing_public_tags - new_public_tags
+            private_tags_to_remove = existing_private_tags - new_private_tags
+            user_contrib.public_tags.remove(*public_tags_to_remove)
+            user_contrib.private_tags.remove(*private_tags_to_remove)
+
+        user_contrib.is_pinned = eval(tags_data.get('is_pinned'))
         user_contrib.save()
     else:
-        user_contrib = UserContribution(user=user, item_id=item_id, is_pinned=True)
+        user_contrib = UserContribution(user=user, item_id=item_id, is_pinned=eval(tags_data.get('is_pinned')))
         user_contrib.save()
         user_contrib.public_tags.add(*new_public_tags)
         user_contrib.private_tags.add(*new_private_tags)
 
 # pylint: enable=no-member
+
 
 ########################################################################################################################
 # DATAMUSE API QUERIES

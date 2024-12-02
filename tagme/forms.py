@@ -25,6 +25,9 @@ class SearchForm(forms.Form):
 
 class TagsForm(forms.Form):
     """ Form for add/edit tags modal """
+    # Need to use a CharField instead of BooleanField because
+    # unchecked BooleanField just straight up don't get included in a request
+    is_pinned = forms.CharField(label=False, required=True, initial="true", widget=forms.TextInput(attrs={'id': 'is-pinned-input'}))
     tagged_item = forms.CharField(label=False, required=True, widget=forms.TextInput(attrs={'id': 'item-id-input'}))
     public_tags = forms.CharField(label=False, required=False, initial="\\n", widget=forms.Textarea(attrs={'id': 'public-tags-form-field'}))
     private_tags = forms.CharField(label=False, required=False, initial="\\n", widget=forms.Textarea(attrs={'id': 'private-tags-form-field'}))

@@ -9,10 +9,12 @@ const unpinItemButton = document.getElementById('unpin-item-button');
 
 const publicTagsContainer = document.getElementById('public-tags-list-container');
 const privateTagsContainer = document.getElementById('private-tags-list-container');
+
 const publicTagsInput = document.getElementById('public-tags-input');
 const privateTagsInput = document.getElementById('private-tags-input');
 const publicTagsFormField = document.getElementById('public-tags-form-field'); // Invisible to users
 const privateTagsFormField = document.getElementById('private-tags-form-field'); // Invisible to users
+const isPinnedFormField = document.getElementById('is-pinned-input'); // Invisible to users
 
 function openModal() {
     addTagsOverlay.classList.add('active');
@@ -78,6 +80,7 @@ document.addEventListener("DOMContentLoaded", function() {
     saveTagsButton.addEventListener('click', function() {
         event.preventDefault();
         // Fill hidden form fields with all tags in modal
+        isPinnedFormField.value = "True"; // MUST have first capital letter for compatibility with Python
         const publicTags = document.querySelectorAll('#public-tags-list-container .tag-value')
         const privateTags = document.querySelectorAll('#private-tags-list-container .tag-value')
         publicTags.forEach(tag => {
@@ -86,6 +89,15 @@ document.addEventListener("DOMContentLoaded", function() {
         privateTags.forEach(tag => {
             privateTagsFormField.value += tag.textContent + '\\n';
         });
+        userTagsForm.submit();
+        closeModal();
+    });
+
+    // Make the "Unpin" button submit the form (only care about isPinned) & close the modal
+    // Must use JavaScript because hidden forms aren't submittable otherwise
+    unpinItemButton.addEventListener('click', function() {
+        event.preventDefault();
+        isPinnedFormField.value = "False"; // MUST have first capital letter for compatibility with Python
         userTagsForm.submit();
         closeModal();
     });
