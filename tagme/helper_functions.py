@@ -49,3 +49,9 @@ def to_firstname_lastname(name):
         lastname, firstname = [name_part.strip() for name_part in name.split(',')]
         return f"{firstname} {lastname}"
     return name
+
+def loc_facet_concatenation(facet1, facet2):
+    """concatenate two facets for filtering LoC API queries"""
+    if isinstance(facet1, str) and isinstance(facet2, str):
+        return facet1+facet2
+    return "error: improper concatenation"
