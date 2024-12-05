@@ -194,13 +194,14 @@ def query_loc_subject(search_string, requested_page_number):
     """Subject search to LOC API"""
     params = {
         "q": search_string,
-        "fa": "partof:catalog&fa=subject:"+search_string
+        "fa": "fa=subject:"+search_string
     }
     print(f"TODO (placeholder code)) {search_string} {requested_page_number}")
 
 
 def _query_loc_api(params, requested_page_number):
     """Actual query to LOC API (PRIVATE FUNCTION)"""
+    params["fa"] = "partof:catalog"
     params["fo"] = "json"
     params["c"] = 15  # Return max. 15 items per query (makes results load faster)
     params["sp"] = requested_page_number
@@ -219,6 +220,8 @@ def _query_loc_api(params, requested_page_number):
 
         results_on_page = []
         for item in data.get("results", []):
+            if item.get('number_lccn') is None:
+                continue
             item_id = item.get('number_lccn')[0]
             title = decode_unicode(strip_punctuation(item.get("item").get('title', 'No title available')))
             publication_date = decode_unicode(item.get('date', 'No publication date available'))
