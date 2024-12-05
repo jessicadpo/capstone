@@ -186,7 +186,7 @@ def create_report(request, item_id):
             except Item.DoesNotExist:
                 return
 
-            # return existing tag, handle None error
+            # return existing tag
             tag = Tag.objects.filter(tag=reported_tag).first()
 
             #Request user
