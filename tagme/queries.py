@@ -196,7 +196,7 @@ def query_loc_subject(search_string, requested_page_number):
         "q": search_string,
         "fa": "fa=subject:"+search_string
     }
-    print(f"TODO (placeholder code)) {search_string} {requested_page_number}")
+    return _query_loc_api(params, requested_page_number)
 
 
 def _query_loc_api(params, requested_page_number):
