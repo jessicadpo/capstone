@@ -221,6 +221,12 @@ def _query_loc_api(params, requested_page_number):
         results_on_page = []
         for item in data.get("results", []):
             if item.get('number_lccn') is None:
+                '''
+                IMPORTANT: 
+                Needed to make sure following lines don't use items with no lccn numbers,
+                but currently breaks search results by simply returning nothing, 
+                so nothing is passed to pagination, so the entire page breaks.
+                '''
                 continue
             item_id = item.get('number_lccn')[0]
             title = decode_unicode(strip_punctuation(item.get("item").get('title', 'No title available')))
