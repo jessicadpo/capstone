@@ -50,8 +50,8 @@ def to_firstname_lastname(name):
         return f"{firstname} {lastname}"
     return name
 
-def loc_facet_concatenation(facet1, facet2):
-    """concatenate two facets for filtering LoC API queries"""
+def fa_concatenation(facet1, facet2):
+    """concatenate two facets for filtering LoC API queries, for future tweaks to search system"""
     if isinstance(facet1, str) and isinstance(facet2, str):
         return facet1+facet2
     return "error: improper concatenation"
