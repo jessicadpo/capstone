@@ -155,6 +155,7 @@ def global_blacklist():
                  'white power', 'wrapping men', 'wrinkled starfish', 'xx', 'xxx', 'yaoi', 'yellow showers', 'yiffy',
                  'zoophilia', 'ZZZZZ']
 
+    tag = 0
     i = 0
     while blacklist[i] != 'ZZZZZ':
         black_listed = True
