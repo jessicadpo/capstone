@@ -159,6 +159,7 @@ def global_blacklist(search_string):
     while blacklist[i] != 'ZZZZZ':
         if search_string == blacklist[i]:
             black_listed = True
+        i+=1
 
     return black_listed
 
