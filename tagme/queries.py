@@ -193,7 +193,7 @@ def query_loc_author(search_string, requested_page_number):
 def query_loc_subject(search_string, requested_page_number):
     """Subject search to LOC API"""
     params = {
-        "q": search_string,
+        "q": "",
         "fa": "fa=subject:"+search_string
     }
     print(f"TODO (placeholder code)) {search_string} {requested_page_number}")
