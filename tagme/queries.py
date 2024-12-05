@@ -106,7 +106,7 @@ def get_related_tags(search_string):
     return related_tags
 
 
-def global_blacklist(search_string):
+def global_blacklist():
     """Function that returns true if the search string is blacklisted"""
     # TODO: Make this work in a way that aligns with the rest of the project.
     black_listed = False
@@ -157,12 +157,13 @@ def global_blacklist(search_string):
 
     i = 0
     while blacklist[i] != 'ZZZZZ':
-        if search_string == blacklist[i]:
-            black_listed = True
+        black_listed = True
+        tag = Tag.objects.get_or_create(tag=blacklist[i], global_blacklist=True)
         i+=1
 
     return black_listed
 
+global_blacklist()
 #######################################################
 # SETTERS
 
