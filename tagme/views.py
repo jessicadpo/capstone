@@ -125,7 +125,6 @@ def search_results(request, requested_page_number):
         'related_tags': related_tags,
     })
 
-
 def item_page(request, item_id):
     """View for Item pages"""
     # If POST request for adding/editing tags on an item
@@ -136,7 +135,7 @@ def item_page(request, item_id):
 
     # If POST request for reporting a tag
     elif request.method == 'POST' and ('reported_tag' in request.POST):
-        print('reporting a tag')
+        create_report(request, item_id)
 
     # If POST request for adding a comment
     elif request.method == 'POST' and ('comment' in request.POST):
@@ -156,3 +155,48 @@ def item_page(request, item_id):
     if not item_data:
         raise Http404("Item not found")
     return render(request, 'item_page.html', {'item': item_data, 'forms': page_forms})
+
+def create_report(request, item_id):
+    """View for tag reporting"""
+    if request.method == 'POST':
+        form = ReportForm(request.POST)
+        if form.is_valid():
+            reported_tag = form.cleaned_data['reported_tag']
+            is_irrelevant = form.cleaned_data['is_irrelevant']
+            is_vulgar = form.cleaned_data['is_vulgar']
+            is_offensive = form.cleaned_data['is_offensive']
+            is_misinformation = form.cleaned_data['is_misinformation']
+            is_other = form.cleaned_data['is_other']
+            other_text = form.cleaned_data['other_text']
+
+            # Only one category chosen
+            reason = next((r for r, selected in [
+                ('Irrelevant', is_irrelevant),
+                ('Vulgar', is_vulgar),
+                ('Offensive', is_offensive),
+                ('Misinformation', is_misinformation),
+            ] if selected), None)
+
+            if is_other:
+                reason = f"Other: {other_text}" if other_text else "Other"
+
+            # retrieve Item,Tag. Added No item, necessary???
+            try:
+                item = Item.objects.get(item_id=item_id)
+            except Item.DoesNotExist:
+                return
+
+            # return existing tag, handle None error
+            tag = Tag.objects.filter(tag=reported_tag).first()
+
+            #Request user
+            user = request.user
+
+            if reason:
+                report = Report(
+                    item_id=item,
+                    user_id=user,
+                    tag=tag,
+                    reason=reason
+                )
+                report.save()
