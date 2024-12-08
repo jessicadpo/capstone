@@ -109,6 +109,7 @@ def search_results(request, requested_page_number):
             item_data['user_public_tags'] = user_public_tags
             item_data['user_private_tags'] = user_private_tags
             item_data['is_pinned'] = get_is_item_pinned(request.user, item_data["item_id"])
+            item_data['points_earned'] = get_user_points_for_item(request.user, item_data["item_id"])
 
     # Get lists of synonymous & related tags
     synonymous_tags = get_synonymous_tags(request.GET.get('search_string'))
@@ -152,6 +153,7 @@ def item_page(request, item_id):
         item_data['user_public_tags'] = user_public_tags
         item_data['user_private_tags'] = user_private_tags
         item_data['is_pinned'] = get_is_item_pinned(request.user, item_id)
+        item_data['points_earned'] = get_user_points_for_item(request.user, item_data["item_id"])
 
     if not item_data:
         raise Http404("Item not found")

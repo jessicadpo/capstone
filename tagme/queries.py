@@ -7,6 +7,8 @@ RATE LIMIT FOR LIBRARY OF CONGRESS API: 20 queries per 10 seconds && 80 queries 
 from urllib.parse import quote
 from django.db.models import Count
 from django.contrib.auth import PermissionDenied
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 import requests
 from .helper_functions import *
 from .models import *
@@ -70,6 +72,18 @@ def get_user_tags_for_item(user, item_id):
 
         return user_public_tags, user_private_tags
     return None, None
+
+
+def get_user_points_for_item(user, item_id):
+    """Function for retrieving the number of points already earned by user for (public) tagging a particular item"""
+    if not user.is_authenticated:
+        raise PermissionDenied("User must be logged in")
+
+    # Returns a list of dicts (each tag in its own dict)
+    user_contrib = UserContribution.objects.filter(user_id=user.id, item_id=item_id)
+    if user_contrib.exists():
+        return user_contrib[0].points_earned
+    return 0
 
 
 def get_synonymous_tags(search_string):
@@ -153,12 +167,36 @@ def set_user_tags_for_item(user, tags_data):
             user_contrib.private_tags.remove(*private_tags_to_remove)
 
         user_contrib.is_pinned = eval(tags_data.get('is_pinned'))
+        user_contrib.points_earned = tags_data.get('total_points_for_item')  # TODO: Add a check to make sure points_earned cannot ever decrease?
         user_contrib.save()
     else:
-        user_contrib = UserContribution(user=user, item_id=item_id, is_pinned=eval(tags_data.get('is_pinned')))
+        user_contrib = UserContribution(user=user, item_id=item_id,
+                                        is_pinned=eval(tags_data.get('is_pinned')),
+                                        points_earned=tags_data.get('total_points_for_item'))
         user_contrib.save()
         user_contrib.public_tags.add(*new_public_tags)
         user_contrib.private_tags.add(*new_private_tags)
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    """Use Django signals to automatically create a user profile points when a user is created (admin and not)"""
+    if created:
+        UserProfile.objects.create(user=instance)
+
+
+@receiver(post_save, sender=UserContribution)
+def update_user_profile_points_on_save(sender, instance, **kwargs):
+    """Use Django signals to automatically update user profile points when a user contribution is added/updated"""
+    user_profile = UserProfile.objects.get(user=instance.user)
+    user_profile.update_points()
+
+
+@receiver(post_delete, sender=UserContribution)
+def update_user_profile_points_on_delete(sender, instance, **kwargs):
+    """Use Django signals to automatically update user profile points when a user contribution is deleted"""
+    user_profile = UserProfile.objects.get(user=instance.user)
+    user_profile.update_points()
 
 # pylint: enable=no-member
 

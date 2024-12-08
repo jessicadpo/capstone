@@ -14,7 +14,7 @@ const publicTagsInput = document.getElementById('public-tags-input');
 const privateTagsInput = document.getElementById('private-tags-input');
 const animatedTagScore = document.getElementById('animated-tag-score');
 const totalPointsEarnedElement = document.getElementById('total-points-earned');
-let initialTotalPointsEarned = 0; // Set when page loads
+let initialTotalPointsEarned = parseInt(totalPointsEarnedElement.textContent.replace(" pts", "")); // Set on page load
 
 const publicTagsFormField = document.getElementById('public-tags-form-field'); // Invisible to users
 const privateTagsFormField = document.getElementById('private-tags-form-field'); // Invisible to users
@@ -24,7 +24,6 @@ const totalPointsEarnedFormField = document.getElementById('total-points-for-ite
 function openModal() {
     setTagScore();
     setTotalPointsEarned();
-    initialTotalPointsEarned = parseInt(totalPointsEarnedElement.textContent.replace(" pts", ""));
     addTagsOverlay.classList.add('active');
     document.body.style.overflow = 'hidden'; // Disable scrolling on the main content
     addTagsModal.showModal();
@@ -38,11 +37,14 @@ function closeModal() {
 }
 
 function isAlreadyAdded(newTagValue, isPublic) {
-    let existingTags = isPublic ? publicTagsFormField.value : privateTagsFormField.value;
-    existingTags = existingTags.toLocaleLowerCase(); // Makes check case-insensitive
     newTagValue = newTagValue.toLocaleLowerCase(); // Makes check case-insensitive
-    if (existingTags.includes('\\n'+ newTagValue +'\\n')) {
-        return true;
+    const existingTags = isPublic ? document.querySelectorAll('#public-tags-list-container .tag-value') : document.querySelectorAll('#private-tags-list-container .tag-value');
+    // Can't use forEach (forEach cannot be interrupted by a return statement)
+    for (let i = 0; i < existingTags.length; i++) {
+        existingTag = existingTags[i].textContent.toLocaleLowerCase(); // Makes check case-insensitive
+        if (existingTag.localeCompare(newTagValue) === 0) {
+            return true;
+        }
     }
     return false;
 }
@@ -89,17 +91,20 @@ function setTotalPointsEarned() {
 }
 
 function setTagScore() {
-    // Tag score should be based on number of tags already added (if there are any)
-    // to prevent delete-then-re-add exploit
-    const currentPublicTagCount = publicTagsContainer.querySelectorAll('.tag').length;
+    // Tag score should be based on total number of tags added (if there are any)
+    const publicTagCount = publicTagsContainer.querySelectorAll('.tag').length;
+    const totalPointsEarned = parseInt(totalPointsEarnedElement.textContent.replace(" pts", ""));
+    // From 11 because score decrements faster than animation --> so decrement happens before animation
+    // --> so need to decrement form 11 for "+10" to show correctly
+    let newTagScore = 11 - publicTagCount;
 
-    if (currentPublicTagCount > 0 && currentPublicTagCount <= 10) {
-        // From 11 because score decrements faster than animation --> so decrement happens before animation
-        // --> so need to decrement form 11 for "+10" to show correctly
-        currentTagScore = 11 - currentPublicTagCount;
-        animatedTagScore.textContent = "+" + currentTagScore;
-    } else if (currentPublicTagCount > 10) {
+    // Tag score should be shown if there are less than 10 public tags added
+    // && if total points earned is under 55 pts (max possible for an item)
+    // && if totalPointsEarned is greater than initialTotalPointsEarned
+    if (publicTagCount > 10 || totalPointsEarned > 55 || totalPointsEarned <= initialTotalPointsEarned) {
         animatedTagScore.textContent = "";
+    } else {  // If between 0 and 10 public tags added && totalPointsEarned <= 55 && newTagScore > initialTotalPointsEarned
+        animatedTagScore.textContent = "+" + newTagScore;
     }
 }
 
@@ -122,6 +127,78 @@ document.addEventListener("DOMContentLoaded", function() {
     // Set close modal button behaviour
     closeXButton.addEventListener('click', closeModal);
     cancelButton.addEventListener('click', closeModal);
+
+    // Set "Pin Item" button behaviour
+    pinItemButtons.forEach(pinItemButton => {
+        pinItemButton.addEventListener('click', function() {
+            const pinningItem = this.closest('.result-item'); // i.e., closest common ancestor of "Pin Item" button and element containing item title
+            const pinningItemTitle = pinningItem.querySelector('.item-title').textContent;
+            const pinningItemId = this.value;
+
+            // Reset form before opening it (always)
+            const tagsInModal = document.querySelectorAll("#tagging-section .remove-tag-button");
+            tagsInModal.forEach(tag => {
+                removeTag(tag)
+            });
+            publicTagsInput.value = '';
+            privateTagsInput.value = '';
+            userTagsForm.reset();
+
+            // Fill with user's tags for the current item (if there are any)
+            // regardless of whether or not item is pinned
+            const publicUserTagsForItem = this.nextElementSibling.querySelectorAll("span");
+            const privateUserTagsForItem = this.nextElementSibling.nextElementSibling.querySelectorAll("span");
+            publicUserTagsForItem.forEach(tag => {
+                addTag(tag.textContent, true);
+            });
+            privateUserTagsForItem.forEach(tag => {
+                addTag(tag.textContent, false)
+            });
+
+            if (this.classList.contains('pin-True')) {
+                // Show the "Unpin" button inside form if the item has already been pinned by user
+                // (Unpin button is hidden by default)
+                unpinItemButton.style.display = "block";
+            } else {
+                // Hide the "Unpin" button inside form if item is NOT already pinned
+                unpinItemButton.style.display = "none";
+            }
+
+            // Pre-fill <b> inside modal header (visible)
+            document.getElementById('saving-item-title').textContent = pinningItemTitle;
+
+            // Pre-fill item-id-input text field (invisible)
+            document.getElementById('item-id-input').value = pinningItemId;
+
+            // Open modal --> disables interaction outside of modal (unlike .show())
+            openModal();
+        });
+    });
+
+    // Set tag text input behaviour (Public tags)
+    publicTagsInput.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();  // Prevent default behaviour
+            const newPublicTag = publicTagsInput.value;
+            addTag(newPublicTag, true); // Add tag HTML
+            setTotalPointsEarned(); // MUST be done before setTagScore()
+            // Setting tag score is faster than animation, so score is decremented before animation plays
+            // If use set timeout of 1 second (animation duration) --> score doesn't decrement in time if user types really fast
+            setTagScore();
+            playScoreAnimation();
+            publicTagsInput.value = ''; // Clear input field
+        }
+    });
+
+    // Set tag text input behaviour (Private tags)
+    privateTagsInput.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();  // Prevent default behaviour
+            const newPrivateTag = privateTagsInput.value;
+            addTag(newPrivateTag, false); // Add tag HTML
+            privateTagsInput.value = ''; // Clear input field
+        }
+    });
 
     // Make the "Save" button submit the form & close the modal
     // Must use JavaScript because hidden forms aren't submittable otherwise
@@ -151,77 +228,5 @@ document.addEventListener("DOMContentLoaded", function() {
         totalPointsEarnedFormField.value = parseInt(totalPointsEarnedElement.textContent.replace(" pts", ""));
         userTagsForm.submit();
         closeModal();
-    });
-
-    // Set "Pin Item" button behaviour
-    pinItemButtons.forEach(pinItemButton => {
-        pinItemButton.addEventListener('click', function() {
-            const pinningItem = this.closest('.result-item'); // i.e., closest common ancestor of "Pin Item" button and element containing item title
-            const pinningItemTitle = pinningItem.querySelector('.item-title').textContent;
-            const pinningItemId = this.value;
-
-            // Reset form before opening it (always)
-            const tagsInModal = document.querySelectorAll("#tagging-section .remove-tag-button");
-            tagsInModal.forEach(tag => {
-                removeTag(tag)
-            });
-            publicTagsInput.value = '';
-            privateTagsInput.value = '';
-            userTagsForm.reset();
-
-            if (this.classList.contains('pin-True')) {
-                // Show the "Unpin" button inside form if the item has already been pinned by user
-                // (Unpin button is hidden by default)
-                unpinItemButton.style.display = "block";
-
-                // Fill with user's tags for the current item (if there are any)
-                const publicUserTagsForItem = this.nextElementSibling.querySelectorAll("span");
-                const privateUserTagsForItem = this.nextElementSibling.nextElementSibling.querySelectorAll("span");
-
-                publicUserTagsForItem.forEach(tag => {
-                    addTag(tag.textContent, true);
-                });
-                privateUserTagsForItem.forEach(tag => {
-                    addTag(tag.textContent, false)
-                });
-            } else {
-                // Hide the "Unpin" button inside form if item is NOT already pinned
-                unpinItemButton.style.display = "none";
-            }
-
-            // Pre-fill <b> inside modal header (visible)
-            document.getElementById('saving-item-title').textContent = pinningItemTitle;
-
-            // Pre-fill item-id-input text field (invisible)
-            document.getElementById('item-id-input').value = pinningItemId;
-
-            // Open modal --> disables interaction outside of modal (unlike .show())
-            openModal();
-        });
-    });
-
-    // Set tag text input behaviour (Public tags)
-    publicTagsInput.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();  // Prevent default behaviour
-            const newPublicTag = publicTagsInput.value;
-            addTag(newPublicTag, true); // Add tag HTML
-            // Setting tag score is faster than animation, so score is decremented before animation plays
-            // If use set timeout of 1 second (animation duration) --> score doesn't decrement in time if user types really fast
-            setTagScore();
-            setTotalPointsEarned();
-            playScoreAnimation();
-            publicTagsInput.value = ''; // Clear input field
-        }
-    });
-
-    // Set tag text input behaviour (Private tags)
-    privateTagsInput.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();  // Prevent default behaviour
-            const newPrivateTag = privateTagsInput.value;
-            addTag(newPrivateTag, false); // Add tag HTML
-            privateTagsInput.value = ''; // Clear input field
-        }
     });
 });

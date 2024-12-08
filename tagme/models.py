@@ -44,6 +44,12 @@ class UserProfile(models.Model):
     equipped_title_1 = models.ForeignKey(Reward, blank=True, null=True, related_name="title_1", on_delete=models.CASCADE)
     equipped_title_2 = models.ForeignKey(Reward, blank=True, null=True, related_name="title_2", on_delete=models.CASCADE)
 
+    def update_points(self):
+        # Sum all points_earned from UserContribution (for that user)
+        total_points = self.user.usercontribution_set.aggregate(total=models.Sum('points_earned'))['total'] or 0
+        self.points = total_points
+        self.save()
+
     def __str__(self):
         return str(self.user)  # For proper display on admin site
 
@@ -67,10 +73,10 @@ class UserContribution(models.Model):
     is_pinned = models.BooleanField(default=False, blank=False, null=False)
     public_tags = models.ManyToManyField(Tag, blank=True, related_name="public_tags")
     private_tags = models.ManyToManyField(Tag, blank=True, related_name="private_tags")
+    points_earned = models.IntegerField(default=0, blank=False, null=False)  # To prevent point farming by deleting/re-adding
     comment = models.TextField(blank=True, null=True)
-
-    # Do NOT use auto_now=True because comment_datetime should not update if only tags are updated
     comment_datetime = models.DateTimeField(blank=True, null=True)
+    # Do NOT use auto_now=True because comment_datetime should not update if only tags are updated
 
     def save_comment(self, *args, **kwargs):
         """Update timestamp when comment is added/edited"""
