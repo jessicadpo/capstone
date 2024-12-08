@@ -80,7 +80,7 @@ b, strong {
     }
 }
 
-.public-user-tags-for-item, .private-user-tags-for-item {
+.public-user-tags-for-item, .private-user-tags-for-item, .points-earned-for-item {
     display: none;
 }
 

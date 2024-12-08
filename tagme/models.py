@@ -45,7 +45,7 @@ class UserProfile(models.Model):
     equipped_title_2 = models.ForeignKey(Reward, blank=True, null=True, related_name="title_2", on_delete=models.CASCADE)
 
     def update_points(self):
-        # Sum all points_earned from UserContribution (for that user)
+        """ Sum all points_earned from UserContribution (for that user) """
         total_points = self.user.usercontribution_set.aggregate(total=models.Sum('points_earned'))['total'] or 0
         self.points = total_points
         self.save()

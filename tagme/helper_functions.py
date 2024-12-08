@@ -3,6 +3,8 @@ import html
 import re
 import string
 
+from django.core.paginator import Paginator
+
 
 def decode_unicode(text_string):
     """Convert any unicode to actual characters"""

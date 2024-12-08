@@ -14,7 +14,7 @@ const publicTagsInput = document.getElementById('public-tags-input');
 const privateTagsInput = document.getElementById('private-tags-input');
 const animatedTagScore = document.getElementById('animated-tag-score');
 const totalPointsEarnedElement = document.getElementById('total-points-earned');
-let initialTotalPointsEarned = parseInt(totalPointsEarnedElement.textContent.replace(" pts", "")); // Set on page load
+let initialTotalPointsEarned = 0; // Set at the same time "Pin" button behaviour is set
 
 const publicTagsFormField = document.getElementById('public-tags-form-field'); // Invisible to users
 const privateTagsFormField = document.getElementById('private-tags-form-field'); // Invisible to users
@@ -64,7 +64,10 @@ function addTag(newTagValue, isPublic) {
         } else {
             privateTagsContainer.appendChild(tagObject);
         }
+
+        return true; // tag was successfully added
     }
+    return false;
 }
 
 function removeTag(removeButton) {
@@ -90,7 +93,7 @@ function setTotalPointsEarned() {
     totalPointsEarnedElement.textContent = totalPointsEarned + " pts";
 }
 
-function setTagScore() {
+function setTagScore(addTagSuccess) {
     // Tag score should be based on total number of tags added (if there are any)
     const publicTagCount = publicTagsContainer.querySelectorAll('.tag').length;
     const totalPointsEarned = parseInt(totalPointsEarnedElement.textContent.replace(" pts", ""));
@@ -101,7 +104,8 @@ function setTagScore() {
     // Tag score should be shown if there are less than 10 public tags added
     // && if total points earned is under 55 pts (max possible for an item)
     // && if totalPointsEarned is greater than initialTotalPointsEarned
-    if (publicTagCount > 10 || totalPointsEarned > 55 || totalPointsEarned <= initialTotalPointsEarned) {
+    // && new (non-duplicate) tag was successfully added
+    if (publicTagCount > 10 || totalPointsEarned > 55 || totalPointsEarned <= initialTotalPointsEarned || !addTagSuccess ) {
         animatedTagScore.textContent = "";
     } else {  // If between 0 and 10 public tags added && totalPointsEarned <= 55 && newTagScore > initialTotalPointsEarned
         animatedTagScore.textContent = "+" + newTagScore;
@@ -155,6 +159,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 addTag(tag.textContent, false)
             });
 
+            // Set textContent of totalPointsEarnedElement && initialTotalPointsEarned
+            initialTotalPointsEarnedForItem = this.nextElementSibling.nextElementSibling.nextElementSibling.querySelectorAll("span");
+            totalPointsEarnedElement.textContent = initialTotalPointsEarnedForItem[0].textContent  + " pts";
+            initialTotalPointsEarned = parseInt(initialTotalPointsEarnedForItem[0].textContent);
+
             if (this.classList.contains('pin-True')) {
                 // Show the "Unpin" button inside form if the item has already been pinned by user
                 // (Unpin button is hidden by default)
@@ -180,11 +189,11 @@ document.addEventListener("DOMContentLoaded", function() {
         if (event.key === 'Enter') {
             event.preventDefault();  // Prevent default behaviour
             const newPublicTag = publicTagsInput.value;
-            addTag(newPublicTag, true); // Add tag HTML
+            success = addTag(newPublicTag, true); // Add tag HTML
             setTotalPointsEarned(); // MUST be done before setTagScore()
             // Setting tag score is faster than animation, so score is decremented before animation plays
             // If use set timeout of 1 second (animation duration) --> score doesn't decrement in time if user types really fast
-            setTagScore();
+            setTagScore(success);
             playScoreAnimation();
             publicTagsInput.value = ''; // Clear input field
         }
@@ -225,7 +234,7 @@ document.addEventListener("DOMContentLoaded", function() {
     unpinItemButton.addEventListener('click', function() {
         event.preventDefault();
         isPinnedFormField.value = "False"; // MUST have first capital letter for compatibility with Python
-        totalPointsEarnedFormField.value = parseInt(totalPointsEarnedElement.textContent.replace(" pts", ""));
+        totalPointsEarnedFormField.value = initialTotalPointsEarned; // Do not save added tags if "Unpin" button is clicked
         userTagsForm.submit();
         closeModal();
     });
