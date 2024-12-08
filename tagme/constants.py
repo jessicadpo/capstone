@@ -9,4 +9,3 @@ GLOBAL_BLACKLIST = ['apeshit', 'arse', 'arsehole', 'ass', 'asshole', 'assmunch',
                     'motherfucking', 'negro', 'nigga', 'nigger', 'nig nog', 'piece of shit',  'poon', 'poontang',
                     'retard', 'retards', 'retarded', 'shit', 'shitblimp', 'shits', 'shitter', 'shitting', 'shitty',
                     'slut', 'sluts', 'sodomize', 'sodomy', 'tranny',  'whore']
-
