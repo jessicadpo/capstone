@@ -1,0 +1,15 @@
+#new-rewards-modal {
+    background-color: #F7F7F7;
+    border: none;
+    border-radius: 20px;
+    z-index: 1000;
+    overflow: visible; /* Do not hide overflowing tooltips */
+}
+
+
+
+
+
+
+
+

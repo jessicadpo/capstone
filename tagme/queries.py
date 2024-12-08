@@ -87,6 +87,19 @@ def get_user_points_for_item(user, item_id):
     return 0
 
 
+def get_user_total_points(user):
+    return (UserProfile.objects.get(user=user)).points
+
+
+def get_new_rewards(prev_score, new_score):
+    """Function for checking if a user should get a new reward + returning the new reward(s) they should be getting"""
+    new_rewards = Reward.objects.filter(points_required__gt=prev_score).filter(points_required__lte=new_score)
+    if new_rewards.exists():
+        return new_rewards
+    else:
+        return None
+
+
 def get_synonymous_tags(search_string):
     """Function for getting tags that are synonyms of a list of given words"""
     # TODO: Parse AND/OR/NOT
@@ -179,6 +192,26 @@ def set_user_tags_for_item(user, tags_data):
         user_contrib.private_tags.add(*new_private_tags)
 
 
+
+def set_global_blacklist():
+    """Function for creating the list of globally-blacklisted tags in the database"""
+    for word in GLOBAL_BLACKLIST:
+        Tag.objects.get_or_create(tag=word, global_blacklist=True)
+
+
+def set_reward_list():
+    """Function for creating the list of reward titles in the database"""
+    points_required = 10
+    for title in REWARD_LIST.keys():
+        hex_colour = REWARD_LIST.get(title)
+        Reward.objects.get_or_create(title=title, hex_colour=hex_colour, points_required=points_required)
+        points_required += 50
+
+
+set_global_blacklist()
+set_reward_list()
+
+
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     """Use Django signals to automatically create a user profile points when a user is created (admin and not)"""
@@ -190,37 +223,17 @@ def create_user_profile(sender, instance, created, **kwargs):
 def update_user_profile_points_on_save(sender, instance, **kwargs):
     """Use Django signals to automatically update user profile points when a user contribution is added/updated"""
     user_profile = UserProfile.objects.get(user=instance.user)
-    prev_score = user_profile.points
     user_profile.update_points()
-    new_score = user_profile.points
-    return get_new_reward(prev_score, new_score)
 
 
 @receiver(post_delete, sender=UserContribution)
 def update_user_profile_points_on_delete(sender, instance, **kwargs):
-    """Use Django signals to automatically update user profile points when a user contribution is deleted"""
+    """
+    Use Django signals to automatically update user profile points when a user contribution is deleted
+    NOTE: UserContributions shouldn't ever be deleted (unless the user exercises their right to be forgotten)
+    """
     user_profile = UserProfile.objects.get(user=instance.user)
-    prev_score = user_profile.points
     user_profile.update_points()
-    new_score = user_profile.points
-    return get_new_reward(prev_score, new_score)
-
-
-def get_new_reward(prev_score, new_score):
-    new_rewards = Reward.objects.filter(points_required__gt=prev_score).filter(points_required__lt=new_score)
-    if new_rewards.exists():
-        return new_rewards
-    else:
-        return None
-
-
-def set_global_blacklist():
-    """Function that returns true if the search string is blacklisted"""
-    for word in GLOBAL_BLACKLIST:
-        Tag.objects.get_or_create(tag=word, global_blacklist=True)
-
-
-set_global_blacklist()
 
 
 # pylint: enable=no-member

@@ -1,0 +1,31 @@
+<!-- TODO: Remove "active" class && "open" attr once done making HTML + CSS" -->
+
+<div id="new-rewards-overlay" class="modal-overlay active"></div> <!-- id so behaves differently from report-tag-overlay -->
+<dialog id="new-rewards-modal" open>
+    <p>Congrats!</p>
+    <p>You've reached {{ new_score }} points and earned:</p>
+    <div>
+        {% for new_reward in new_rewards %}
+            [[REWARD TITLE]]
+        {% endfor %}
+    </div>
+    <p>Equip title?</p>
+
+    <div class="tooltip">
+        <i id="equip-tooltip" class="fa fa-question-circle" aria-label="Tooltip for equipping titles" tabindex="0"></i>
+        <div class="tooltip-bubble yellow-bubble bubble-on-right">
+            <div class="bubble-tail-outline"></div>
+            <div class="bubble-tail"></div>
+            <div class="bubble-content">
+                <p><b>Equipped titles</b> are displayed next to your username on any comment you leave.</p>
+                <p>You can always equip titles later from your profile page.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="new-rewards-modal-footer">
+        <button id="skip-button" class="modal-footer-button">Not right now</button>
+        <button id="equip-button" class="modal-footer-button">Yes</button>
+    </div>
+</dialog>
+

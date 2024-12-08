@@ -74,12 +74,17 @@ def about(request):
 def search_results(request, requested_page_number):
     """View for Search Results pages"""
     page_forms = {"search_form": SearchForm(), "tags_form": TagsForm()}
+    new_rewards = None
+    new_score = -1
 
     # If POST request for adding/editing tags on an item
     if request.method == 'POST' and ('tagged_item' in request.POST):
         tags_form = TagsForm(request.POST)
         if tags_form.is_valid():  # cleans form inputs
+            prev_score = get_user_total_points(request.user)
             set_user_tags_for_item(request.user, tags_form.cleaned_data)
+            new_score = get_user_total_points(request.user)
+            new_rewards = get_new_rewards(prev_score, new_score)
 
     # TODO: Code for parsing AND/OR/NOT/*/? --> Investigate pyparsing & Shunting Yard algorithm
 
@@ -124,16 +129,24 @@ def search_results(request, requested_page_number):
         'forms': page_forms,
         'synonymous_tags': synonymous_tags,
         'related_tags': related_tags,
+        'new_score': new_score,
+        'new_rewards': new_rewards,  # Need this so can trigger "Congrats!" popup
     })
 
 
 def item_page(request, item_id):
     """View for Item pages"""
+    new_rewards = None
+    new_score = -1
+
     # If POST request for adding/editing tags on an item
     if request.method == 'POST' and ('tagged_item' in request.POST):
         tags_form = TagsForm(request.POST)
         if tags_form.is_valid():  # cleans form inputs
+            prev_score = get_user_total_points(request.user)
             set_user_tags_for_item(request.user, tags_form.cleaned_data)
+            new_score = get_user_total_points(request.user)
+            new_rewards = get_new_rewards(prev_score, new_score)
 
     # If POST request for reporting a tag
     elif request.method == 'POST' and ('reported_tag' in request.POST):
@@ -157,4 +170,10 @@ def item_page(request, item_id):
 
     if not item_data:
         raise Http404("Item not found")
-    return render(request, 'item_page.html', {'item': item_data, 'forms': page_forms})
+
+    return render(request, 'item_page.html', {
+        'item': item_data,
+        'forms': page_forms,
+        'new_score': new_score,
+        'new_rewards': new_rewards,  # Need this so can trigger "Congrats!" popup
+    })
