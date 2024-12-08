@@ -10,6 +10,7 @@ from django.contrib.auth import PermissionDenied
 import requests
 from .helper_functions import *
 from .models import *
+from .constants import *
 
 
 ########################################################################################################################
@@ -106,68 +107,8 @@ def get_related_tags(search_string):
     return related_tags
 
 
-def global_blacklist():
-    """Function that returns true if the search string is blacklisted"""
-    # TODO: Make this work in a way that aligns with the rest of the project.
-    black_listed = False
-    # This list was found online, and was not written or created by any member of this group
-    blacklist = ['Acrotomophilia', 'anal', 'anilingus', 'anus', 'apeshit', 'arsehole', 'ass', 'asshole', 'assmunch',
-                 'auto erotic', 'autoerotic', 'babeland', 'baby batter', 'baby juice', 'ball gag', 'ball gravy',
-                 'ball kicking', 'ball licking', 'ball sack', 'ball sucking', 'bangbros', 'barely legal', 'bastard',
-                 'bastardo', 'bastinado', 'bbw', 'bdsm', 'beaner', 'beaners', 'beaver cleaver', 'beaver lips',
-                 'bestiality', 'big breasts', 'big knockers', 'big tits', 'bimbos', 'birdlock', 'bitch', 'bitches',
-                 'black cock', 'blowjob', 'blow job', 'blow your load', 'blue waffle', 'blumpkin', 'bollocks',
-                 'bondage', 'boner', 'boob', 'boobs', 'booty call', 'brown showers', 'bukkake', 'bulldyke',
-                 'bullet vibe', 'bullshit', 'bung hole', 'bunghole', 'busty', 'butt', 'buttcheeks', 'butthole',
-                 'camel toe', 'camgirl', 'camslut', 'camwhore', 'carpet muncher', 'carpetmuncher', 'chocolate rosebuds',
-                 'circlejerk', 'cleveland steamer', 'clit', 'clitoris', 'clover clamps', 'clusterfuck', 'cock', 'cocks',
-                 'coprolagnia', 'coprophilia', 'cornhole', 'coon', 'coons', 'creampie', 'cum', 'cumming', 'cunnilingus',
-                 'cunt', 'darkie', 'deep throat', 'deepthroat', 'dendrophilia', 'dick', 'dildo', 'dingleberry',
-                 'dingleberries', 'dirty pillows', 'dirty sanchez', 'doggie style', 'doggiestyle', 'doggy style',
-                 'doggystyle', 'dog style', 'dolcett', 'dominatrix', 'dommes', 'donkey punch', 'double dong',
-                 'double penetration', 'dp action', 'dry hump', 'dvda', 'eat my ass', 'ecchi', 'ejaculation', 'erotic',
-                 'erotism', 'escort', 'eunuch', 'faggot', 'fecal', 'felch', 'fellatio', 'feltch', 'female squirting',
-                 'femdom', 'figging', 'fingerbang', 'fingering', 'fisting', 'footjob', 'frotting', 'fuck',
-                 'fuck buttons', 'fuckin', 'fucking', 'fucktards', 'fudge packer', 'fudgepacker', 'futanari',
-                 'gang bang', 'genitals', 'giant cock', 'girl on top', 'girls gone wild', 'goatcx', 'goatse',
-                 'god damn', 'gokkun', 'golden shower', 'goodpoop', 'goo girl', 'goregasm', 'grope', 'group sex',
-                 'g-spot', 'guro', 'hand job', 'handjob', 'hentai', 'honkey', 'hooker', 'hot carl', 'hot chick',
-                 'huge fat', 'humping', 'intercourse', 'jack off', 'jail bait', 'jailbait', 'jelly donut', 'jerk off',
-                 'jigaboo', 'jiggaboo', 'jiggerboo', 'jizz', 'juggs', 'kike', 'kinbaku', 'kinkster', 'kinky',
-                 'knobbing', 'leather restraint', 'leather straight jacket', 'lemon party', 'lolita', 'lovemaking',
-                 'make me come', 'male squirting', 'masturbate', 'menage a trois', 'milf', 'missionary position',
-                 'motherfucker', 'mound of venus', 'mr hands', 'muff diver', 'muffdiving', 'nambla', 'nawashi', 'negro',
-                 'nigga', 'nigger', 'nig nog', 'nimphomania', 'nipple', 'nipples', 'nude', 'nudity', 'nympho',
-                 'nymphomania', 'octopussy', 'omorashi', 'orgasm', 'orgy', 'paedophile', 'paki', 'panties', 'panty',
-                 'pedobear', 'pedophile', 'pegging', 'penis', 'phone sex', 'piece of shit', 'pissing', 'piss pig',
-                 'pisspig', 'playboy', 'pleasure chest', 'pole smoker', 'ponyplay', 'poof', 'poon', 'poontang',
-                 'punany', 'poop chute', 'poopchute', 'porn', 'porno', 'pornography', 'prince albert piercing', 'pthc',
-                 'pubes', 'pussy', 'queaf', 'queef', 'quim', 'raghead', 'raging boner', 'raping', 'rectum',
-                 'reverse cowgirl', 'rimjob', 'rimming', 'sadism', 'santorum', 'scat', 'schlong', 'scissoring', 'semen',
-                 'sex', 'sexo', 'sexy', 'shaved beaver', 'shaved pussy', 'shemale', 'shibari', 'shit', 'shitblimp',
-                 'shitty', 'shota', 'shrimping', 'skeet', 'slanteye', 'slut', 's&m', 'snatch', 'snowballing',
-                 'sodomize', 'sodomy', 'spic', 'splooge', 'splooge moose', 'spooge', 'spread legs', 'spunk', 'strap on',
-                 'strapon', 'strappado', 'strip club', 'suck', 'sucks', 'swinger', 'tea bagging', 'threesome',
-                 'throating', 'tied up', 'tight white', 'tit', 'tits', 'titties', 'titty', 'topless', 'tosser',
-                 'towelhead', 'tranny', 'tribadism', 'tub girl', 'tubgirl', 'tushy', 'twat', 'twink', 'twinkie',
-                 'two girls one cup', 'undressing', 'upskirt', 'urethra play', 'urophilia', 'vagina', 'venus mound',
-                 'vibrator', 'violet wand', 'vorarephilia', 'voyeur', 'vulva', 'wank', 'wetback', 'wet dream',
-                 'white power', 'wrapping men', 'wrinkled starfish', 'xx', 'xxx', 'yaoi', 'yellow showers', 'yiffy',
-                 'zoophilia', 'ZZZZZ']
-
-    tag = 0
-    i = 0
-    while blacklist[i] != 'ZZZZZ':
-        black_listed = True
-        tag = Tag.objects.get_or_create(tag=blacklist[i], global_blacklist=True)
-        i+=1
-
-    return black_listed
-
-global_blacklist()
 #######################################################
 # SETTERS
-
 
 def set_user_tags_for_item(user, tags_data):
     """Function for adding/updating a user's tags for a particular item"""
@@ -213,6 +154,15 @@ def set_user_tags_for_item(user, tags_data):
         user_contrib.save()
         user_contrib.public_tags.add(*new_public_tags)
         user_contrib.private_tags.add(*new_private_tags)
+
+
+def set_global_blacklist():
+    """Function that returns true if the search string is blacklisted"""
+    for word in GLOBAL_BLACKLIST:
+        Tag.objects.get_or_create(tag=word, global_blacklist=True)
+
+
+set_global_blacklist()
 
 # pylint: enable=no-member
 
