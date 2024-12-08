@@ -153,6 +153,38 @@ def set_user_tags_for_item(user, tags_data):
         user_contrib.public_tags.add(*new_public_tags)
         user_contrib.private_tags.add(*new_private_tags)
 
+
+def create_tag_report(user, item_id, report_data):
+    """View for tag reporting"""
+    reported_tag = report_data['reported_tag']
+    is_irrelevant = report_data['is_irrelevant']
+    is_vulgar = report_data['is_vulgar']
+    is_offensive = report_data['is_offensive']
+    is_misinformation = report_data['is_misinformation']
+    is_other = report_data['is_other']
+    other_text = report_data['other_text']
+
+    # Set reason for the report
+    reason = next((r for r, selected in [
+        ('Irrelevant', is_irrelevant),
+        ('Vulgar', is_vulgar),
+        ('Offensive', is_offensive),
+        ('Misinformation', is_misinformation),
+        ('Other', is_other),
+    ] if selected), None)
+    if other_text:  # If other_text is not empty
+        reason += other_text
+
+    item = Item.objects.get(item_id=item_id)
+    tag = Tag.objects.get(tag=reported_tag)
+
+    # TODO: Check if the tag has global_whitelist=True and/or if item is in the tag's item_whitelist
+    # TODO: If yes to either --> do NOT create a report in the database
+
+    # Create the report in the database
+    report = Report(item_id=item, user_id=user, tag=tag, reason=reason)
+    report.save()
+
 # pylint: enable=no-member
 
 ########################################################################################################################
