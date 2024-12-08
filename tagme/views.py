@@ -158,4 +158,3 @@ def item_page(request, item_id):
     if not item_data:
         raise Http404("Item not found")
     return render(request, 'item_page.html', {'item': item_data, 'forms': page_forms})
-
