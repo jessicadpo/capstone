@@ -31,7 +31,8 @@ class TagsForm(forms.Form):
     tagged_item = forms.CharField(label=False, required=True, widget=forms.TextInput(attrs={'id': 'item-id-input'}))
     public_tags = forms.CharField(label=False, required=False, initial="\\n", widget=forms.Textarea(attrs={'id': 'public-tags-form-field'}))
     private_tags = forms.CharField(label=False, required=False, initial="\\n", widget=forms.Textarea(attrs={'id': 'private-tags-form-field'}))
-    # Need initial for the isAlreadyAdded function in tag_modal.js
+    # Need initial '\\n' for the isAlreadyAdded function in tag_modal.js
+    total_points_for_item = forms.IntegerField(label=False, required=True, widget=forms.NumberInput(attrs={'id': 'total-points-for-item-field'}))
 
 
 class ReportForm(forms.Form):

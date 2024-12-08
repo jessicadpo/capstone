@@ -29,9 +29,17 @@
                         </div>
                     </div>
                 </div>
+
+                <div id="total-points-section">
+                    <span>Total points: </span>
+                    <span id="total-points-earned">0 pts</span>
+                </div>
             </div>
 
-            <input id="public-tags-input" type="text" placeholder="Add tags..."/>
+            <div class="tag-input-section">
+                <input id="public-tags-input" type="text" placeholder="Add tags..."/>
+                <span id="animated-tag-score"></span> <!-- Set to +[Score] in JavaScript -->
+            </div>
 
             <div id="public-tags-list-container" class="tag-list-container">
                 <!-- Filled using JavaScript -->
@@ -55,7 +63,10 @@
                 </div>
             </div>
 
-            <input id="private-tags-input" type="text" placeholder="Add tags..."/>
+            <div class="tag-input-section">
+                <input id="private-tags-input" type="text" placeholder="Add tags..."/>
+                <!-- Private tags do NOT give points -->
+            </div>
 
             <div id="private-tags-list-container" class="tag-list-container">
                 <!-- Filled using JavaScript -->

@@ -12,17 +12,26 @@ const privateTagsContainer = document.getElementById('private-tags-list-containe
 
 const publicTagsInput = document.getElementById('public-tags-input');
 const privateTagsInput = document.getElementById('private-tags-input');
+const animatedTagScore = document.getElementById('animated-tag-score');
+const totalPointsEarnedElement = document.getElementById('total-points-earned');
+let initialTotalPointsEarned = 0; // Set when page loads
+
 const publicTagsFormField = document.getElementById('public-tags-form-field'); // Invisible to users
 const privateTagsFormField = document.getElementById('private-tags-form-field'); // Invisible to users
 const isPinnedFormField = document.getElementById('is-pinned-input'); // Invisible to users
+const totalPointsEarnedFormField = document.getElementById('total-points-for-item-field'); // Invisible to users
 
 function openModal() {
+    setTagScore();
+    setTotalPointsEarned();
+    initialTotalPointsEarned = parseInt(totalPointsEarnedElement.textContent.replace(" pts", ""));
     addTagsOverlay.classList.add('active');
     document.body.style.overflow = 'hidden'; // Disable scrolling on the main content
     addTagsModal.showModal();
 }
 
 function closeModal() {
+    animatedTagScore.classList.remove('play-animation'); // Prevent animation playing on modal re-open
     addTagsModal.close();
     document.body.style.overflow = ''; // Re-enable scrolling on the main content
     addTagsOverlay.classList.remove('active');
@@ -41,18 +50,18 @@ function isAlreadyAdded(newTagValue, isPublic) {
 function addTag(newTagValue, isPublic) {
     // Do NOT add tag if input is empty or if tag has already been added by user
     if (newTagValue.trim() !== '' && !isAlreadyAdded(newTagValue, isPublic)) {
-      const tagTemplate = document.getElementById('deletable-tag-template');
-      const tagObject = tagTemplate.content.children[0].cloneNode(true);
+        const tagTemplate = document.getElementById('deletable-tag-template');
+        const tagObject = tagTemplate.content.children[0].cloneNode(true);
 
-      // Insert user input into tagObject's <a> element
-      tagObject.querySelector('a').textContent = newTagValue;
+        // Insert user input into tagObject's <a> element
+        tagObject.querySelector('a').textContent = newTagValue;
 
-      // Add tag to public/private-tags-list-container
-      if (isPublic) {
-        publicTagsContainer.appendChild(tagObject);
-      } else {
-        privateTagsContainer.appendChild(tagObject);
-      }
+        // Add tag to public/private-tags-list-container
+        if (isPublic) {
+            publicTagsContainer.appendChild(tagObject);
+        } else {
+            privateTagsContainer.appendChild(tagObject);
+        }
     }
 }
 
@@ -60,9 +69,48 @@ function removeTag(removeButton) {
     const tagDiv = removeButton.closest('.deletable-tag');
     if (tagDiv) {
         tagDiv.remove();
+        setTotalPointsEarned();
     }
 }
 
+function setTotalPointsEarned() {
+    // Total points earned should be based on number of tags currently added
+    // but should NEVER decrement below initial minimum to prevent delete-then-re-add exploit
+    // Initial minimum --> based on number of public tags already added by user --> get from server when page loads / refreshes
+    const currentPublicTags = publicTagsContainer.querySelectorAll('.tag');
+    let totalPointsEarned = 0;
+    currentPublicTags.forEach((tag, index) => {
+        if (index <= 10) {
+            totalPointsEarned += (10 - index);
+        }
+    });
+    totalPointsEarned = Math.max(initialTotalPointsEarned, totalPointsEarned);
+    totalPointsEarnedElement.textContent = totalPointsEarned + " pts";
+}
+
+function setTagScore() {
+    // Tag score should be based on number of tags already added (if there are any)
+    // to prevent delete-then-re-add exploit
+    const currentPublicTagCount = publicTagsContainer.querySelectorAll('.tag').length;
+
+    if (currentPublicTagCount > 0 && currentPublicTagCount <= 10) {
+        // From 11 because score decrements faster than animation --> so decrement happens before animation
+        // --> so need to decrement form 11 for "+10" to show correctly
+        currentTagScore = 11 - currentPublicTagCount;
+        animatedTagScore.textContent = "+" + currentTagScore;
+    } else if (currentPublicTagCount > 10) {
+        animatedTagScore.textContent = "";
+    }
+}
+
+function playScoreAnimation() {
+    // REMINDER: Private tags do not give points
+    animatedTagScore.classList.remove('play-animation');
+    void animatedTagScore.offsetWidth; // Force browser to re-render span before re-applying class
+    animatedTagScore.classList.add('play-animation');
+}
+
+/*--------------------------------------------------------------------------------------------------------------------*/
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape' || event.keyCode === 27) {
         closeModal();
@@ -81,6 +129,8 @@ document.addEventListener("DOMContentLoaded", function() {
         event.preventDefault();
         // Fill hidden form fields with all tags in modal
         isPinnedFormField.value = "True"; // MUST have first capital letter for compatibility with Python
+        totalPointsEarnedFormField.value = parseInt(totalPointsEarnedElement.textContent.replace(" pts", ""));
+
         const publicTags = document.querySelectorAll('#public-tags-list-container .tag-value')
         const privateTags = document.querySelectorAll('#private-tags-list-container .tag-value')
         publicTags.forEach(tag => {
@@ -98,6 +148,7 @@ document.addEventListener("DOMContentLoaded", function() {
     unpinItemButton.addEventListener('click', function() {
         event.preventDefault();
         isPinnedFormField.value = "False"; // MUST have first capital letter for compatibility with Python
+        totalPointsEarnedFormField.value = parseInt(totalPointsEarnedElement.textContent.replace(" pts", ""));
         userTagsForm.submit();
         closeModal();
     });
@@ -155,6 +206,11 @@ document.addEventListener("DOMContentLoaded", function() {
             event.preventDefault();  // Prevent default behaviour
             const newPublicTag = publicTagsInput.value;
             addTag(newPublicTag, true); // Add tag HTML
+            // Setting tag score is faster than animation, so score is decremented before animation plays
+            // If use set timeout of 1 second (animation duration) --> score doesn't decrement in time if user types really fast
+            setTagScore();
+            setTotalPointsEarned();
+            playScoreAnimation();
             publicTagsInput.value = ''; // Clear input field
         }
     });
