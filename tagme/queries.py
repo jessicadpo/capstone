@@ -180,8 +180,9 @@ def create_tag_report(user, item_id, report_data):
     item = Item.objects.get(item_id=item_id)
     tag = Tag.objects.get(tag=reported_tag)
 
-    # TODO: Check if the tag has global_whitelist=True and/or if item is in the tag's item_whitelist
-    # TODO: If yes to either --> do NOT create a report in the database
+    # if tag Whitelisted, ignore report
+    if tag.global_whitelist or item in tag.item_whitelist.all():
+        return
 
     # Create the report in the database
     report = Report(item_id=item, user_id=user, tag=tag, reason=reason)
