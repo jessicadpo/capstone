@@ -12,6 +12,7 @@ from django.dispatch import receiver
 import requests
 from .helper_functions import *
 from .models import *
+from .constants import *
 
 
 ########################################################################################################################
@@ -120,9 +121,6 @@ def get_related_tags(search_string):
     return related_tags
 
 
-
-
-
 #######################################################
 # SETTERS
 
@@ -216,11 +214,21 @@ def get_new_reward(prev_score, new_score):
         return None
 
 
+def set_global_blacklist():
+    """Function that returns true if the search string is blacklisted"""
+    for word in GLOBAL_BLACKLIST:
+        Tag.objects.get_or_create(tag=word, global_blacklist=True)
+
+
+set_global_blacklist()
+
+
 # pylint: enable=no-member
 
 
 ########################################################################################################################
 # DATAMUSE API QUERIES
+
 
 def query_datamuse_synonyms(word):
     """Function for synonyms of a given word (may or may NOT exist as tags in our database)"""
