@@ -120,6 +120,9 @@ def get_related_tags(search_string):
     return related_tags
 
 
+
+
+
 #######################################################
 # SETTERS
 
@@ -189,14 +192,29 @@ def create_user_profile(sender, instance, created, **kwargs):
 def update_user_profile_points_on_save(sender, instance, **kwargs):
     """Use Django signals to automatically update user profile points when a user contribution is added/updated"""
     user_profile = UserProfile.objects.get(user=instance.user)
+    prev_score = user_profile.points
     user_profile.update_points()
+    new_score = user_profile.points
+    return get_new_reward(prev_score, new_score)
 
 
 @receiver(post_delete, sender=UserContribution)
 def update_user_profile_points_on_delete(sender, instance, **kwargs):
     """Use Django signals to automatically update user profile points when a user contribution is deleted"""
     user_profile = UserProfile.objects.get(user=instance.user)
+    prev_score = user_profile.points
     user_profile.update_points()
+    new_score = user_profile.points
+    return get_new_reward(prev_score, new_score)
+
+
+def get_new_reward(prev_score, new_score):
+    new_rewards = Reward.objects.filter(points_required__gt=prev_score).filter(points_required__lt=new_score)
+    if new_rewards.exists():
+        return new_rewards
+    else:
+        return None
+
 
 # pylint: enable=no-member
 
@@ -261,7 +279,7 @@ def _query_loc_api(params, requested_page_number):
 
         results_on_page = []
         for item in data.get("results", []):
-            
+
             item_id = item.get('number_lccn')[0]
             title = decode_unicode(strip_punctuation(item.get("item").get('title', 'No title available')))
             publication_date = decode_unicode(item.get('date', 'No publication date available'))
