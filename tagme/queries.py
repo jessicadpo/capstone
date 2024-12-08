@@ -10,6 +10,7 @@ from django.contrib.auth import PermissionDenied
 import requests
 from .helper_functions import *
 from .models import *
+from .constants import *
 
 
 ########################################################################################################################
@@ -105,6 +106,7 @@ def get_related_tags(search_string):
 
     return related_tags
 
+
 #######################################################
 # SETTERS
 
@@ -185,10 +187,21 @@ def create_tag_report(user, item_id, report_data):
     report = Report(item_id=item, user_id=user, tag=tag, reason=reason)
     report.save()
 
+
+def set_global_blacklist():
+    """Function that returns true if the search string is blacklisted"""
+    for word in GLOBAL_BLACKLIST:
+        Tag.objects.get_or_create(tag=word, global_blacklist=True)
+
+
+set_global_blacklist()
+
+
 # pylint: enable=no-member
 
 ########################################################################################################################
 # DATAMUSE API QUERIES
+
 
 def query_datamuse_synonyms(word):
     """Function for synonyms of a given word (may or may NOT exist as tags in our database)"""
