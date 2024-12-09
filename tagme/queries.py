@@ -88,6 +88,7 @@ def get_user_points_for_item(user, item_id):
 
 
 def get_user_total_points(user):
+    """Function for getting a user's current total number of points"""
     return (UserProfile.objects.get(user=user)).points
 
 
@@ -99,8 +100,7 @@ def get_new_reward(prev_score, new_score):
         for reward in new_reward:
             new_reward_list.append({'title': reward.title, 'colour': reward.hex_colour})
         return new_reward_list
-    else:
-        return None
+    return None
 
 
 def get_synonymous_tags(search_string):
@@ -219,7 +219,7 @@ def create_tag_report(user, item_id, report_data):
     item = Item.objects.get(item_id=item_id)
     tag = Tag.objects.get(tag=reported_tag)
 
-    # if tag Whitelisted, ignore report
+    # If tag whitelisted globally or for item --> do not create report
     if tag.global_whitelist or item in tag.item_whitelist.all():
         return
 
@@ -237,7 +237,7 @@ def set_global_blacklist():
 def set_reward_list():
     """Function for creating the list of reward titles in the database"""
     points_required = 10
-    for title in REWARD_LIST.keys():
+    for title in REWARD_LIST:
         hex_colour = REWARD_LIST.get(title)
         Reward.objects.get_or_create(title=title, hex_colour=hex_colour, points_required=points_required)
         points_required += 50
@@ -248,29 +248,27 @@ set_reward_list()
 
 
 @receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
+def create_user_profile(sender, instance, created, **kwargs):  # pylint: disable=unused-argument
     """Use Django signals to automatically create a user profile points when a user is created (admin and not)"""
     if created:
         UserProfile.objects.create(user=instance)
 
 
 @receiver(post_save, sender=UserContribution)
-def update_user_profile_points_on_save(sender, instance, **kwargs):
+def update_user_profile_points_on_save(sender, instance, **kwargs):  # pylint: disable=unused-argument
     """Use Django signals to automatically update user profile points when a user contribution is added/updated"""
     user_profile = UserProfile.objects.get(user=instance.user)
     user_profile.update_points()
 
 
 @receiver(post_delete, sender=UserContribution)
-def update_user_profile_points_on_delete(sender, instance, **kwargs):
+def update_user_profile_points_on_delete(sender, instance, **kwargs):  # pylint: disable=unused-argument
     """
     Use Django signals to automatically update user profile points when a user contribution is deleted
     NOTE: UserContributions shouldn't ever be deleted (unless the user exercises their right to be forgotten)
     """
     user_profile = UserProfile.objects.get(user=instance.user)
     user_profile.update_points()
-
-
 
 # pylint: enable=no-member
 

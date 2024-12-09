@@ -46,7 +46,7 @@ class UserProfile(models.Model):
 
     def update_points(self):
         """ Sum all points_earned from UserContribution (for that user) """
-        total_points = self.user.usercontribution_set.aggregate(total=models.Sum('points_earned'))['total'] or 0
+        total_points = self.user.usercontribution_set.aggregate(total=models.Sum('points_earned'))['total'] or 0  # pylint: disable=no-member
         self.points = total_points
         self.save()
 
