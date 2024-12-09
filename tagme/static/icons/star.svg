@@ -1,0 +1,10 @@
+<svg width="52" height="50" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" overflow="hidden">
+    <defs>
+        <clipPath id="clip0">
+            <rect x="1504" y="828" width="52" height="50"/>
+        </clipPath>
+    </defs>
+    <g clip-path="url(#clip0)" transform="translate(-1504 -828)">
+        <path d="M1504 847.098 1523.86 847.098 1530 828 1536.14 847.098 1556 847.098 1539.93 858.902 1546.07 878 1530 866.196 1513.93 878 1520.07 858.902Z" fill="#FFFFFF" fill-rule="evenodd"/>
+    </g>
+</svg>

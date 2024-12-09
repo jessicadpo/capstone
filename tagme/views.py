@@ -73,13 +73,17 @@ def about(request):
 
 def search_results(request, requested_page_number):
     """View for Search Results pages"""
-    page_forms = {"search_form": SearchForm(), "tags_form": TagsForm()}
+    page_forms = {"search_form": SearchForm(), "tags_form": TagsForm(), "equip_form": EquipForm()}
+    score_data = {'user_points': -1, 'new_reward': None}
 
     # If POST request for adding/editing tags on an item
     if request.method == 'POST' and ('tagged_item' in request.POST):
         tags_form = TagsForm(request.POST)
         if tags_form.is_valid():  # cleans form inputs
+            prev_score = get_user_total_points(request.user)
             set_user_tags_for_item(request.user, tags_form.cleaned_data)
+            score_data['user_points'] = get_user_total_points(request.user)
+            score_data['new_reward'] = get_new_reward(prev_score, score_data['user_points'])
 
     # TODO: Code for parsing AND/OR/NOT/*/? --> Investigate pyparsing & Shunting Yard algorithm
 
@@ -109,6 +113,7 @@ def search_results(request, requested_page_number):
             item_data['user_public_tags'] = user_public_tags
             item_data['user_private_tags'] = user_private_tags
             item_data['is_pinned'] = get_is_item_pinned(request.user, item_data["item_id"])
+            item_data['points_earned'] = get_user_points_for_item(request.user, item_data["item_id"])
 
     # Get lists of synonymous & related tags
     synonymous_tags = get_synonymous_tags(request.GET.get('search_string'))
@@ -123,16 +128,22 @@ def search_results(request, requested_page_number):
         'forms': page_forms,
         'synonymous_tags': synonymous_tags,
         'related_tags': related_tags,
+        'score_data': score_data,  # Need this so can trigger "Congrats!" popup
     })
 
 
 def item_page(request, item_id):
     """View for Item pages"""
+    score_data = {'user_points': -1, 'new_reward': None}
+
     # If POST request for adding/editing tags on an item
     if request.method == 'POST' and ('tagged_item' in request.POST):
         tags_form = TagsForm(request.POST)
         if tags_form.is_valid():  # cleans form inputs
+            prev_score = get_user_total_points(request.user)
             set_user_tags_for_item(request.user, tags_form.cleaned_data)
+            score_data['user_points'] = get_user_total_points(request.user)
+            score_data['new_reward'] = get_new_reward(prev_score, score_data['user_points'])
 
     # If POST request for reporting a tag
     elif request.method == 'POST' and ('reported_tag' in request.POST):
@@ -144,7 +155,7 @@ def item_page(request, item_id):
     elif request.method == 'POST' and ('comment' in request.POST):
         print('adding/editing a comment')
 
-    page_forms = {"search_form": SearchForm(), "tags_form": TagsForm(), "report_form": ReportForm()}
+    page_forms = {"search_form": SearchForm(), "tags_form": TagsForm(), "report_form": ReportForm(), "equip_form": EquipForm()}
     results_on_search_page = request.session.get('results_on_page', {})  # Retrieve search results from the session
     item_data = results_on_search_page.get(str(item_id))  # Get the specific item using the item ID
     item_data['tags'] = get_all_tags_for_item(item_id)
@@ -154,7 +165,13 @@ def item_page(request, item_id):
         item_data['user_public_tags'] = user_public_tags
         item_data['user_private_tags'] = user_private_tags
         item_data['is_pinned'] = get_is_item_pinned(request.user, item_id)
+        item_data['points_earned'] = get_user_points_for_item(request.user, item_data["item_id"])
 
     if not item_data:
         raise Http404("Item not found")
-    return render(request, 'item_page.html', {'item': item_data, 'forms': page_forms})
+
+    return render(request, 'item_page.html', {
+        'item': item_data,
+        'forms': page_forms,
+        'score_data': score_data,  # Need this so can trigger "Congrats!" popup
+    })

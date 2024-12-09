@@ -23,12 +23,24 @@ class SearchForm(forms.Form):
         attrs={'id': 'search-input', 'placeholder': 'Search', 'label': 'Search'}))
 
 
+class EquipForm(forms.Form):
+    """ Form for equipping a title """
+    title_to_equip = forms.CharField(label=False, min_length=1, max_length=999, required=True, widget=forms.TextInput(
+        attrs={'id': 'title-to-equip-input'}))
+    equip_position = forms.ChoiceField(label=False, choices=(("1", "1"), ("2", "2")), required=True, widget=forms.Select(
+        attrs={'id': 'equip-position-input'}))
+
+
 class TagsForm(forms.Form):
     """ Form for add/edit tags modal """
+    # Need to use a CharField instead of BooleanField because
+    # unchecked BooleanField just straight up don't get included in a request
+    is_pinned = forms.CharField(label=False, required=True, initial="true", widget=forms.TextInput(attrs={'id': 'is-pinned-input'}))
     tagged_item = forms.CharField(label=False, required=True, widget=forms.TextInput(attrs={'id': 'item-id-input'}))
     public_tags = forms.CharField(label=False, required=False, initial="\\n", widget=forms.Textarea(attrs={'id': 'public-tags-form-field'}))
     private_tags = forms.CharField(label=False, required=False, initial="\\n", widget=forms.Textarea(attrs={'id': 'private-tags-form-field'}))
-    # Need initial for the isAlreadyAdded function in tag_modal.js
+    # Need initial '\\n' for the isAlreadyAdded function in tag_modal.js
+    total_points_for_item = forms.IntegerField(label=False, required=True, widget=forms.NumberInput(attrs={'id': 'total-points-for-item-field'}))
 
 
 class ReportForm(forms.Form):

@@ -7,6 +7,8 @@ RATE LIMIT FOR LIBRARY OF CONGRESS API: 20 queries per 10 seconds && 80 queries 
 from urllib.parse import quote
 from django.db.models import Count
 from django.contrib.auth import PermissionDenied
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 import requests
 from .helper_functions import *
 from .models import *
@@ -73,6 +75,34 @@ def get_user_tags_for_item(user, item_id):
     return None, None
 
 
+def get_user_points_for_item(user, item_id):
+    """Function for retrieving the number of points already earned by user for (public) tagging a particular item"""
+    if not user.is_authenticated:
+        raise PermissionDenied("User must be logged in")
+
+    # Returns a list of dicts (each tag in its own dict)
+    user_contrib = UserContribution.objects.filter(user_id=user.id, item_id=item_id)
+    if user_contrib.exists():
+        return user_contrib[0].points_earned
+    return 0
+
+
+def get_user_total_points(user):
+    """Function for getting a user's current total number of points"""
+    return (UserProfile.objects.get(user=user)).points
+
+
+def get_new_reward(prev_score, new_score):
+    """Function for checking if a user should get a new reward + returning the new reward they should be getting"""
+    new_reward = Reward.objects.filter(points_required__gt=prev_score).filter(points_required__lte=new_score)
+    if new_reward.exists():
+        new_reward_list = []  # Format as an array to keep consistent with other get_rewards() functions
+        for reward in new_reward:
+            new_reward_list.append({'title': reward.title, 'colour': reward.hex_colour})
+        return new_reward_list
+    return None
+
+
 def get_synonymous_tags(search_string):
     """Function for getting tags that are synonyms of a list of given words"""
     # TODO: Parse AND/OR/NOT
@@ -134,23 +164,32 @@ def set_user_tags_for_item(user, tags_data):
     user_contrib = UserContribution.objects.filter(user=user, item=item)
     if user_contrib.exists():
         user_contrib = user_contrib[0]
+
         existing_public_tags = set(user_contrib.public_tags.all())
         existing_private_tags = set(user_contrib.private_tags.all())
 
         public_tags_to_add = new_public_tags - existing_public_tags
-        public_tags_to_remove = existing_public_tags - new_public_tags
         private_tags_to_add = new_private_tags - existing_private_tags
-        private_tags_to_remove = existing_private_tags - new_private_tags
-
         user_contrib.public_tags.add(*public_tags_to_add)
-        user_contrib.public_tags.remove(*public_tags_to_remove)
         user_contrib.private_tags.add(*private_tags_to_add)
-        user_contrib.private_tags.remove(*private_tags_to_remove)
 
-        user_contrib.is_pinned = True
+        # If user already has tags, but the item is being unpinned or is CURRENTLY unpinned
+        # (meaning user is re-pinning an item that they previously tagged)
+        # Do NOT override previous tags --> Only override if user is changing the tags on an item that's already pinned
+        # + they are NOT unpinning the item
+        if user_contrib.is_pinned and eval(tags_data.get('is_pinned')):
+            public_tags_to_remove = existing_public_tags - new_public_tags
+            private_tags_to_remove = existing_private_tags - new_private_tags
+            user_contrib.public_tags.remove(*public_tags_to_remove)
+            user_contrib.private_tags.remove(*private_tags_to_remove)
+
+        user_contrib.is_pinned = eval(tags_data.get('is_pinned'))
+        user_contrib.points_earned = tags_data.get('total_points_for_item')  # TODO: Add a check to make sure points_earned cannot ever decrease?
         user_contrib.save()
     else:
-        user_contrib = UserContribution(user=user, item_id=item_id, is_pinned=True)
+        user_contrib = UserContribution(user=user, item_id=item_id,
+                                        is_pinned=eval(tags_data.get('is_pinned')),
+                                        points_earned=tags_data.get('total_points_for_item'))
         user_contrib.save()
         user_contrib.public_tags.add(*new_public_tags)
         user_contrib.private_tags.add(*new_private_tags)
@@ -180,7 +219,7 @@ def create_tag_report(user, item_id, report_data):
     item = Item.objects.get(item_id=item_id)
     tag = Tag.objects.get(tag=reported_tag)
 
-    # if tag Whitelisted, ignore report
+    # If tag whitelisted globally or for item --> do not create report
     if tag.global_whitelist or item in tag.item_whitelist.all():
         return
 
@@ -190,15 +229,49 @@ def create_tag_report(user, item_id, report_data):
 
 
 def set_global_blacklist():
-    """Function that returns true if the search string is blacklisted"""
+    """Function for creating the list of globally-blacklisted tags in the database"""
     for word in GLOBAL_BLACKLIST:
         Tag.objects.get_or_create(tag=word, global_blacklist=True)
 
 
-set_global_blacklist()
+def set_reward_list():
+    """Function for creating the list of reward titles in the database"""
+    points_required = 10
+    for title in REWARD_LIST:
+        hex_colour = REWARD_LIST.get(title)
+        Reward.objects.get_or_create(title=title, hex_colour=hex_colour, points_required=points_required)
+        points_required += 50
 
+
+set_global_blacklist()
+set_reward_list()
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):  # pylint: disable=unused-argument
+    """Use Django signals to automatically create a user profile points when a user is created (admin and not)"""
+    if created:
+        UserProfile.objects.create(user=instance)
+
+
+@receiver(post_save, sender=UserContribution)
+def update_user_profile_points_on_save(sender, instance, **kwargs):  # pylint: disable=unused-argument
+    """Use Django signals to automatically update user profile points when a user contribution is added/updated"""
+    user_profile = UserProfile.objects.get(user=instance.user)
+    user_profile.update_points()
+
+
+@receiver(post_delete, sender=UserContribution)
+def update_user_profile_points_on_delete(sender, instance, **kwargs):  # pylint: disable=unused-argument
+    """
+    Use Django signals to automatically update user profile points when a user contribution is deleted
+    NOTE: UserContributions shouldn't ever be deleted (unless the user exercises their right to be forgotten)
+    """
+    user_profile = UserProfile.objects.get(user=instance.user)
+    user_profile.update_points()
 
 # pylint: enable=no-member
+
 
 ########################################################################################################################
 # DATAMUSE API QUERIES
@@ -261,6 +334,7 @@ def _query_loc_api(params, requested_page_number):
 
         results_on_page = []
         for item in data.get("results", []):
+
             item_id = item.get('number_lccn')[0]
             title = decode_unicode(strip_punctuation(item.get("item").get('title', 'No title available')))
             publication_date = decode_unicode(item.get('date', 'No publication date available'))
