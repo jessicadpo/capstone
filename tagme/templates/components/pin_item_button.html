@@ -7,17 +7,17 @@
     {% endif %}
 </button>
 
-<div class="public-user-tags-for-item"> <!-- Hidden from user (Need this to pre-fill "Add tags" form in Search results page in JavaScript -->
+<div class="public-user-tags-for-item invisible"> <!-- Hidden from user (Need this to pre-fill "Add tags" form in Search results page in JavaScript -->
     {% for tag in item.user_public_tags %}
         <span>{{ tag }}</span>
     {% endfor %}
 </div>
-<div class="private-user-tags-for-item"> <!-- Hidden from user (Need this to pre-fill "Add tags" form in Search results page in JavaScript -->
+<div class="private-user-tags-for-item invisible"> <!-- Hidden from user (Need this to pre-fill "Add tags" form in Search results page in JavaScript -->
     {% for tag in item.user_private_tags %}
         <span>{{ tag }}</span>
     {% endfor %}
 </div>
-<div class="points-earned-for-item"> <!-- Hidden from user (Need this to pre-fill "Add tags" form in Search results page in JavaScript -->
+<div class="points-earned-for-item invisible"> <!-- Hidden from user (Need this to pre-fill "Add tags" form in Search results page in JavaScript -->
     <span>{{ item.points_earned }}</span>
 </div>
 

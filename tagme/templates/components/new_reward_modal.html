@@ -1,0 +1,44 @@
+<div id="new-reward-overlay" class="modal-overlay"></div> <!-- id so behaves differently from report-tag-overlay -->
+
+<div class="firework invisible"></div>
+<div class="firework invisible"></div>
+<div class="firework invisible"></div>
+
+<dialog id="new-reward-modal" class="modal">
+    <div class="modal-content"> <!-- Need this because can't apply display=flex to <dialog> directly -->
+        <h1>Congrats!</h1>
+        <p>You've reached {{ score_data.user_points }} points and earned:</p>
+        <div>
+            {% for reward in score_data.new_reward %}
+                {% include "components/reward_title.html" %}
+            {% endfor %}
+        </div>
+
+        <div id="equip-title-line">
+           <p>Equip title?</p>
+            <div class="tooltip">
+                <i id="equip-tooltip" class="fa fa-question-circle" aria-label="Tooltip for equipping titles" tabindex="0"></i>
+                <div class="tooltip-bubble yellow-bubble bubble-on-right">
+                    <div class="bubble-tail-outline"></div>
+                    <div class="bubble-tail"></div>
+                    <div class="bubble-content">
+                        <p><b>Equipped titles</b> are displayed next to your username on any comment you leave.</p>
+                        <p>You can always equip titles later from your profile page.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button id="skip-equip-button" class="modal-footer-button">Not right now</button>
+            <button id="yes-equip-button" class="modal-footer-button" autofocus>Yes</button>
+        </div>
+    </div>
+
+    <!-- NOT VISIBLE -->
+    <form id="equip-title-form" class="invisible" method="POST">
+        {% csrf_token %}
+        {{ forms.equip_form }}
+    </form>
+</dialog>
+

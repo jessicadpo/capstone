@@ -4,7 +4,7 @@
 
 <div id="add-tags-overlay" class="modal-overlay"></div> <!-- id so overlay behaves differently from report-tag-overlay -->
 
-<dialog id="add-tags-modal">
+<dialog id="add-tags-modal" class="modal">
     <div class="header-with-x-button">
         <h1>Your tags for: <b id="saving-item-title">[Item Title]</b></h1>
         <button id="close-tag-modal-button" class="close-x-button" aria-label="Close tag panel">✖</button>
@@ -72,14 +72,14 @@
         </div>
     </div>
 
-    <div id="add-tags-modal-footer">
+    <div id="add-tags-modal-footer" class="modal-footer"> <!-- Need id for border-top (CSS) -->
         <button id="cancel-tags-modal-button" class="modal-footer-button">Cancel</button>
         <button id="save-tags-button" class="modal-footer-button">Save</button> <!-- Submits the form via JavaScript -->
         <button id="unpin-item-button" class="modal-footer-button">Unpin</button> <!-- Submits the form via JavaScript -->
     </div>
 
     <!-- NOT VISIBLE -->
-    <form id="user-tags-form" method="POST">
+    <form id="user-tags-form" class="invisible" method="POST">
         {% csrf_token %}
         {{ forms.tags_form }}
     </form>

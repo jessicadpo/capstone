@@ -21,7 +21,7 @@ const privateTagsFormField = document.getElementById('private-tags-form-field');
 const isPinnedFormField = document.getElementById('is-pinned-input'); // Invisible to users
 const totalPointsEarnedFormField = document.getElementById('total-points-for-item-field'); // Invisible to users
 
-function openModal() {
+function openTagsModal() {
     setTagScore();
     setTotalPointsEarned();
     addTagsOverlay.classList.add('active');
@@ -29,7 +29,7 @@ function openModal() {
     addTagsModal.showModal();
 }
 
-function closeModal() {
+function closeTagsModal() {
     animatedTagScore.classList.remove('play-animation'); // Prevent animation playing on modal re-open
     addTagsModal.close();
     document.body.style.overflow = ''; // Re-enable scrolling on the main content
@@ -122,15 +122,15 @@ function playScoreAnimation() {
 /*--------------------------------------------------------------------------------------------------------------------*/
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape' || event.keyCode === 27) {
-        closeModal();
+        closeTagsModal();
     }
 });
 
 // Triggers after DOM content is finished loading
 document.addEventListener("DOMContentLoaded", function() {
     // Set close modal button behaviour
-    closeXButton.addEventListener('click', closeModal);
-    cancelButton.addEventListener('click', closeModal);
+    closeXButton.addEventListener('click', closeTagsModal);
+    cancelButton.addEventListener('click', closeTagsModal);
 
     // Set "Pin Item" button behaviour
     pinItemButtons.forEach(pinItemButton => {
@@ -180,7 +180,7 @@ document.addEventListener("DOMContentLoaded", function() {
             document.getElementById('item-id-input').value = pinningItemId;
 
             // Open modal --> disables interaction outside of modal (unlike .show())
-            openModal();
+            openTagsModal();
         });
     });
 
@@ -226,7 +226,7 @@ document.addEventListener("DOMContentLoaded", function() {
             privateTagsFormField.value += tag.textContent + '\\n';
         });
         userTagsForm.submit();
-        closeModal();
+        closeTagsModal();
     });
 
     // Make the "Unpin" button submit the form (only care about isPinned) & close the modal
@@ -236,6 +236,6 @@ document.addEventListener("DOMContentLoaded", function() {
         isPinnedFormField.value = "False"; // MUST have first capital letter for compatibility with Python
         totalPointsEarnedFormField.value = initialTotalPointsEarned; // Do not save added tags if "Unpin" button is clicked
         userTagsForm.submit();
-        closeModal();
+        closeTagsModal();
     });
 });

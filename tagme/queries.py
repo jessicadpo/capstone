@@ -91,11 +91,14 @@ def get_user_total_points(user):
     return (UserProfile.objects.get(user=user)).points
 
 
-def get_new_rewards(prev_score, new_score):
-    """Function for checking if a user should get a new reward + returning the new reward(s) they should be getting"""
-    new_rewards = Reward.objects.filter(points_required__gt=prev_score).filter(points_required__lte=new_score)
-    if new_rewards.exists():
-        return new_rewards
+def get_new_reward(prev_score, new_score):
+    """Function for checking if a user should get a new reward + returning the new reward they should be getting"""
+    new_reward = Reward.objects.filter(points_required__gt=prev_score).filter(points_required__lte=new_score)
+    if new_reward.exists():
+        new_reward_list = []  # Format as an array to keep consistent with other get_rewards() functions
+        for reward in new_reward:
+            new_reward_list.append({'title': reward.title, 'colour': reward.hex_colour})
+        return new_reward_list
     else:
         return None
 
@@ -190,7 +193,6 @@ def set_user_tags_for_item(user, tags_data):
         user_contrib.save()
         user_contrib.public_tags.add(*new_public_tags)
         user_contrib.private_tags.add(*new_private_tags)
-
 
 
 def set_global_blacklist():

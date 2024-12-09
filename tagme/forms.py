@@ -23,6 +23,14 @@ class SearchForm(forms.Form):
         attrs={'id': 'search-input', 'placeholder': 'Search', 'label': 'Search'}))
 
 
+class EquipForm(forms.Form):
+    """ Form for equipping a title """
+    title_to_equip = forms.CharField(label=False, min_length=1, max_length=999, required=True, widget=forms.TextInput(
+        attrs={'id': 'title-to-equip-input'}))
+    equip_position = forms.ChoiceField(label=False, choices=(("1", "1"), ("2", "2")), required=True, widget=forms.Select(
+        attrs={'id': 'equip-position-input'}))
+
+
 class TagsForm(forms.Form):
     """ Form for add/edit tags modal """
     # Need to use a CharField instead of BooleanField because
