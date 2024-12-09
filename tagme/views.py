@@ -149,7 +149,9 @@ def item_page(request, item_id):
 
     # If POST request for reporting a tag
     elif request.method == 'POST' and ('reported_tag' in request.POST):
-        print('reporting a tag')
+        report_form = ReportForm(request.POST)
+        if report_form.is_valid():
+            create_tag_report(request.user, item_id, report_form.cleaned_data)
 
     # If POST request for adding a comment
     elif request.method == 'POST' and ('comment' in request.POST):
