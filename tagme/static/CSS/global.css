@@ -144,6 +144,7 @@ b, strong {
 
     & > img { /* The triangle shape at the end */
         min-width: 20px;
+        aspect-ratio: 50 / 25;
     }
 }
 
@@ -159,6 +160,7 @@ b, strong {
     align-items: center;
     gap: 5px;
     height: fit-content;
+    min-width: fit-content;
 
     & img { /* The light green trapeze svg */
         position:absolute; /* Positioned relative to grandparent .tag, not parent .tag-text */
