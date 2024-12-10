@@ -9,3 +9,13 @@ GLOBAL_BLACKLIST = ['apeshit', 'arse', 'arsehole', 'ass', 'asshole', 'assmunch',
                     'motherfucking', 'negro', 'nigga', 'nigger', 'nig nog', 'piece of shit',  'poon', 'poontang',
                     'retard', 'retards', 'retarded', 'shit', 'shitblimp', 'shits', 'shitter', 'shitting', 'shitty',
                     'slut', 'sluts', 'sodomize', 'sodomy', 'tranny',  'whore']
+
+REWARD_LIST = {
+    "New to the Family": "#B52801",         # Red
+    "Busy Bee": "#C67A2A",                  # Gold
+    "Keen Cataloguer": "#C46200",           # Green
+    "Sharp Sorter": "#006996",              # Blue
+    "Diligent Documenter": "#C67A2A",       # Gold
+    "Elite Archivist": "#B63200",           # Orange
+    "Metadata Master": "#820096",           # Purple
+}

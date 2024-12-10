@@ -44,6 +44,12 @@ class UserProfile(models.Model):
     equipped_title_1 = models.ForeignKey(Reward, blank=True, null=True, related_name="title_1", on_delete=models.CASCADE)
     equipped_title_2 = models.ForeignKey(Reward, blank=True, null=True, related_name="title_2", on_delete=models.CASCADE)
 
+    def update_points(self):
+        """ Sum all points_earned from UserContribution (for that user) """
+        total_points = self.user.usercontribution_set.aggregate(total=models.Sum('points_earned'))['total'] or 0  # pylint: disable=no-member
+        self.points = total_points
+        self.save()
+
     def __str__(self):
         return str(self.user)  # For proper display on admin site
 
@@ -67,10 +73,10 @@ class UserContribution(models.Model):
     is_pinned = models.BooleanField(default=False, blank=False, null=False)
     public_tags = models.ManyToManyField(Tag, blank=True, related_name="public_tags")
     private_tags = models.ManyToManyField(Tag, blank=True, related_name="private_tags")
+    points_earned = models.IntegerField(default=0, blank=False, null=False)  # To prevent point farming by deleting/re-adding
     comment = models.TextField(blank=True, null=True)
-
-    # Do NOT use auto_now=True because comment_datetime should not update if only tags are updated
     comment_datetime = models.DateTimeField(blank=True, null=True)
+    # Do NOT use auto_now=True because comment_datetime should not update if only tags are updated
 
     def save_comment(self, *args, **kwargs):
         """Update timestamp when comment is added/edited"""
@@ -92,9 +98,9 @@ class Report(models.Model):
         # ReportDecision.GLOBAL_BLACKLIST.label --> returns "Global Blacklist"
 
     report_id = models.BigAutoField(primary_key=True, blank=False, null=False)
-    item_id = models.ForeignKey(Item, on_delete=models.CASCADE)  # null=False && blank=False by default
+    item_id = models.ForeignKey(Item, on_delete=models.CASCADE)  # null=False && blank=False by default #TODO: Change to item
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)  #TODO: Change to user
     reason = models.TextField(blank=False, null=False)
     creation_datetime = models.DateTimeField(auto_now_add=True)  # Datetime cannot be overwritten / manually set
     decision = models.CharField(max_length=16, blank=True, null=True, choices=ReportDecision)
