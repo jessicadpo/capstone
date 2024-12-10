@@ -18,6 +18,10 @@ body {
     color: black;
 }
 
+main {
+    flex-grow: 1; /* Take up all available space between top bar and footer */
+}
+
 b, strong {
     font-weight: 500;
 }
@@ -150,7 +154,6 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
 
     & .bubble-content {
         z-index: 1001;
-        padding: 0px 10px;
     }
 
     & .bubble-tail {
@@ -181,12 +184,13 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
 /* REWARD TITLES */
 .reward-title {
     height: 30px;
+    min-width: fit-content;
     padding: 5px 20px 5px 10px;
     border-radius: 10px;
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
+    justify-content: start;
     gap: 10px;
     cursor: default;
     position: relative;
@@ -378,6 +382,16 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
     border-color: inherit;
     border-radius: 5px;
     z-index: 0; /* Default */
+
+    & > p:first-child {
+        margin-top: 0;
+    }
+
+    & > p:last-child {
+        margin-bottom: 0;
+    }
+
+
 }
 
 .bubble-tail-outline { /* Triangle BORDER part of speech bubble shape */
@@ -661,6 +675,37 @@ div:has(>#search-input) { /* Because Django puts every field in its own div... *
 #account-dropdown-options i {
     color: #537A00;
     font-size: 1.2em;
+}
+
+/**********************************************************************************************************************/
+/* SIDE BAR (USER PROFILE / SAVED ITEMS / ACCOUNT SETTIGNS) */
+#user-account-sidebar {
+    height: 100%;
+    width: 15%;
+    border-right: solid 1px #537A00;
+    overflow: hidden; /* TODO: Figure out how to adapt this when browser width is small */
+    display: flex;
+    flex-direction: column; /* Main axis = Vertical */
+}
+
+#user-account-sidebar a {
+    padding: 15px 20px;
+    font-size: 1.4rem;
+    font-weight: 300;
+    text-decoration: none;
+    border-bottom: solid 1px #537A00;
+    display: flex;
+    flex-direction: row; /* Main axis = horizontal */
+    align-items: center;
+    gap: 10px;
+
+    & i {
+        color: #537A00;
+    }
+
+    &:hover {
+        background-color: #E0EEAC;
+    }
 }
 
 /**********************************************************************************************************************/

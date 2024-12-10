@@ -9,16 +9,16 @@ function openAccountDropdown() {
 
 // Close the dropdown menu if the user clicks outside of it
 window.onclick = function(event) {
-  if (!event.target.matches('.dropdown-button') && !event.target.matches('.dropdown-button *')) {
-    var dropdowns = document.getElementsByClassName("dropdown-options");
-    var i;
-    for (i = 0; i < dropdowns.length; i++) {
-      var openDropdown = dropdowns[i];
-      if (openDropdown.classList.contains('show')) {
-        openDropdown.classList.remove('show');
-      }
+    if (!event.target.matches('.dropdown-button') && !event.target.matches('.dropdown-button *')) {
+        var dropdowns = document.getElementsByClassName("dropdown-options");
+        var i;
+        for (i = 0; i < dropdowns.length; i++) {
+            var openDropdown = dropdowns[i];
+            if (openDropdown.classList.contains('show')) {
+                openDropdown.classList.remove('show');
+            }
+        }
     }
-  }
 }
 
 // Update the text inside the dropdown menu button to the selected item

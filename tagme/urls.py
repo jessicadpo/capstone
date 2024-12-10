@@ -20,9 +20,10 @@ from django.contrib import admin
 from .views import *
 
 urlpatterns = [
+    # Cannot start URLs with <str:username> because of conflicts if username is "admin"
     path('', homepage, name="homepage"),
-    path('admin/', admin.site.urls),
     path('signup-login', signup_login),
+    path('profile/<str:username>', user_profile, name="user_profile"),
     path('logout', logout_view),
     path('search/<str:requested_page_number>/', search_results, name="search_results"),
     path('item/<str:item_id>/', item_page, name="item_page"),

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en ">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ request.user.username }} - TagMe Profile</title>
+
+    <!-- Roboto font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="../../static/CSS/global.css">
+    <link rel="stylesheet" href="../../static/CSS/user_profile.css">
+</head>
+
+<body>
+    {% include "components/top_bar.html" %}
+
+    <main>
+        <nav id="user-account-sidebar">
+            <a id="my-profile-sidebar-link" href="/profile/{{ request.user.username }}"><i class="fa fa-user-o" aria-hidden="true"></i>My Profile</a>
+            <a id="pinned-items-sidebar-link" href="/pinned-items/{{ request.user.username }}"><i class="fa fa-thumb-tack" aria-hidden="true"></i>Pinned Items</a>
+            <a id="account-settings-sidebar-link" href="/settings/{{ request.user.username }}"><i class="fa fa-cog" aria-hidden="true"></i>Account Settings</a>
+            <a id="logout-sidebar-link" href="/logout"><i class="fa fa-sign-out" aria-hidden="true"></i>Log Out</a>
+        </nav>
+
+        <div id="profile-section">
+            <div id="profile-header">
+                <i class="fa fa-user-circle" aria-hidden="true"></i>
+                <span>{{ request.user.username }}</span>
+            </div>
+
+            <div id="profile-content">
+                <div id="progress-equip-row">
+                    <div class="content-box" id="progress-section">
+                        <h1>Progress</h1>
+
+                        <div id="progress-bar">
+                            {% if score_data.points_since_last_reward > 0 %}
+                                <div id="current-progress-bar">
+                                    <div class="tickmark" id="middle-tickmark">
+                                        <span>{{ score_data.points_since_last_reward }}</span>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            <div class="tickmark" id="start-tickmark">
+                                <span>0</span>
+                            </div>
+
+                            <div class="tickmark" id="end-tickmark">
+                                <i class="fa fa-gift" aria-hidden="true"></i>
+                                {% if earned_titles %} <!-- If earned_titles is NOT empty (at least 1 title earned already -->
+                                    <span>50</span>
+                                {% else %}
+                                    <span>10</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div id="progress-info-line">
+                            <div>
+                                <h2>Total:</h2>
+                                <span>{{ score_data.user_points }} pts</span>
+                            </div>
+
+                            <div>
+                                <h2>Next reward:</h2>
+                                <!-- Need for loop because next_reward is formatted as an array (for consistency) -->
+                                {% for reward in next_reward %}
+                                    {% include 'components/reward_title.html' %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-box" id="equipped-titles-section">
+                        <div id="equipped-titles-header">
+                            <h1>Equipped Titles</h1>
+                            <div class="tooltip">
+                                <i id="equip-tooltip" class="fa fa-question-circle" aria-label="Tooltip for equipping titles" tabindex="0"></i>
+                                <div class="tooltip-bubble yellow-bubble bubble-on-right">
+                                    <div class="bubble-tail-outline"></div>
+                                    <div class="bubble-tail"></div>
+                                    <div class="bubble-content">
+                                        <p><b>Equipped titles</b> are displayed next to your username on any comment you leave.</p>
+                                        <p>Click the pencil icons or drag-and-drop earned titles to equip them!</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="equipped-titles-content">
+                            {% for reward in equipped_titles %}
+                                <div class="equipped-title-widget">
+                                    <div class="dropdown dropzone">
+                                        {% if reward != null %}
+                                            {% include 'components/reward_title.html' %}
+                                        {% else %}
+                                            <div class="empty-equip-slot"><span>Empty</span></div>
+                                        {% endif %}
+                                        <div class="dropdown-options">
+                                            {% for reward in earned_titles %}
+                                                {% include 'components/reward_title.html' %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <button class="edit-button dropdown-button" onclick="openEquipDropdown(this)" aria-label="Change title">
+                                        <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-box" id="earned-titles-section">
+                    <h1>Earned Titles</h1>
+                    <div id="earned-titles-content">
+                        {% for reward in earned_titles %}
+                            {% include 'components/reward_title.html' %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    {% include "components/footer.html" %}
+
+    <!-- JavaScript -->
+    <script type="text/javascript" src="../../static/JavaScript/global.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/user_profile.js"></script>
+</body>
+</html>

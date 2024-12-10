@@ -49,3 +49,8 @@ def to_firstname_lastname(name):
         lastname, firstname = [name_part.strip() for name_part in name.split(',')]
         return f"{firstname} {lastname}"
     return name
+
+
+def reward_to_dict_format(reward):
+    """Convert a Reward object to a front-end readable dict format"""
+    return {'title': reward.title, 'colour': reward.hex_colour, 'points_required': reward.points_required}

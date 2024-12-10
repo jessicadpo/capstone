@@ -1,8 +1,9 @@
 """Module for TagMe views"""
 from urllib.parse import urlparse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import login, logout
-from django.urls import is_valid_path
+from django.contrib.auth.decorators import login_required
+from django.urls import is_valid_path, reverse
 from django.http import Http404
 from .forms import *
 from .queries import *
@@ -29,8 +30,6 @@ def signup_login(request):
             username = signup_form.cleaned_data.get('username')
             password = signup_form.cleaned_data.get('password1')
             user = authenticate(request, username=username, password=password)
-            extended_user = UserProfile(user=user)
-            extended_user.save()  # Create UserProfile at the same time as user
             login(request, user)
 
             # Ensure next_url is safe or default to home page
@@ -60,6 +59,32 @@ def signup_login(request):
     return render(request, 'signup_login.html', {'forms': page_forms})
 
 
+@login_required
+def user_profile(request, username):
+    page_forms = {"search_form": SearchForm(), "equip_form": EquipForm()}
+    score_data = {'user_points': -1, 'points_since_last_reward': -1}
+
+    # Redirect user to their own profile page if they try to access someone else's
+    if request.user.username != username:
+        return redirect(reverse('user_profile', args=[request.user.username]))
+
+    next_reward = get_next_reward(request.user)
+    equipped_titles = get_equipped_titles(request.user)
+    earned_titles = get_earned_rewards(request.user)
+    score_data['user_points'] = get_user_total_points(request.user)
+    if earned_titles is not None:
+        most_recent_reward = max(earned_titles, key=lambda title: title["points_required"])
+        score_data["points_since_last_reward"] = score_data['user_points'] - most_recent_reward['points_required']
+
+    return render(request, 'user_profile.html', {
+        'forms': page_forms,
+        'next_reward': next_reward,
+        'equipped_titles': equipped_titles,
+        'earned_titles': earned_titles,
+        'score_data': score_data
+    })
+
+
 def logout_view(request):
     """View for Logout Functionality"""
     logout(request)
@@ -74,7 +99,7 @@ def about(request):
 def search_results(request, requested_page_number):
     """View for Search Results pages"""
     page_forms = {"search_form": SearchForm(), "tags_form": TagsForm(), "equip_form": EquipForm()}
-    score_data = {'user_points': -1, 'new_reward': None}
+    score_data = {'user_points': -1, 'new_rewards': None}
 
     # If POST request for adding/editing tags on an item
     if request.method == 'POST' and ('tagged_item' in request.POST):
@@ -83,7 +108,7 @@ def search_results(request, requested_page_number):
             prev_score = get_user_total_points(request.user)
             set_user_tags_for_item(request.user, tags_form.cleaned_data)
             score_data['user_points'] = get_user_total_points(request.user)
-            score_data['new_reward'] = get_new_reward(prev_score, score_data['user_points'])
+            score_data['new_rewards'] = get_new_rewards(prev_score, score_data['user_points'])
 
     # TODO: Code for parsing AND/OR/NOT/*/? --> Investigate pyparsing & Shunting Yard algorithm
 
@@ -134,7 +159,7 @@ def search_results(request, requested_page_number):
 
 def item_page(request, item_id):
     """View for Item pages"""
-    score_data = {'user_points': -1, 'new_reward': None}
+    score_data = {'user_points': -1, 'new_rewards': None}
 
     # If POST request for adding/editing tags on an item
     if request.method == 'POST' and ('tagged_item' in request.POST):
@@ -143,7 +168,7 @@ def item_page(request, item_id):
             prev_score = get_user_total_points(request.user)
             set_user_tags_for_item(request.user, tags_form.cleaned_data)
             score_data['user_points'] = get_user_total_points(request.user)
-            score_data['new_reward'] = get_new_reward(prev_score, score_data['user_points'])
+            score_data['new_rewards'] = get_new_rewards(prev_score, score_data['user_points'])
 
     # If POST request for reporting a tag
     elif request.method == 'POST' and ('reported_tag' in request.POST):
