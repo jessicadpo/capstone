@@ -1,6 +1,6 @@
 """Module for TagMe views"""
 from urllib.parse import urlparse
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.urls import is_valid_path, reverse
@@ -61,6 +61,7 @@ def signup_login(request):
 
 @login_required
 def user_profile(request, username):
+    """View for a user's "My Profile" page"""
     page_forms = {"search_form": SearchForm(), "equip_form": EquipForm()}
     score_data = {'user_points': -1, 'points_since_last_reward': -1}
 
