@@ -235,4 +235,4 @@ def process_report_form(request, item_id):
 def process_comment_form(request, item_id):
     """Function for processing "Add Comment" form"""
     # TODO
-    print('placeholder code')
+    print(f'placeholder code{request, item_id}')
