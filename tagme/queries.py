@@ -5,11 +5,13 @@ Module for querying models AND Library of Congress & Datamuse APIs
 RATE LIMIT FOR LIBRARY OF CONGRESS API: 20 queries per 10 seconds && 80 queries per 1 minute
 """
 from urllib.parse import quote
+from django.db import connection
 from django.db.models import Count
 from django.contrib.auth import PermissionDenied
 from django.db.models.signals import post_save, post_delete, post_migrate
 from django.dispatch import receiver
 import requests
+from .apps import TagMeConfig
 from .helper_functions import *
 from .models import *
 from .constants import *
@@ -292,6 +294,14 @@ def set_reward_list(sender, **kwargs):  # pylint: disable=unused-argument
             hex_colour = REWARD_LIST.get(title)
             Reward.objects.get_or_create(title=title, hex_colour=hex_colour, points_required=points_required)
             points_required += 50
+
+
+# Automatically set global blacklist & rewards if database already exists (i.e., already migrated)
+if "tagme_tag" in connection.introspection.table_names():
+    set_global_blacklist(sender=TagMeConfig)
+
+if "tagme_reward" in connection.introspection.table_names():
+    set_reward_list(sender=TagMeConfig)
 
 
 @receiver(post_save, sender=User)
