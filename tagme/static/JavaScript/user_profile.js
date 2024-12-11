@@ -5,6 +5,17 @@ const endTickNumberSpan = document.querySelector('#end-tickmark span');
 const earnedTitles = document.querySelectorAll('#earned-titles-content .reward-title');
 const dropzones = document.querySelectorAll('.dropzone');
 
+const equippedSlot1 = document.getElementById("equipped-title-1");
+const equippedSlot2 = document.getElementById("equipped-title-2");
+const dropdownItemsSlot1 = document.querySelectorAll("#equipped-title-1 + .dropdown-options > *");
+const dropdownItemsSlot2 = document.querySelectorAll("#equipped-title-2 + .dropdown-options > *");
+
+const equipForm = document.getElementById("equip-form");
+const titleToEquipFormField = document.getElementById('title-to-equip-input');
+const equipSlotFormField = document.getElementById('equip-slot-input');
+
+/*--------------------------------------------------------------------------------------------------------------------*/
+/* PROGRESS SECTION */
 function setCurrentProgressBarWidth() {
     const currentProgressPoints = parseInt(middleTickNumberSpan.textContent);
     const pointsGoal = parseInt(endTickNumberSpan.textContent);
@@ -33,13 +44,45 @@ function preventTickmarkOverlap() {
     }
 }
 
+/*--------------------------------------------------------------------------------------------------------------------*/
+/* EQUIPPED TITLES SECTION */
+
+// When the user clicks on the button, toggle between hiding and showing the dropdown content
+function openEquipDropdown(editButton) {
+    editButton.parentElement.querySelector(".dropdown-options").classList.toggle("show");
+}
+
+function updateEquippedTitle(toEquip, equipSlotNumber) {
+    if (equipSlotNumber === 1) {
+        toUnequip = document.querySelector("#equipped-title-1 > div");
+        equippedSlot1.replaceChild(toEquip, toUnequip);
+
+        // Fill hidden form fields with new title to equip
+        titleToEquipFormField.value = toEquip.querySelector("span").textContent;
+        equipSlotFormField.value = "1";
+    }
+    else if (equipSlotNumber === 2) {
+        toUnequip = document.querySelector("#equipped-title-2 > div");
+        equippedSlot2.replaceChild(toEquip, toUnequip);
+
+        // Fill hidden form fields with new title to equip
+        titleToEquipFormField.value = toEquip.querySelector("span").textContent;
+        equipSlotFormField.value = "2";
+    }
+
+    equipForm.submit();
+}
+
+/*--------------------------------------------------------------------------------------------------------------------*/
+/* EARNED TITLES SECTION */
+
 function makeEarnedTitlesDraggable() {
     earnedTitles.forEach(earnedTitle => {
         earnedTitle.setAttribute('draggable', 'true');
 
         // Set drag behaviour (style dropzones)
         earnedTitle.addEventListener('dragstart', (e) => {
-            e.dataTransfer.setData("text/plain", e.target.textContent); // Pass the textContent of the title being dragged
+            e.dataTransfer.setData("text/plain", e.target.outerHTML); // Pass the textContent of the title being dragged
         });
     });
 
@@ -60,20 +103,20 @@ function makeEarnedTitlesDraggable() {
             e.preventDefault(); // Prevent browser default handling
             dropzone.classList.remove("hovered");
 
-            const titleText = e.dataTransfer.getData("text/plain");
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = e.dataTransfer.getData("text/plain");
+            const earnedTitleClone = tempDiv.firstElementChild;
+            earnedTitleClone.removeAttribute('draggable');
 
-            // TODO: submit equip form
+            // Figure out if this is dropzone for equipSlot1 or equipSlot2
+            if (dropzone.id === 'equipped-title-1') {
+                updateEquippedTitle(earnedTitleClone, 1);
+            } else if (dropzone.id === 'equipped-title-2') {
+                updateEquippedTitle(earnedTitleClone, 2);
+            }
         });
     });
 }
-
-
-// When the user clicks on the button, toggle between hiding and showing the dropdown content
-function openEquipDropdown(editButton) {
-    editButton.parentElement.querySelector(".dropdown-options").classList.toggle("show");
-
-}
-
 
 
 // Triggers after DOM content is finished loading
@@ -81,4 +124,22 @@ document.addEventListener("DOMContentLoaded", function() {
     setCurrentProgressBarWidth();
     preventTickmarkOverlap();
     makeEarnedTitlesDraggable();
-})
+
+    // Update the text inside the (relevant) equip slot to the selected dropdown option
+    dropdownItemsSlot1.forEach(item => {
+        item.addEventListener("click", function(event) {
+            event.preventDefault(); // Prevent page from jumping
+            const selectedTitleClone = item.cloneNode(true);
+            updateEquippedTitle(selectedTitleClone, 1);  // Change the equipped div with the clicked div
+        });
+    });
+
+    dropdownItemsSlot2.forEach(item => {
+        item.addEventListener("click", function(event) {
+            event.preventDefault(); // Prevent page from jumping
+            const selectedTitleClone = item.cloneNode(true);
+            updateEquippedTitle(selectedTitleClone, 2);  // Change the equipped div with the clicked div
+        });
+    });
+
+});

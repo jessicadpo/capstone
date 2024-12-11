@@ -4,10 +4,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.urls import is_valid_path, reverse
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from .forms import *
 from .queries import *
-from .models import UserProfile
 
 
 def homepage(request):
@@ -69,8 +68,13 @@ def user_profile(request, username):
     if request.user.username != username:
         return redirect(reverse('user_profile', args=[request.user.username]))
 
+    # If POST request for equipping a title
+    if request.method == "POST" and ('title_to_equip' in request.POST):
+        process_equip_form(request)
+        return HttpResponse(status=204)  # NOT a render() so that page doesn't reload
+
     next_reward = get_next_reward(request.user)
-    equipped_titles = get_equipped_titles(request.user)
+    equipped_title_1, equipped_title_2 = get_equipped_titles(request.user)
     earned_titles = get_earned_rewards(request.user)
     score_data['user_points'] = get_user_total_points(request.user)
     if earned_titles is not None:
@@ -80,7 +84,8 @@ def user_profile(request, username):
     return render(request, 'user_profile.html', {
         'forms': page_forms,
         'next_reward': next_reward,
-        'equipped_titles': equipped_titles,
+        'equipped_title_1': equipped_title_1,
+        'equipped_title_2': equipped_title_2,
         'earned_titles': earned_titles,
         'score_data': score_data
     })
@@ -104,12 +109,12 @@ def search_results(request, requested_page_number):
 
     # If POST request for adding/editing tags on an item
     if request.method == 'POST' and ('tagged_item' in request.POST):
-        tags_form = TagsForm(request.POST)
-        if tags_form.is_valid():  # cleans form inputs
-            prev_score = get_user_total_points(request.user)
-            set_user_tags_for_item(request.user, tags_form.cleaned_data)
-            score_data['user_points'] = get_user_total_points(request.user)
-            score_data['new_rewards'] = get_new_rewards(prev_score, score_data['user_points'])
+        score_data = process_tags_form(request, score_data)
+
+    # If POST request for equipping a title
+    elif request.method == "POST" and ('title_to_equip' in request.POST):
+        #  Note: Page needs to reload if equipping a title from a search_results page (to update added tags, etc.)
+        process_equip_form(request)
 
     # TODO: Code for parsing AND/OR/NOT/*/? --> Investigate pyparsing & Shunting Yard algorithm
 
@@ -164,22 +169,20 @@ def item_page(request, item_id):
 
     # If POST request for adding/editing tags on an item
     if request.method == 'POST' and ('tagged_item' in request.POST):
-        tags_form = TagsForm(request.POST)
-        if tags_form.is_valid():  # cleans form inputs
-            prev_score = get_user_total_points(request.user)
-            set_user_tags_for_item(request.user, tags_form.cleaned_data)
-            score_data['user_points'] = get_user_total_points(request.user)
-            score_data['new_rewards'] = get_new_rewards(prev_score, score_data['user_points'])
+        score_data = process_tags_form(request, score_data)
+
+    # If POST request for equipping a title
+    elif request.method == "POST" and ('title_to_equip' in request.POST):
+        #  Note: Page needs to reload if equipping a title from a search_results page (to update added tags, etc.)
+        process_equip_form(request)
 
     # If POST request for reporting a tag
     elif request.method == 'POST' and ('reported_tag' in request.POST):
-        report_form = ReportForm(request.POST)
-        if report_form.is_valid():
-            create_tag_report(request.user, item_id, report_form.cleaned_data)
+        process_report_form(request, item_id)
 
     # If POST request for adding a comment
     elif request.method == 'POST' and ('comment' in request.POST):
-        print('adding/editing a comment')
+        process_comment_form(request, item_id)
 
     page_forms = {"search_form": SearchForm(), "tags_form": TagsForm(), "report_form": ReportForm(), "equip_form": EquipForm()}
     results_on_search_page = request.session.get('results_on_page', {})  # Retrieve search results from the session
@@ -201,3 +204,35 @@ def item_page(request, item_id):
         'forms': page_forms,
         'score_data': score_data,  # Need this so can trigger "Congrats!" popup
     })
+
+
+def process_tags_form(request, score_data):
+    """Function for processing "Add Tags" form"""
+    tags_form = TagsForm(request.POST)
+    if tags_form.is_valid():  # cleans form inputs
+        prev_score = get_user_total_points(request.user)
+        set_user_tags_for_item(request.user, tags_form.cleaned_data)
+        score_data['user_points'] = get_user_total_points(request.user)
+        score_data['new_rewards'] = get_new_rewards(prev_score, score_data['user_points'])
+    return score_data
+
+
+def process_equip_form(request):
+    """Function for processing "Equip Title" form"""
+    equip_form = EquipForm(request.POST)
+    if equip_form.is_valid():
+        # TODO: Call Django query for equipping a title here
+        print('placeholder code')
+
+
+def process_report_form(request, item_id):
+    """Function for processing "Report Tag" form"""
+    report_form = ReportForm(request.POST)
+    if report_form.is_valid():
+        create_tag_report(request.user, item_id, report_form.cleaned_data)
+
+
+def process_comment_form(request, item_id):
+    """Function for processing "Add Comment" form"""
+    # TODO
+    print('placeholder code')

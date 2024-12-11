@@ -99,23 +99,21 @@ def get_user_total_points(user):
 
 def get_equipped_titles(user):
     """Function for getting a user's currently equipped titles"""
-    # Format as an array to keep consistent with other get_rewards()/get_titles() functions
-    # Default of [None, None] to guarantee that there is always 2 equip "slots" returned even if nothing is equipped
-    equipped_title_list = [None, None]
+    equipped_title_1 = None
+    equipped_title_2 = None
+
     user_profile = UserProfile.objects.filter(user=user)
     if user_profile.exists():
-        equipped_title_1 = Reward.objects.filter(title=user_profile[0].equipped_title_1)
-        equipped_title_2 = Reward.objects.filter(title=user_profile[0].equipped_title_2)
+        equipped_title_1_object = Reward.objects.filter(title=user_profile[0].equipped_title_1)
+        equipped_title_2_object = Reward.objects.filter(title=user_profile[0].equipped_title_2)
 
-        if equipped_title_1.exists():
-            equipped_title_list.remove(None)
-            equipped_title_list.insert(0, reward_to_dict_format(equipped_title_1))
+        if equipped_title_1_object.exists():
+            equipped_title_1 = reward_to_dict_format(equipped_title_1_object)
 
-        if equipped_title_2.exists():
-            equipped_title_list.remove(None)
-            equipped_title_list.insert(1, reward_to_dict_format(equipped_title_2))
+        if equipped_title_2_object.exists():
+            equipped_title_2 = reward_to_dict_format(equipped_title_2_object)
 
-    return equipped_title_list
+    return equipped_title_1, equipped_title_2
 
 
 def get_earned_rewards(user):
