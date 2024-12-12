@@ -5,11 +5,13 @@ Module for querying models AND Library of Congress & Datamuse APIs
 RATE LIMIT FOR LIBRARY OF CONGRESS API: 20 queries per 10 seconds && 80 queries per 1 minute
 """
 from urllib.parse import quote
+from django.db import connection
 from django.db.models import Count
 from django.contrib.auth import PermissionDenied
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save, post_delete, post_migrate
 from django.dispatch import receiver
 import requests
+from .apps import TagMeConfig
 from .helper_functions import *
 from .models import *
 from .constants import *
@@ -89,17 +91,62 @@ def get_user_points_for_item(user, item_id):
 
 def get_user_total_points(user):
     """Function for getting a user's current total number of points"""
-    return (UserProfile.objects.get(user=user)).points
+    user_profile = UserProfile.objects.filter(user=user)
+    if user_profile.exists():
+        return user_profile[0].points
+    return 0
 
 
-def get_new_reward(prev_score, new_score):
+def get_equipped_titles(user):
+    """Function for getting a user's currently equipped titles"""
+    equipped_title_1 = None
+    equipped_title_2 = None
+
+    user_profile = UserProfile.objects.filter(user=user)
+    if user_profile.exists():
+        equipped_title_1_object = Reward.objects.filter(title=user_profile[0].equipped_title_1)
+        equipped_title_2_object = Reward.objects.filter(title=user_profile[0].equipped_title_2)
+
+        if equipped_title_1_object.exists():
+            equipped_title_1 = reward_to_dict_format(equipped_title_1_object)
+
+        if equipped_title_2_object.exists():
+            equipped_title_2 = reward_to_dict_format(equipped_title_2_object)
+
+    return equipped_title_1, equipped_title_2
+
+
+def get_earned_rewards(user):
+    """Function for getting all rewards already earned by a user"""
+    total_points = get_user_total_points(user)
+    earned_rewards = Reward.objects.filter(points_required__lte=total_points)
+    if earned_rewards.exists():
+        # Format as an array to keep consistent with other get_rewards()/get_titles() functions
+        earned_rewards_list = []
+        for reward in earned_rewards:
+            earned_rewards_list.append(reward_to_dict_format(reward))
+        return earned_rewards_list
+    return None
+
+
+def get_next_reward(user):
+    """Function for getting the next reward the user can earn (i.e., reward is NOT earned yet)"""
+    total_points = get_user_total_points(user)
+    next_reward = Reward.objects.filter(points_required__gt=total_points).order_by("points_required")
+    if next_reward.exists():
+        # Format as an array to keep consistent with other get_rewards()/get_titles() functions
+        return [reward_to_dict_format(next_reward[0])]
+    return None
+
+
+def get_new_rewards(prev_score, new_score):
     """Function for checking if a user should get a new reward + returning the new reward they should be getting"""
-    new_reward = Reward.objects.filter(points_required__gt=prev_score).filter(points_required__lte=new_score)
-    if new_reward.exists():
-        new_reward_list = []  # Format as an array to keep consistent with other get_rewards() functions
-        for reward in new_reward:
-            new_reward_list.append({'title': reward.title, 'colour': reward.hex_colour})
-        return new_reward_list
+    new_rewards = Reward.objects.filter(points_required__gt=prev_score).filter(points_required__lte=new_score)
+    if new_rewards.exists():
+        new_rewards_list = []  # Format as an array to keep consistent with other get_rewards()/get_titles() functions
+        for reward in new_rewards:
+            new_rewards_list.append(reward_to_dict_format(reward))
+        return new_rewards_list
     return None
 
 
@@ -113,7 +160,7 @@ def get_synonymous_tags(search_string):
         synonym_tag = Tag.objects.filter(tag=synonym)
         if synonym_tag.exists():
             # Need to format it as a dict to stay consistent with return format of get_all_tags_for_item()
-            synonymous_tags.append({"tag" : synonym_tag[0].tag})
+            synonymous_tags.append({"tag": synonym_tag[0].tag})
 
     # TODO: Need a way to determine which tags more relevant (so can list the most relevant ones first)
 
@@ -228,23 +275,31 @@ def create_tag_report(user, item_id, report_data):
     report.save()
 
 
-def set_global_blacklist():
-    """Function for creating the list of globally-blacklisted tags in the database"""
-    for word in GLOBAL_BLACKLIST:
-        Tag.objects.get_or_create(tag=word, global_blacklist=True)
+@receiver(post_migrate)
+def set_global_blacklist(sender, **kwargs):  # pylint: disable=unused-argument
+    """Function for creating the list of globally-blacklisted tags in the database automatically after db is created"""
+    if sender.name == 'tagme':
+        for word in GLOBAL_BLACKLIST:
+            Tag.objects.get_or_create(tag=word, global_blacklist=True)
 
 
-def set_reward_list():
-    """Function for creating the list of reward titles in the database"""
-    points_required = 10
-    for title in REWARD_LIST:
-        hex_colour = REWARD_LIST.get(title)
-        Reward.objects.get_or_create(title=title, hex_colour=hex_colour, points_required=points_required)
-        points_required += 50
+@receiver(post_migrate)
+def set_reward_list(sender, **kwargs):  # pylint: disable=unused-argument
+    """Function for creating the list of reward titles in the database automatically after db is created"""
+    if sender.name == 'tagme':
+        points_required = 10
+        for title in REWARD_LIST:
+            hex_colour = REWARD_LIST.get(title)
+            Reward.objects.get_or_create(title=title, hex_colour=hex_colour, points_required=points_required)
+            points_required += 50
 
 
-set_global_blacklist()
-set_reward_list()
+# Automatically set global blacklist & rewards if database already exists (i.e., already migrated)
+if "tagme_tag" in connection.introspection.table_names():
+    set_global_blacklist(sender=TagMeConfig)
+
+if "tagme_reward" in connection.introspection.table_names():
+    set_reward_list(sender=TagMeConfig)
 
 
 @receiver(post_save, sender=User)

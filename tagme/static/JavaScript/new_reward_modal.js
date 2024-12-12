@@ -5,9 +5,9 @@ const skipEquipButton = document.getElementById('skip-equip-button');
 const yesEquipButton = document.getElementById('yes-equip-button');
 const fireworks = document.querySelectorAll('.firework');
 
-const equipTitleForm = document.getElementById('equip-title-form');
+const equipForm = document.getElementById('equip-title-form');
 const titleToEquipFormField = document.getElementById('title-to-equip-input');
-const equipPositionFormField = document.getElementById('equip-position-input');
+const equipSlotFormField = document.getElementById('equip-slot-input');
 
 function openNewRewardModal() {
     newRewardOverlay.classList.add('active');
@@ -56,14 +56,15 @@ function playFireworks() {
 }
 
 function equipTitle() {
-        // Auto-enter title to equip in hidden form field
-    titleToEquipFormField.value = newReward.textContent;
-
+    // Fill hidden form fields with new title to equip
+    titleToEquipFormField.value = newReward[0].textContent;
+    equipSlotFormField.value = "1"; // Always equip new rewards as Title #1 TODO: Change?
+    equipForm.submit();
 }
 
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape' || event.keyCode === 27) {
-        closenewRewardModal();
+        closeNewRewardModal();
     }
 });
 
@@ -75,12 +76,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // Set "Yes" (Equip) button behaviour
     yesEquipButton.addEventListener('click', function() {
         event.preventDefault();
-
-        // Fill hidden form fields with new title to equip
-        titleToEquipFormField.value = newReward.textContent;
-        equipPositionFormField.value = "1"; // Always equip new rewards as Title #1 TODO: Change?
-
-        equipTitleForm.submit();
+        equipTitle();
         closeNewRewardModal();
     });
 

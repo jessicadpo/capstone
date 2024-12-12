@@ -1,0 +1,324 @@
+main {
+    display: flex;
+    flex-direction: row; /* Main axis = Horizontal */
+    border-top: solid 1px #8A8A8A;
+}
+
+/* -------------------------------------------------------------------------------------------------------------------*/
+/* SIDE BAR */
+#my-profile-sidebar-link {
+    background-color: #3B6000;
+    color: white;
+
+    & i {
+        color: white !important; /* Use !important to guarantee override of global.css */
+    }
+
+    &:hover { /* No change on hover */
+        background-color: #3B6000 !important;
+        color: white !important;
+    }
+}
+
+/* -------------------------------------------------------------------------------------------------------------------*/
+/* PROFILE SECTION (MAIN CONTENT) */
+#profile-section {
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column; /* Main axis = Vertical */
+}
+
+#profile-header {
+    background-color: #3B6000;
+    padding: 20px;
+    display: flex;
+    flex-direction: row; /* Main axis = Horizontal */
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+
+    & i {
+        font-size: 3rem;
+    }
+
+    & span {
+        font-size: 3rem;
+        font-weight: 500;
+        color: white;
+    }
+}
+
+#profile-content {
+    flex-grow: 1;
+    padding: 30px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column; /* Main axis = Vertical */
+    gap: 15px;
+
+    & h1 {
+        margin: 0;
+        font-weight: 400;
+    }
+}
+
+#progress-equip-row {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+
+    & > div {
+        width: 50%;
+    }
+}
+
+.content-box {
+    background-color: white;
+    padding: 20px 30px;
+    border-radius: 20px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column; /* Main axis = Vertical */
+    align-items: start;
+}
+
+/* ------------------------------------------------------------*/
+/* PROGRESS SECTION  */
+#progress-bar {
+    width: 100%;
+    display: flex;
+    flex-direction: row; /* Main axis = Horizontal */
+    position: relative; /* So can position end-tickmark & current-progress-bar relative to progress bar */
+
+    &::before {  /* Background progress bar */
+        content: "";
+        width: inherit;
+        height: 25px;
+        background-color: #D9D9D9;
+        position: absolute;
+        bottom: 0;
+    }
+}
+
+#current-progress-bar {
+    position: absolute;
+    /* width set in JavaScript (user_profile.js) */
+    height: 25px;
+    background-color: #C9960A;
+    bottom: 0;
+}
+
+.tickmark {
+    height: 75px;
+    font-size: 1.4rem;
+    display: flex;
+    flex-direction: column; /* Main axis = Horizontal */
+    align-items: center;
+    justify-content: end;
+    position: relative; /* So can position icons relative to tickmark */
+
+    & span {
+        font-weight: 400;
+        position: relative; /* So can use JavaScript to reposition if overlap */
+    }
+
+    & i { /* Place icons (e.g., gift icon) above tickmark number */
+        position: absolute;
+        font-size: 1.8rem;
+        top: -20px;
+    }
+
+    &::after {  /* Vertical line part of the tickmark */
+        content: "";
+        height: 35px;
+        width: 2px;
+        background-color: black;
+    }
+
+    &:last-child {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        /* Further position towards the right by 50% of its own width (i.e., centers tickmark on edge of background progress bar */
+        transform: translate(50%, 0);
+    }
+}
+
+#start-tickmark {
+    /* Further position towards the left by 50% of its own width (i.e., centers tickmark on edge of background progress bar */
+    transform: translate(-50%, 0);
+}
+
+#progress-info-line {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 15px;
+
+    & h2 {
+        font-weight: 400;
+    }
+
+    & #total-points { /* Only the span containing the total points */
+        font-size: 1.4rem;
+    }
+
+    & > div {
+        flex-grow: 1; /* Proportionally occupy max-available width */
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+    }
+}
+
+/* ------------------------------------------------------------*/
+/* EQUIPPED TITLES SECTION  */
+#equipped-titles-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+
+    & .tooltip i {
+        font-size: 1.5em;
+        color: #959595;
+    }
+}
+
+#equipped-titles-content {
+    box-sizing: border-box; /* Sizing includes padding */
+    width: 100%;
+    height: 100%;
+    padding: 0px 20px;
+    display: flex;
+    flex-direction: row; /* Main axis = Horizontal */
+    gap: 10%;
+
+    & .dropdown-options {
+        border-color: #8A8A8A;
+    }
+}
+
+.equipped-title-widget {
+    width: 50%;
+    display: flex;
+    flex-direction: row; /* Main axis = Horizontal */
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    & > .dropdown {
+        flex-grow: 1; /* Takes all available width not occupied by edit button */
+    }
+}
+
+.dropzone.hovered {
+    & .empty-equip {
+        border-color: #006996;
+        background-color: rgba(0, 105, 150, 0.25); /* Same blue colour, but more transparent */
+    }
+
+    & > .reward-title::after { /* TODO: TEST */
+        height: inherit;
+        width: inherit;
+        position: absolute;
+        border: dashed 2px #006996;
+        background-color: rgba(0, 105, 150, 0.25); /* Same blue colour, but more transparent */
+    }
+}
+
+.empty-equip {
+    height: 30px;
+
+    padding: 5px 15px 5px 15px;
+    border: dashed 2px #8A8A8A;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    & span {
+        color: #8A8A8A;
+        font-weight: 400;
+        font-size: 1.1em;
+    }
+}
+
+
+.edit-button {
+    width: auto; /* Override CSS of .dropdown-button (global.css) */
+    height: auto;
+    padding: 0px;
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    & i {
+        color: #8A8A8A;
+        font-size: 2rem;
+    }
+}
+
+.edit-button:hover, .edit-button:focus {
+    background: none; /* Override CSS of .dropdown-button (global.css) */
+    & i {
+        color: black;
+    }
+}
+
+.dropdown-options > .reward-title { /* Reward titles in the dropdown options menu */
+    display: flex; /* Override ".dropdown-options > *" styling from global.css */
+    padding: 5px 20px 5px 10px;
+    border-radius: 0;
+    border: none;
+
+    &:hover {
+        cursor: pointer;
+        border: solid 2px white;
+    }
+}
+
+.dropdown-options > .empty-equip { /* "Empty" option in the dropdown options menu */
+    display: flex; /* Override ".dropdown-options > *" styling from global.css */
+    border: none;
+    &:hover {
+        border: solid 2px #8A8A8A;
+        background-color: white;
+    }
+}
+
+/* Applies to the .empty-equip or > .reward-title only when "show" class is added to dropdown-options */
+.dropdown:has(>.show) .dropzone > .empty-equip, .dropdown:has(>.show) .dropzone > .reward-title {
+    border-radius: 10px 10px 0px 0px;
+}
+
+
+/* ------------------------------------------------------------*/
+/* EARNED TITLES SECTION  */
+
+#earned-titles-content {
+    width: 100%;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: start;
+    align-content: start;
+    gap: 15px;
+    box-sizing: border-box;
+
+    & .reward-title {
+        cursor: grab;
+    }
+}
+
+
+
+
+
+
