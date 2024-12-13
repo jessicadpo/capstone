@@ -118,6 +118,17 @@ h1 {
     overflow: hidden;
     -webkit-mask-image: none;
     mask-image: none;
+
+    & h1 {
+        font-size: 2rem;
+        margin: 0px;
+        margin-top: 5%;
+        margin-bottom: 10px;
+    }
+
+    & *:not(h1) {
+        margin: 0px;
+    }
 }
 
 #column2-main-content.reading-less {  /* "Read More" button is visible + currently saying "Read More" */
@@ -127,10 +138,6 @@ h1 {
     mask-repeat: no-repeat;
     -webkit-mask-size: 100% 100%;
     mask-size: 100% 100%;
-}
-
-#column2-main-content * {
-    margin: 0;
 }
 
 #media-type {
@@ -154,10 +161,6 @@ h1 {
 #item-authors {
     font-size: 2.2rem;
     margin-bottom: 10px;
-}
-
-#description-header {
-    margin-top: 5%;
 }
 
 #item-description {

@@ -5,6 +5,7 @@ Module for querying models AND Library of Congress & Datamuse APIs
 RATE LIMIT FOR LIBRARY OF CONGRESS API: 20 queries per 10 seconds && 80 queries per 1 minute
 """
 from urllib.parse import quote
+from django.utils.timezone import localtime
 from django.db import connection
 from django.db.models import Count
 from django.contrib.auth import PermissionDenied
@@ -54,6 +55,31 @@ def get_all_tags_for_item(item_id):
             tag_dict['tag'] = tag_dict.pop('public_tags')
 
         return list(public_tags_with_counts)
+    return None
+
+
+def get_all_comments_for_item(item_id):
+    """Function for getting all comments for a particular item_id"""
+    item = Item.objects.filter(item_id=item_id)
+    if item.exists():
+        # Exclude contributions with 0 comments
+        comment_contributions = (UserContribution.objects
+                                   .filter(item_id=item_id)
+                                   .exclude(comment__isnull=True)
+                                   .order_by('comment_datetime'))
+
+        # Return an array of dicts, each dict contains:
+        # comment's text, comment_datetime, contributing user's username, contributing user's equipped titles
+        comments = []
+        for contrib in comment_contributions:
+            equipped_1, equipped_2 = get_equipped_titles(contrib.user)
+            comment = {'text': contrib.comment,
+                       'datetime': localtime(contrib.comment_datetime).strftime('%B %m, %Y %H:%M %p'),
+                       'username': contrib.user.username,
+                       'equipped_title_1': equipped_1,
+                       'equipped_title_2': equipped_2}
+            comments.append(comment)
+        return comments
     return None
 
 
@@ -108,10 +134,10 @@ def get_equipped_titles(user):
         equipped_title_2_object = Reward.objects.filter(title=user_profile[0].equipped_title_2)
 
         if equipped_title_1_object.exists():
-            equipped_title_1 = reward_to_dict_format(equipped_title_1_object)
+            equipped_title_1 = reward_to_dict_format(equipped_title_1_object[0])
 
         if equipped_title_2_object.exists():
-            equipped_title_2 = reward_to_dict_format(equipped_title_2_object)
+            equipped_title_2 = reward_to_dict_format(equipped_title_2_object[0])
 
     return equipped_title_1, equipped_title_2
 

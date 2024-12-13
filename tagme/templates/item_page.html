@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="../../static/CSS/report_modal.css">
     <link rel="stylesheet" href="../../static/CSS/tag_modal.css">
     <link rel="stylesheet" href="../../static/CSS/new_reward_modal.css">
+    <link rel="stylesheet" href="../../static/CSS/user_comment.css">
     <link rel="stylesheet" href="../../static/CSS/item_page.css">
 </head>
 
@@ -43,8 +44,9 @@
                     <p id="item-title" class="item-title"> {{ item.title }}</p>
                     <p id="item-authors">by <b>{{ item.authors }}</b></p>
                     <p id="item-pub-date">{{ item.publication_date }}</p>
-                    <h1 id="description-header">Description</h1>
+                    <h1>Description</h1>
                     <p id="item-description">{{ item.description }}</p>
+                    <h1>Subject Headings</h1>
                     <div id="item-subject-headings">
                         {% for subject in item.subjects %}
                             <a href="#" class="subject-heading-link">{{ subject }}</a>
@@ -83,8 +85,9 @@
             <div id="comments-pane">
                 <textarea placeholder="Add comment..."></textarea>
 
-                <!-- TODO: For loop for each comment on current page -->
-                {% include 'components/user_comment.html' %}
+                {% for comment in item.comments %}
+                    {% include 'components/user_comment.html' %}
+                {% endfor %}
 
                 <p>1 to 15 of 999,999,999 comments</p>
                 <!-- TODO: Paste similar pagination as in search results page -->

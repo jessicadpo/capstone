@@ -80,12 +80,13 @@ function setBackLink() {
     // Store link to search results page in sessionStorage
     // ONLY store links that include "/search/#/?search_type=..." in the URL
     const search_results_URL_pattern = /\/search\/\d+\/\?search_type=/;
+
     if (search_results_URL_pattern.test(document.referrer)) {
         sessionStorage.setItem("search_results_referrer", document.referrer);
     }
     // If document.referrer is NOT a search_results page, NOT signup-login page, NOR the item page itself (i.e., due to page reload)
     // --> Remove "search_results_referrer" from sessionStorage
-    else if ((new URL(document.referrer)).pathname != '/signup-login' && document.URL != document.referrer) {
+    else if (document.referrer != "" && (new URL(document.referrer)).pathname != '/signup-login' && document.URL != document.referrer) {
         sessionStorage.removeItem("search_results_referrer");
     }
 

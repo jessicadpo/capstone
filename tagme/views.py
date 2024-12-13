@@ -190,6 +190,7 @@ def item_page(request, item_id):
     results_on_search_page = request.session.get('results_on_page', {})  # Retrieve search results from the session
     item_data = results_on_search_page.get(str(item_id))  # Get the specific item's LOC API data using the item ID
     item_data['tags'] = get_all_tags_for_item(item_id)
+    item_data['comments'] = get_all_comments_for_item(item_id)
 
     if request.user.is_authenticated:
         user_public_tags, user_private_tags = get_user_tags_for_item(request.user, item_id)
