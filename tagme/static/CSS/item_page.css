@@ -83,9 +83,9 @@ h1 {
 
 /* -----------COLUMN 1-------------*/
 .column1 {
-    height: 510px;
-    max-height: 100%;
     width: 360px;
+    max-height: 100%;
+    aspect-ratio: 36 / 51;
     max-width: 20%;
     overflow: hidden;
     display: flex;
@@ -105,7 +105,7 @@ h1 {
 .column2 {
     height: 100%;
     width: 50%;
-    font-size: 1.6em;
+    font-size: 1.6rem;
     display: flex;
     flex-direction: column; /* Main axis = Vertical */
     justify-content: space-between;
@@ -162,6 +162,28 @@ h1 {
 
 #item-description {
     font-size: 1.3rem;
+}
+
+#item-subject-headings {
+    margin: 20px 0px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.subject-heading-link {
+    padding: 5px 15px;
+    font-size: 1.3rem;
+    text-decoration: none;
+    background: white;
+    border: solid 1px #3B6000;
+    border-radius: 25px;
+
+    &:hover {
+        color: white;
+        background-color: #3B6000;
+    }
 }
 
 #column2-read-more-button {

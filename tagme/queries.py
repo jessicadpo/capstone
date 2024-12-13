@@ -389,11 +389,14 @@ def _query_loc_api(params, requested_page_number):
 
         results_on_page = []
         for item in data.get("results", []):
-
             item_id = item.get('number_lccn')[0]
             title = decode_unicode(strip_punctuation(item.get("item").get('title', 'No title available')))
             publication_date = decode_unicode(item.get('date', 'No publication date available'))
             description = decode_unicode('\n'.join(item.get('description', 'No description available')))
+
+            subjects = item.get('subject', [])
+            for i in range(len(subjects)):
+                subjects[i] = to_title_case(subjects[i])
 
             authors = item.get('contributor', ['Unknown'])
             for i in range(len(authors)):
@@ -408,6 +411,7 @@ def _query_loc_api(params, requested_page_number):
                 'authors': to_title_case('; '.join(authors)),  # Combine authors into a single string
                 'publication_date': publication_date,
                 'description': description,
+                'subjects': subjects,
                 'cover': cover,
             })
 

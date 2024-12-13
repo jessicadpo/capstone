@@ -42,9 +42,13 @@
                     <p id="item-title" class="item-title"> {{ item.title }}</p>
                     <p id="item-authors">by <b>{{ item.authors }}</b></p>
                     <p id="item-pub-date">{{ item.publication_date }}</p>
-
                     <h1 id="description-header">Description</h1>
                     <p id="item-description">{{ item.description }}</p>
+                    <div id="item-subject-headings">
+                        {% for subject in item.subjects %}
+                            <a href="#" class="subject-heading-link">{{ subject }}</a>
+                        {% endfor %}
+                    </div>
                 </div>
                 <button id="column2-read-more-button">Read more <i class="fa fa-angle-down" aria-hidden="true"></i></button>
             </div>
