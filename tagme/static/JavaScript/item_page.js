@@ -1,3 +1,5 @@
+const backLink = document.getElementById('back-link');
+
 const entireItemSection = document.getElementById('item-info-section');
 const column2MainContent = document.getElementById('column2-main-content');
 const readMoreButton = document.getElementById('column2-read-more-button');
@@ -18,7 +20,6 @@ const reportButtons = document.querySelectorAll('.report-button');
 const reportTagDialog = document.getElementById('report-tag-dialog');
 const reportedTagComponent = document.querySelector('#report-tag-dialog .tag-content a');
 const reportTagForm = document.getElementById('report-tag-form');
-
 
 let isReadingMore = false;
 
@@ -76,6 +77,28 @@ function checkTagsOverflow() {
     });
 }
 
+function setBackLink() {
+    // Store link to search results page in sessionStorage
+    // ONLY store links that include "/search/#/?search_type=..." in the URL
+    const search_results_URL_pattern = /\/search\/\d+\/\?search_type=/;
+    if (search_results_URL_pattern.test(document.referrer)) {
+        sessionStorage.setItem("search_results_referrer", document.referrer);
+    }
+    // If document.referrer is NOT a search_results page NOR the item page itself (i.e., due to page reload)
+    // --> Remove "search_results_referrer" from sessionStorage
+    else if (document.URL != document.referrer) {
+        sessionStorage.removeItem("search_results_referrer");
+    }
+
+    // Show & set href link of "Back to Search Results link only if there's a "search_results_referrer" in sessionStorage
+    if (sessionStorage.getItem("search_results_referrer")) {
+        backLink.setAttribute("href", sessionStorage.getItem("search_results_referrer"))
+        backLink.style.display = "flex";
+    } else {
+        backLink.style.display = "none";
+    }
+}
+
 function openSidebar() {
     sidebar.classList.add('active');
     reportOverlay.classList.add('active');
@@ -97,6 +120,9 @@ function closeSidebar() {
 
 // Triggers after DOM content is finished loading
 document.addEventListener("DOMContentLoaded", function () {
+    // Determine if "Back to Search Results" link should be displayed + (if yes) set its link
+    setBackLink();
+
     // Determine if "Read More" button should be displayed or not
     checkColumn2Overflow();
     checkTagsOverflow();

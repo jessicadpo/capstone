@@ -50,7 +50,7 @@ h1 {
     font-size: 1.3rem;
     text-decoration: none;
     vertical-align: middle;
-    display: flex;
+    display: none; /* Changes to flex via JavaScript (item_page.js) */
     flex-direction: row; /* Main axis = Horizontal */
     align-items: center;
     gap: 20px;
