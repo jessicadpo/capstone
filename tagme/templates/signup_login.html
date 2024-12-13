@@ -21,9 +21,10 @@
     {% include "components/top_bar.html" %}
 
     <main>
-        <form id="signup-form" method="post">
+        <form id="signup-form" method="POST">
             <h1>Sign Up</h1>
             <div class="form-inputs-section">
+                <input type="hidden" class="referrer-input" name="referrer" value="/"/> <!-- Value set via JavaScript -->
                 {% csrf_token %}
                 {% for field in forms.signup_form %}
                     <div>
@@ -45,14 +46,15 @@
                     </div>
                 {% endfor %}
             </div>
-            <input type="submit" class="submit-buttons" name="signup-submit" value="Create Account"/>
+            <input type="submit" id="signup-submit-button" class="submit-buttons" name="signup-submit" value="Create Account"/>
         </form>
 
         <div id="divider"></div>
 
-        <form id="login-form" method="post">
+        <form id="login-form" method="POST">
             <h1>Log In</h1>
             <div class="form-inputs-section">
+                <input type="hidden" class="referrer-input" name="referrer" value="/"/> <!-- Value set via JavaScript -->
                 {% csrf_token %}
                 {% for field in forms.login_form %}
                     <div>
@@ -74,11 +76,13 @@
                     </div>
                 {% endfor %}
             </div>
-            <input type="submit" class="submit-buttons" name="login-submit" value="Log In"/>
+            <input type="submit" id="login-submit-button" class="submit-buttons" name="login-submit" value="Log In"/>
         </form>
 
     </main>
 
     {% include "components/footer.html" %}
+
+    <script type="text/javascript" src="../../static/JavaScript/signup_login.js"></script>
 </body>
 </html>

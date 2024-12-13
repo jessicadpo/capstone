@@ -5,6 +5,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.urls import is_valid_path, reverse
 from django.http import Http404, HttpResponse
+from django.utils.http import is_same_domain
 from .forms import *
 from .queries import *
 
@@ -18,8 +19,8 @@ def homepage(request):
 def signup_login(request):
     """View for Sign up/Login page"""
     page_forms = {}
-    if request.method != 'POST':
-        page_forms = {"signup_form": SignUpForm(), "login_form": LoginForm()}  # If request.method == 'GET'
+    if request.method == 'GET':
+        page_forms = {"signup_form": SignUpForm(), "login_form": LoginForm()}
 
     # NOTE: USERNAMES MUST BE UNIQUE
     elif request.method == 'POST' and ('signup-submit' in request.POST):
@@ -32,10 +33,10 @@ def signup_login(request):
             login(request, user)
 
             # Ensure next_url is safe or default to home page
-            next_url = request.POST.get('next', request.GET.get('next', '/'))
+            next_url = request.POST.get('referrer')
             parsed_url = urlparse(next_url)
-            if not parsed_url.netloc and is_valid_path(next_url):
-                return redirect(next_url)  # TODO: This isn't working
+            if parsed_url.netloc and is_valid_path(parsed_url.path):
+                return redirect(next_url)
             return redirect("/")
         page_forms = {"signup_form": signup_form, "login_form": LoginForm()}  # If login_form is invalid
 
@@ -48,10 +49,10 @@ def signup_login(request):
             login(request, user)
 
             # Ensure next_url is safe or default to home page
-            next_url = request.POST.get('next', request.GET.get('next', '/'))
+            next_url = request.POST.get('referrer')
             parsed_url = urlparse(next_url)
-            if not parsed_url.netloc and is_valid_path(next_url):
-                return redirect(next_url)  # TODO: This isn't working
+            if parsed_url.netloc and is_valid_path(parsed_url.path):
+                return redirect(next_url)
             return redirect("/")
         page_forms = {"signup_form": SignUpForm(), "login_form": login_form}  # If login_form is invalid
 
