@@ -1,0 +1,82 @@
+main {
+    border-top: solid 1px #8A8A8A;
+    padding: 3vh 2vw;
+
+    & > h1 {
+        padding: 15px 0px;
+        border-bottom: solid 1px #8A8A8A;
+    }
+}
+
+.content-box {
+    background-color: white;
+    padding: 20px 30px;
+    border-radius: 20px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15);
+
+    & h1, h2 {
+        margin: 0;
+        font-weight: 400;
+        font-size: 1.8em;
+    }
+
+    & p {
+        font-size: 1.2rem;
+    }
+}
+
+/* -------------------------------------------------------------------------------------------------------------------*/
+/* WEBSITE INFO SECTION */
+#website-info-section {
+    display: flex;
+    flex-direction: row;
+    gap: 50px;
+
+    & > * {
+        width: 50%;
+    }
+}
+
+/* -------------------------------------------------------------------------------------------------------------------*/
+/* TEAM INFO SECTION */
+#team-info-section {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 30px;
+}
+
+#team-info-section .content-box {
+    height: 150px;
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+
+    & > div {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    & img {
+        height: 100%;
+        border-radius: 50%;
+        aspect-ratio: 1 / 1;
+    }
+
+    & h3 {
+        margin: 5px 0px;
+        font-weight: 500;
+        color: #3B6000;
+        font-size: 1rem;
+    }
+
+    & p {
+        white-space: normal;
+        word-wrap: break-all;
+    }
+}
+
+
+/* -------------------------------------------------------------------------------------------------------------------*/
+/* REFERENCES SECTION */

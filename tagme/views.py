@@ -99,7 +99,8 @@ def logout_view(request):
 
 def about(request):
     """View for About page"""
-    return render(request, 'about.html')
+    page_forms = {"search_form": SearchForm()}
+    return render(request, 'about.html', {'forms': page_forms})
 
 
 def search_results(request, requested_page_number):
@@ -150,7 +151,7 @@ def search_results(request, requested_page_number):
     synonymous_tags = get_synonymous_tags(request.GET.get('search_string'))
     related_tags = get_related_tags(request.GET.get('search_string'))
 
-    # Store results in session # TODO: Double-check I did this for the "Return to Search Results" button in item page
+    # Store results in session
     request.session['results_on_page'] = {item['item_id']: item for item in results_on_page}
 
     return render(request, 'search_results.html', {
@@ -186,7 +187,7 @@ def item_page(request, item_id):
 
     page_forms = {"search_form": SearchForm(), "tags_form": TagsForm(), "report_form": ReportForm(), "equip_form": EquipForm()}
     results_on_search_page = request.session.get('results_on_page', {})  # Retrieve search results from the session
-    item_data = results_on_search_page.get(str(item_id))  # Get the specific item using the item ID
+    item_data = results_on_search_page.get(str(item_id))  # Get the specific item's LOC API data using the item ID
     item_data['tags'] = get_all_tags_for_item(item_id)
 
     if request.user.is_authenticated:

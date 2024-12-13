@@ -24,7 +24,10 @@
     {% include "components/new_reward_modal.html" %}
 
     <main id="main-content"> <!-- Need the main-content id for JavaScript -->
-        <a id="back-link" href="#" aria-label="Back to search results"><i class="fa fa-angle-left" aria-hidden="true"></i>Back to Search Results</a>
+        <button id="back-link" onclick="javascript:history.go(-1);" aria-label="Back to search results">
+            <i class="fa fa-angle-left" aria-hidden="true"></i>
+            Back to Search Results
+        </button>
 
         <!-- Need <div> result-item class for "Save Item" button JavaScript behaviour (tag_modal.js) -->
         <div id="item-info-section" class="result-item">

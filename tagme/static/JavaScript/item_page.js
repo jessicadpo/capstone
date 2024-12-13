@@ -107,12 +107,6 @@ document.addEventListener("DOMContentLoaded", function () {
         toggleReadMore();
     });
 
-    // Set href of "Back to Search Results" link
-    // TODO: If user submits a POST form --> referrer becomes the page itself (can no longer go back to prev page)
-    // TODO: Fix --> prevent POST forms from reloading page? (possible?)
-    const backLink = document.getElementById('back-link');
-    backLink.href = document.referrer;
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Disable link (keyboard navigation) of reportedTagElement
     reportedTagComponent.setAttribute('tabindex', '-1');

@@ -53,7 +53,7 @@ def get_all_tags_for_item(item_id):
         for tag_dict in public_tags_with_counts:
             tag_dict['tag'] = tag_dict.pop('public_tags')
 
-        return public_tags_with_counts
+        return list(public_tags_with_counts)
     return None
 
 
