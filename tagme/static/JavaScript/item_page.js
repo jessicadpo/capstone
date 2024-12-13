@@ -19,7 +19,6 @@ const sidebar = document.getElementById('tag-sidebar');
 const reportButtons = document.querySelectorAll('.report-button');
 const reportTagDialog = document.getElementById('report-tag-dialog');
 const reportedTagComponent = document.querySelector('#report-tag-dialog .tag-content a');
-const reportTagForm = document.getElementById('report-tag-form');
 
 let isReadingMore = false;
 
@@ -154,7 +153,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // Reset form if open for a different tag
             if (reportButton != lastButton) {
-                reportTagForm.reset();
+                document.getElementById('report-tag-form').reset();
                 lastButton = reportButton;
             }
 

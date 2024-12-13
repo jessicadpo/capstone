@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <link rel="stylesheet" href="../../static/CSS/global.css">
+    <link rel="stylesheet" href="../../static/CSS/report_modal.css">
     <link rel="stylesheet" href="../../static/CSS/tag_modal.css">
     <link rel="stylesheet" href="../../static/CSS/new_reward_modal.css">
     <link rel="stylesheet" href="../../static/CSS/item_page.css">
@@ -129,34 +130,7 @@
         </div>
     </aside>
 
-    <dialog id="report-tag-dialog">
-        <form id="report-tag-form" method="POST">
-            <div class="header-with-x-button">
-                <h1>Report Tag</h1>
-                <button formmethod="dialog" id="close-report-modal-button" class="close-x-button" aria-label="Close Report Tag form">✖</button>
-            </div>
-
-            {% include "components/tag.html" %}
-
-            <h2>What is wrong with this tag?</h2>
-            {% csrf_token %}
-            {% for field in forms.report_form %}
-                <div>
-                    {{ field }}
-                    {% if field.label != False %}
-                        <label for="{{ field.id_for_label }}">
-                            <span class="fake-checkbox"></span> <!-- Because actual checkboxes can't be styled as easily -->
-                            {{ field.label }}
-                        </label>
-                    {% endif %}
-                </div>
-            {% endfor %}
-            <div id="report-form-footer">
-                <button id="cancel-tag-report-button" class="form-footer-button" formmethod="dialog">Cancel</button>
-                <input id="submit-tag-report-button" class="form-footer-button" type="submit" value="Report">
-            </div>
-        </form>
-    </dialog>
+    {% include "components/report_modal.html" %}
 
     {% include "components/tag_modal.html" %}
 
@@ -164,6 +138,7 @@
 
     <!-- JavaScript -->
     <script type="text/javascript" src="../../static/JavaScript/global.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/report_modal.js"></script>
     <script type="text/javascript" src="../../static/JavaScript/tag_modal.js"></script>
     <script type="text/javascript" src="../../static/JavaScript/new_reward_modal.js"></script>
     <script type="text/javascript" src="../../static/JavaScript/item_page.js"></script>
