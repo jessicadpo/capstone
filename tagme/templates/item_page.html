@@ -84,17 +84,7 @@
                 <textarea placeholder="Add comment..."></textarea>
 
                 <!-- TODO: For loop for each comment on current page -->
-                <div class="comment">
-                    <div class="comment-header">
-                        <p>Username</p>
-                        <p><i class="fa fa-star" aria-hidden="true"></i>Reward Title 1</p>
-                        <p><i class="fa fa-star" aria-hidden="true"></i>Reward Title 2</p>
-                        <button><i class="fa fa-pencil-square-o" aria-hidden="true"></i>Edit comment</button>
-                    </div>
-                    <p>Date</p>
-                    <p>Comment</p>
-                    <button>Read more <i class="fa fa-angle-down" aria-hidden="true"></i></button>
-                </div>
+                {% include 'components/user_comment.html' %}
 
                 <p>1 to 15 of 999,999,999 comments</p>
                 <!-- TODO: Paste similar pagination as in search results page -->
