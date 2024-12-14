@@ -57,7 +57,7 @@ def reward_to_dict_format(reward):
 
 def normalize_string(full_string):
     """Normalize a string by removing punctuation and splitting it into components"""
-    name = re.sub(r'[^\w\s]', '', full_string)
+    full_string = re.sub(r'[^\w\s]', '', full_string)
     return set(full_string.lower().split())
 
 def is_string_match(query_string, reference_string):
@@ -66,5 +66,11 @@ def is_string_match(query_string, reference_string):
     another string, no matter the order.
     """
     normalized_search = normalize_string(query_string)
+    # print("strmatchfunction input: ", normalized_search) # debugging
     normalized_reference = normalize_string(reference_string)
-    return normalized_search.issubset(normalized_reference) or normalized_reference.issubset(normalized_search)
+    # print("strmatchfunction reference: ", normalized_reference) # debugging
+    return (
+            normalized_search.issubset(normalized_reference) or
+            normalized_reference.issubset(normalized_search) or
+            normalized_search == normalized_reference
+    )

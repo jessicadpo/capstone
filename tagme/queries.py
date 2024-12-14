@@ -363,7 +363,6 @@ def query_loc_author(search_string, requested_page_number, type_indicator):
     """Author search to LOC API"""
     params = {
         "q": search_string,
-        "fa": "fa=contributor:"+search_string
     }
     # currently requires exact match. obvious not good
     return _query_loc_api(params, requested_page_number, search_string, type_indicator)
@@ -398,14 +397,19 @@ def _query_loc_api(params, requested_page_number, search_string, type_indicator)
         response.raise_for_status()  # Raise an error if the request fails
         data = response.json()  # Parse the JSON response
 
+        print("queryURL:", endpoint + query_url)    # for debugging
+        # print("API Response:", response.json())
+
         results_on_page = []
         for item in data.get("results", []):
             if item.get('number_lccn') is None:
                 continue
 
             if type_indicator == "Author":
-                contributors = item.get('contributors', [])
+                contributors = item.get('contributor', []) #DEBUGGING: Returns nothing?
+                # print(contributors) # debugging
                 if not any(is_string_match(search_string, contributor) for contributor in contributors):
+                    print("Contributor non-match"),
                     continue
 
             item_id = item.get('number_lccn')[0]
