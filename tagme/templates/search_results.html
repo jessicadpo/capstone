@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TagMe: Search Results</title>
+    <title>Search Results</title>
 
     <!-- Roboto font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,11 +15,13 @@
 
     <link rel="stylesheet" href="../../static/CSS/global.css">
     <link rel="stylesheet" href="../../static/CSS/tag_modal.css">
+    <link rel="stylesheet" href="../../static/CSS/new_reward_modal.css">
     <link rel="stylesheet" href="../../static/CSS/search_results.css">
 </head>
 
 <body>
     {% include "components/top_bar.html" %}
+    {% include "components/new_reward_modal.html" %}
     {% load html_math %}
 
     <main>
@@ -169,6 +171,7 @@
 
     <!-- JavaScript -->
     <script type="text/javascript" src="../../static/JavaScript/global.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/new_reward_modal.js"></script>
     <script type="text/javascript" src="../../static/JavaScript/tag_modal.js"></script>
     <script type="text/javascript" src="../../static/JavaScript/search_results.js"></script>
 </body>

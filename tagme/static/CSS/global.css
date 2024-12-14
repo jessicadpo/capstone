@@ -18,8 +18,16 @@ body {
     color: black;
 }
 
+main {
+    flex-grow: 1; /* Take up all available space between top bar and footer */
+}
+
 b, strong {
     font-weight: 500;
+}
+
+.invisible {
+    display: none;
 }
 
 /**********************************************************************************************************************/
@@ -80,10 +88,6 @@ b, strong {
     }
 }
 
-.public-user-tags-for-item, .private-user-tags-for-item {
-    display: none;
-}
-
 .header-with-x-button {
     display: flex;
     flex-direction: row;
@@ -110,6 +114,120 @@ b, strong {
 }
 
 /**********************************************************************************************************************/
+/* MODALS */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    display: none;
+}
+
+.modal-overlay.active {
+    display: block;
+}
+
+
+.modal {
+    background-color: #F7F7F7;
+    border: none;
+    border-radius: 20px;
+    z-index: 1000;
+    overflow: visible; /* Do not hide overflowing tooltips */
+    & .header-with-x-button {
+        margin: 0;
+    }
+}
+
+dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
+    & i {
+        font-size: 1.5em;
+        color: #959595;
+    }
+
+    & .bubble-tail-outline {
+        z-index: 1000;
+    }
+
+    & .bubble-content {
+        z-index: 1001;
+    }
+
+    & .bubble-tail {
+        z-index: 1002;
+    }
+}
+
+.modal-footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10%;
+    padding-top: 15px;
+}
+
+.modal-footer-button {
+    width: 30%;
+    min-width: 120px;
+    padding: 10px 0px;
+    font-size: 1.3em;
+    font-weight: 400;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+/**********************************************************************************************************************/
+/* REWARD TITLES */
+.reward-title {
+    height: 30px;
+    min-width: fit-content;
+    padding: 5px 20px 5px 10px;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    gap: 10px;
+    cursor: default;
+
+    & img {
+        height: 80%;
+    }
+
+    & span {
+        color: white;
+        font-weight: 400;
+        font-size: 1.1em;
+        text-wrap: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &::before { /* Shine effect on hover */
+        content: "";
+        position: absolute;
+        height: 200%;
+        width: 50px;
+        transform: rotate(20deg);
+        background-color: rgba(255, 255, 255, 0.2);
+        left: -100px;
+        top: -25px;
+        z-index: 1;
+    }
+
+    &:hover::before {
+        transition: left 0.7s ease;
+        left: 110%;
+    }
+}
+
+/**********************************************************************************************************************/
 /* TAGS */
 .tag {
     width: fit-content;
@@ -121,7 +239,7 @@ b, strong {
     position: relative; /* So can position the shine animation */
     overflow: hidden; /* Hide animated ::before .tag:hover */
 
-    &::before {
+    &::before { /* Shine effect on hover */
         content: "";
         position: absolute;
         height: 200%;
@@ -144,6 +262,7 @@ b, strong {
 
     & > img { /* The triangle shape at the end */
         min-width: 20px;
+        aspect-ratio: 50 / 25;
     }
 }
 
@@ -159,6 +278,7 @@ b, strong {
     align-items: center;
     gap: 5px;
     height: fit-content;
+    min-width: fit-content;
 
     & img { /* The light green trapeze svg */
         position:absolute; /* Positioned relative to grandparent .tag, not parent .tag-text */
@@ -265,6 +385,16 @@ b, strong {
     border-color: inherit;
     border-radius: 5px;
     z-index: 0; /* Default */
+
+    & > p:first-child {
+        margin-top: 0;
+    }
+
+    & > p:last-child {
+        margin-bottom: 0;
+    }
+
+
 }
 
 .bubble-tail-outline { /* Triangle BORDER part of speech bubble shape */
@@ -373,9 +503,12 @@ b, strong {
     display: none;
     position: absolute;
     z-index: 1;
-    min-width: 100%;
+    box-sizing: border-box; /* Sizing includes padding & border */
+    width: 100%;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    border: solid 1px #3B6000;
     border-radius: 0px 0px 10px 10px;
+    overflow: hidden;
 }
 
 .dropdown-options > * {
@@ -383,7 +516,7 @@ b, strong {
     margin: 0px;
     padding: 12px 16px;
     background-color: white;
-    border: solid #3B6000 1px;
+    border-bottom: solid 1px #3B6000;
     color: black;
     text-decoration: none;
     font-size: 1.1em;
@@ -391,6 +524,7 @@ b, strong {
 
 .dropdown-options > *:last-of-type {
     border-radius: 0px 0px 10px 10px;
+    border-bottom: none;
 }
 
 /* Change color of dropdown links on hover */
@@ -548,6 +682,37 @@ div:has(>#search-input) { /* Because Django puts every field in its own div... *
 #account-dropdown-options i {
     color: #537A00;
     font-size: 1.2em;
+}
+
+/**********************************************************************************************************************/
+/* SIDE BAR (USER PROFILE / SAVED ITEMS / ACCOUNT SETTIGNS) */
+#user-account-sidebar {
+    height: 100%;
+    width: 15%;
+    border-right: solid 1px #537A00;
+    overflow: hidden; /* TODO: Figure out how to adapt this when browser width is small */
+    display: flex;
+    flex-direction: column; /* Main axis = Vertical */
+}
+
+#user-account-sidebar a {
+    padding: 15px 20px;
+    font-size: 1.4rem;
+    font-weight: 300;
+    text-decoration: none;
+    border-bottom: solid 1px #537A00;
+    display: flex;
+    flex-direction: row; /* Main axis = horizontal */
+    align-items: center;
+    gap: 10px;
+
+    & i {
+        color: #537A00;
+    }
+
+    &:hover {
+        background-color: #E0EEAC;
+    }
 }
 
 /**********************************************************************************************************************/

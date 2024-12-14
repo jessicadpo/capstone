@@ -1,5 +1,4 @@
 main {
-    flex-grow: 1; /* Take up all available space between top bar and footer */
     display: flex;
     flex-direction: row; /* Main axis = Horizontal */
     padding: 10vh 2vw;

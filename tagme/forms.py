@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from django.core.validators import EMPTY_VALUES
+from .models import Reward
 
 SEARCH_TYPES = (
     ("Keyword", "Keyword"),
@@ -23,12 +24,27 @@ class SearchForm(forms.Form):
         attrs={'id': 'search-input', 'placeholder': 'Search', 'label': 'Search'}))
 
 
+class EquipForm(forms.Form):
+    """ Form for equipping a title """
+    title_choices = list(Reward.objects.all().values_list('title', 'title'))  # pylint: disable=no-member
+    title_choices.append(("Empty", "Empty"))
+    title_choices = tuple(title_choices)
+    title_to_equip = forms.ChoiceField(label=False, choices=title_choices,
+                                       required=True, widget=forms.Select(attrs={'id': 'title-to-equip-input'}))
+    equip_slot = forms.ChoiceField(label=False, choices=(("1", "1"), ("2", "2")), required=True,
+                                   widget=forms.Select(attrs={'id': 'equip-slot-input'}))
+
+
 class TagsForm(forms.Form):
     """ Form for add/edit tags modal """
+    # Need to use a CharField instead of BooleanField because
+    # unchecked BooleanField just straight up don't get included in a request
+    is_pinned = forms.CharField(label=False, required=True, initial="true", widget=forms.TextInput(attrs={'id': 'is-pinned-input'}))
     tagged_item = forms.CharField(label=False, required=True, widget=forms.TextInput(attrs={'id': 'item-id-input'}))
     public_tags = forms.CharField(label=False, required=False, initial="\\n", widget=forms.Textarea(attrs={'id': 'public-tags-form-field'}))
     private_tags = forms.CharField(label=False, required=False, initial="\\n", widget=forms.Textarea(attrs={'id': 'private-tags-form-field'}))
-    # Need initial for the isAlreadyAdded function in tag_modal.js
+    # Need initial '\\n' for the isAlreadyAdded function in tag_modal.js
+    total_points_for_item = forms.IntegerField(label=False, required=True, widget=forms.NumberInput(attrs={'id': 'total-points-for-item-field'}))
 
 
 class ReportForm(forms.Form):

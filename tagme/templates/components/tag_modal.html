@@ -2,11 +2,9 @@
     {% include 'components/tag_deletable.html' %}
 </template>
 
+<div id="add-tags-overlay" class="modal-overlay"></div> <!-- id so overlay behaves differently from report-tag-overlay -->
 
-
-<div id="add-tags-overlay"></div> <!-- id so overlay behaves differently from report-tag-overlay -->
-
-<dialog id="add-tags-modal"> <!-- TODO -->
+<dialog id="add-tags-modal" class="modal">
     <div class="header-with-x-button">
         <h1>Your tags for: <b id="saving-item-title">[Item Title]</b></h1>
         <button id="close-tag-modal-button" class="close-x-button" aria-label="Close tag panel">✖</button>
@@ -29,9 +27,17 @@
                         </div>
                     </div>
                 </div>
+
+                <div id="total-points-section">
+                    <span>Total points: </span>
+                    <span id="total-points-earned"></span> <!-- Set using JavaScript -->
+                </div>
             </div>
 
-            <input id="public-tags-input" type="text" placeholder="Add tags..."/>
+            <div class="tag-input-section">
+                <input id="public-tags-input" type="text" placeholder="Add tags..."/>
+                <span id="animated-tag-score"></span> <!-- Set to +[Score] in JavaScript -->
+            </div>
 
             <div id="public-tags-list-container" class="tag-list-container">
                 <!-- Filled using JavaScript -->
@@ -55,7 +61,10 @@
                 </div>
             </div>
 
-            <input id="private-tags-input" type="text" placeholder="Add tags..."/>
+            <div class="tag-input-section">
+                <input id="private-tags-input" type="text" placeholder="Add tags..."/>
+                <!-- Private tags do NOT give points -->
+            </div>
 
             <div id="private-tags-list-container" class="tag-list-container">
                 <!-- Filled using JavaScript -->
@@ -63,14 +72,14 @@
         </div>
     </div>
 
-    <div id="add-tags-modal-footer">
+    <div id="add-tags-modal-footer" class="modal-footer"> <!-- Need id for border-top (CSS) -->
         <button id="cancel-tags-modal-button" class="modal-footer-button">Cancel</button>
-        <button id="save-tags-button" class="modal-footer-button">Save</button> <!-- Submits the form -->
-        <button id="unpin-item-button" class="modal-footer-button">Unpin</button> <!-- TODO: sets is_pinned to False -->
+        <button id="save-tags-button" class="modal-footer-button">Save</button> <!-- Submits the form via JavaScript -->
+        <button id="unpin-item-button" class="modal-footer-button">Unpin</button> <!-- Submits the form via JavaScript -->
     </div>
 
     <!-- NOT VISIBLE -->
-    <form id="user-tags-form" method="POST">
+    <form id="user-tags-form" class="invisible" method="POST">
         {% csrf_token %}
         {{ forms.tags_form }}
     </form>

@@ -3,7 +3,6 @@ html {
 }
 
 main {
-    flex-grow: 1; /* Take up all available space between top bar and footer */
     display: flex;
     flex-direction: column; /* Main axis = Vertical */
     padding: 0px 3vw;
