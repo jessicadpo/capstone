@@ -380,7 +380,7 @@ def query_loc_subject(search_string, requested_page_number):
     # TODO: Find a way to query without a query (possible? or need a filter interface?)
 
 
-def _query_loc_api(params, requested_page_number, searchtype):
+def _query_loc_api(params, requested_page_number):
     """Actual query to LOC API (PRIVATE FUNCTION)"""
     params["fa"] = "partof:catalog"
     params["fo"] = "json"
