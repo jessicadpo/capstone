@@ -361,7 +361,13 @@ def query_loc_title(search_string, requested_page_number):
 
 def query_loc_author(search_string, requested_page_number):
     """Author search to LOC API"""
-    print(f"TODO (placeholder code) {search_string} {requested_page_number}")
+    params = {
+        "q": search_string,
+        "fa": "fa=contributor:"+search_string
+    }
+    # currently requires exact match. obvious not good
+    return _query_loc_api(params, requested_page_number)
+
 
 
 def query_loc_subject(search_string, requested_page_number):
@@ -374,7 +380,7 @@ def query_loc_subject(search_string, requested_page_number):
     # TODO: Find a way to query without a query (possible? or need a filter interface?)
 
 
-def _query_loc_api(params, requested_page_number):
+def _query_loc_api(params, requested_page_number, searchtype):
     """Actual query to LOC API (PRIVATE FUNCTION)"""
     params["fa"] = "partof:catalog"
     params["fo"] = "json"
@@ -397,6 +403,7 @@ def _query_loc_api(params, requested_page_number):
         for item in data.get("results", []):
             if item.get('number_lccn') is None:
                 continue
+
             item_id = item.get('number_lccn')[0]
             title = decode_unicode(strip_punctuation(item.get("item").get('title', 'No title available')))
             publication_date = decode_unicode(item.get('date', 'No publication date available'))
