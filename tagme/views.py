@@ -121,18 +121,19 @@ def search_results(request, requested_page_number):
     search_string = request.GET.get('search_string')
     results_on_page = []
     pagination: None
+    type_indicator = request.GET.get('search_type')
     match request.GET.get('search_type'):
         case "Keyword":
-            results_on_page, pagination = query_loc_keyword(search_string, requested_page_number)
+            results_on_page, pagination = query_loc_keyword(search_string, requested_page_number, type_indicator)
             # TODO: Need to also search our UserContribution model
         case "Tag":
             print("placeholder code")  # Replace with Django queries
         case "Title":
             print("placeholder code")  # Replace with API call
         case "Author":
-            print("placeholder code")  # Replace with API call
+            results_on_page, pagination = query_loc_subject(search_string, requested_page_number, type_indicator)
         case "Subject":
-            results_on_page, pagination = query_loc_subject(search_string, requested_page_number)
+            results_on_page, pagination = query_loc_subject(search_string, requested_page_number, type_indicator)
         case _:
             raise Http404("Invalid search type")
 

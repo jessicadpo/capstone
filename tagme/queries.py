@@ -345,42 +345,41 @@ def query_datamuse_related_words(word):
 ########################################################################################################################
 # LOC API QUERIES
 
-def query_loc_keyword(search_string, requested_page_number):
+def query_loc_keyword(search_string, requested_page_number, type_indicator):
     """Keyword search to LOC API"""
     params = {
         "q": search_string,  # Default parameters set in _query_loc_api() function
         "fa": "partof:catalog"
     }
-    return _query_loc_api(params, requested_page_number)
+    return _query_loc_api(params, requested_page_number, search_string, type_indicator)
 
 
-def query_loc_title(search_string, requested_page_number):
+def query_loc_title(search_string, requested_page_number, type_indicator):
     """Title search to LOC API"""
     print(f"TODO (placeholder code) {search_string} {requested_page_number}")
 
 
-def query_loc_author(search_string, requested_page_number):
+def query_loc_author(search_string, requested_page_number, type_indicator):
     """Author search to LOC API"""
     params = {
         "q": search_string,
         "fa": "fa=contributor:"+search_string
     }
     # currently requires exact match. obvious not good
-    return _query_loc_api(params, requested_page_number)
+    return _query_loc_api(params, requested_page_number, search_string, type_indicator)
 
 
-
-def query_loc_subject(search_string, requested_page_number):
+def query_loc_subject(search_string, requested_page_number, type_indicator):
     """Subject search to LOC API. Treats search string as both keyword and subject"""
     params = {
         "q": search_string,
         "fa": "fa=subject:"+search_string
     }
-    return _query_loc_api(params, requested_page_number)
+    return _query_loc_api(params, requested_page_number, search_string, type_indicator)
     # TODO: Find a way to query without a query (possible? or need a filter interface?)
 
 
-def _query_loc_api(params, requested_page_number):
+def _query_loc_api(params, requested_page_number, search_string, type_indicator):
     """Actual query to LOC API (PRIVATE FUNCTION)"""
     params["fa"] = "partof:catalog"
     params["fo"] = "json"
@@ -403,6 +402,11 @@ def _query_loc_api(params, requested_page_number):
         for item in data.get("results", []):
             if item.get('number_lccn') is None:
                 continue
+
+            if type_indicator == "Author":
+                contributors = item.get('contributors', [])
+                if not any(is_string_match(search_string, contributor) for contributor in contributors):
+                    continue
 
             item_id = item.get('number_lccn')[0]
             title = decode_unicode(strip_punctuation(item.get("item").get('title', 'No title available')))
