@@ -132,7 +132,7 @@ def search_results(request, requested_page_number):
         case "Author":
             print("placeholder code")  # Replace with API call
         case "Subject":
-            print("placeholder code")  # Replace with API call
+            results_on_page, pagination = query_loc_subject(search_string, requested_page_number)
         case _:
             raise Http404("Invalid search type")
 
