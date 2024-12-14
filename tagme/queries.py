@@ -365,12 +365,13 @@ def query_loc_author(search_string, requested_page_number):
 
 
 def query_loc_subject(search_string, requested_page_number):
-    """Subject search to LOC API"""
+    """Subject search to LOC API. Treats search string as both keyword and subject"""
     params = {
         "q": search_string,
         "fa": "fa=subject:"+search_string
     }
     return _query_loc_api(params, requested_page_number)
+    # TODO: Find a way to query without a query (possible? or need a filter interface?)
 
 
 def _query_loc_api(params, requested_page_number):
