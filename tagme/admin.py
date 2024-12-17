@@ -19,6 +19,7 @@ class ReportAdmin(admin.ModelAdmin):
     list_filter = ('tag', 'creation_datetime', 'decision', 'user_id')
     search_fields = ('reason', 'user_id__username', 'tag__tag')
 
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return qs
