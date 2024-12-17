@@ -383,19 +383,18 @@ def _query_loc_api(search_string, requested_page_number, type_indicator):
 
             if type_indicator == "Author":
                 contributors = item.get('contributor', []) #DEBUGGING: Returns nothing?
-                # print(contributors) # debugging
                 if not any(is_string_match(search_string, contributor) for contributor in contributors):
-                    print("Contributor non-match"),
+                    # print("Contributor non-match"),
                     continue
             if type_indicator == "Subject":
                 subject = item.get('subject', [])
                 if not any(is_string_match(search_string, subject) for subject in subject):
-                    print("Subject non-match"),
+                    # print("Subject non-match"),
                     continue
             if type_indicator == "Title":
                 title = item.get('title', [])
                 if not any(is_string_match(search_string, title) for title in title):
-                    print("Title non-match"),
+                    # print("Title non-match"),
                     continue
             # TODO: is_string_match currently checks if *any* of the search is in *any* of the field data. not optimal
             # TODO: Make this set of if statements more efficient (definitely possible)
