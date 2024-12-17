@@ -13,7 +13,7 @@ GLOBAL_BLACKLIST = ['apeshit', 'arse', 'arsehole', 'ass', 'asshole', 'assmunch',
 REWARD_LIST = {
     "New to the Family": "#B52801",         # Red
     "Busy Bee": "#C67A2A",                  # Gold
-    "Keen Cataloguer": "#C46200",           # Green
+    "Keen Cataloguer": "#537A00",           # Green
     "Sharp Sorter": "#006996",              # Blue
     "Diligent Documenter": "#C67A2A",       # Gold
     "Elite Archivist": "#B63200",           # Orange

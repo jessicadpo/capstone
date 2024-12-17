@@ -5,11 +5,12 @@
 <div class="firework invisible"></div>
 
 <dialog id="new-reward-modal" class="modal">
+    <!-- TODO: Need to redesign to allow choosing of equip slot (1 or 2) + if 2 new rewards at the same time -->
     <div class="modal-content"> <!-- Need this because can't apply display=flex to <dialog> directly -->
         <h1>Congrats!</h1>
         <p>You've reached {{ score_data.user_points }} points and earned:</p>
         <div>
-            {% for reward in score_data.new_reward %}
+            {% for reward in score_data.new_rewards %}
                 {% include "components/reward_title.html" %}
             {% endfor %}
         </div>

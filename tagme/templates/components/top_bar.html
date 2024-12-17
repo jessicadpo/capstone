@@ -21,9 +21,9 @@
                     <span>{{ request.user.username }}</span>
                 </button>
                 <div id="account-dropdown-options" class="dropdown-options">
-                    <a href="/user"><i class="fa fa-user-o" aria-hidden="true"></i>My Profile</a>
-                    <a href="/user/saved-items"><i class="fa fa-thumb-tack" aria-hidden="true"></i>Saved Items</a>
-                    <a href="/user/settings"><i class="fa fa-cog" aria-hidden="true"></i>Account Settings</a>
+                    <a href="/profile/{{ request.user.username }}"><i class="fa fa-user-o" aria-hidden="true"></i>My Profile</a>
+                    <a href="/pinned-items/{{ request.user.username }}"><i class="fa fa-thumb-tack" aria-hidden="true"></i>Pinned Items</a>
+                    <a href="/settings/{{ request.user.username }}"><i class="fa fa-cog" aria-hidden="true"></i>Account Settings</a>
                     <a href="/logout"><i class="fa fa-sign-out" aria-hidden="true"></i>Log Out</a>
                 </div>
             </div>
