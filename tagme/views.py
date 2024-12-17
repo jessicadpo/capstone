@@ -124,17 +124,18 @@ def search_results(request, requested_page_number):
     type_indicator = request.GET.get('search_type')
     match request.GET.get('search_type'):
         case "Keyword":
-            results_on_page, pagination = query_loc_keyword(search_string, requested_page_number, type_indicator)
-            # TODO: Need to also search our UserContribution model
+            results_on_page, pagination = query_loc_gateway(search_string, requested_page_number, type_indicator)
+            # TODO: For Keyword searchNeed to also search our UserContribution model
         case "Tag":
             print("placeholder code")  # Replace with Django queries
-        case "Title":
-            print("placeholder code")  # Replace with API call
-        case "Author":
-            results_on_page, pagination = query_loc_subject(search_string, requested_page_number, type_indicator)
-        case "Subject":
-            results_on_page, pagination = query_loc_subject(search_string, requested_page_number, type_indicator)
+        case "Title" | "Author" | "Subject":
+            results_on_page, pagination = query_loc_gateway(search_string, requested_page_number, type_indicator)
+        #case "Author":
+        #    results_on_page, pagination = query_loc_gateway(search_string, requested_page_number, type_indicator)
+        #case "Subject":
+            # results_on_page, pagination = query_loc_gateway(search_string, requested_page_number, type_indicator)
         case _:
+            print("search type received: '{type_indicator}'")
             raise Http404("Invalid search type")
 
     # Add "is_pinned" to every item in results_on_page

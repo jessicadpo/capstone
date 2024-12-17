@@ -345,47 +345,23 @@ def query_datamuse_related_words(word):
 ########################################################################################################################
 # LOC API QUERIES
 
-def query_loc_keyword(search_string, requested_page_number, type_indicator):
-    """Keyword search to LOC API"""
-    params = {
-        "q": search_string,  # Default parameters set in _query_loc_api() function
-        "fa": "partof:catalog"
-    }
-    return _query_loc_api(params, requested_page_number, search_string, type_indicator)
+def query_loc_gateway(search_string, requested_page_number, type_indicator):
+    """Exists as medium between users and direct query to LOC API"""
+    # TODO: Perform input cleaning here so people can't inject API manipulation
+    return _query_loc_api(search_string, requested_page_number, type_indicator)
 
 
-def query_loc_title(search_string, requested_page_number, type_indicator):
-    """Title search to LOC API"""
-    print(f"TODO (placeholder code) {search_string} {requested_page_number}")
-
-
-def query_loc_author(search_string, requested_page_number, type_indicator):
-    """Author search to LOC API"""
-    params = {
-        "q": search_string,
-    }
-    # currently requires exact match. obvious not good
-    return _query_loc_api(params, requested_page_number, search_string, type_indicator)
-
-
-def query_loc_subject(search_string, requested_page_number, type_indicator):
-    """Subject search to LOC API. Treats search string as both keyword and subject"""
-    params = {
-        "q": search_string,
-        "fa": "fa=subject:"+search_string
-    }
-    return _query_loc_api(params, requested_page_number, search_string, type_indicator)
-    # TODO: Find a way to query without a query (possible? or need a filter interface?)
-
-
-def _query_loc_api(params, requested_page_number, search_string, type_indicator):
+def _query_loc_api(search_string, requested_page_number, type_indicator):
     """Actual query to LOC API (PRIVATE FUNCTION)"""
-    params["fa"] = "partof:catalog"
-    params["fo"] = "json"
-    params["c"] = 15  # Return max. 15 items per query (makes results load faster)
-    params["sp"] = requested_page_number
-
+    params = {
+        "q": search_string,
+        "fa": "partof:catalog",
+        "fo": "json",
+        "c":  15, # Return max. 15 items per query (makes results load faster)
+        "sp": requested_page_number
+    }
     query = "?"
+
     for param_key in params.keys():
         query += param_key + "=" + quote(str(params.get(param_key)), safe=":") + "&"  # Do not encode ":" of "fa" params
     query = query[:-1]  # Remove ending "&" from query
@@ -411,6 +387,18 @@ def _query_loc_api(params, requested_page_number, search_string, type_indicator)
                 if not any(is_string_match(search_string, contributor) for contributor in contributors):
                     print("Contributor non-match"),
                     continue
+            if type_indicator == "Subject":
+                subject = item.get('subject', [])
+                if not any(is_string_match(search_string, subject) for subject in subject):
+                    print("Subject non-match"),
+                    continue
+            if type_indicator == "Title":
+                title = item.get('title', [])
+                if not any(is_string_match(search_string, title) for title in title):
+                    print("Title non-match"),
+                    continue
+            # TODO: is_string_match currently checks if *any* of the search is in *any* of the field data. not optimal
+            # TODO: Make this set of if statements more efficient (definitely possible)
 
             item_id = item.get('number_lccn')[0]
             title = decode_unicode(strip_punctuation(item.get("item").get('title', 'No title available')))
