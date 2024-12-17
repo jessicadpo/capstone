@@ -19,3 +19,5 @@ REWARD_LIST = {
     "Elite Archivist": "#B63200",           # Orange
     "Metadata Master": "#820096",           # Purple
 }
+
+VALID_SEARCH_TYPES = ['Keyword', 'Tag', 'Title', 'Author', 'Subject']

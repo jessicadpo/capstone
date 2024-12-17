@@ -54,23 +54,3 @@ def to_firstname_lastname(name):
 def reward_to_dict_format(reward):
     """Convert a Reward object to a front-end readable dict format"""
     return {'title': reward.title, 'colour': reward.hex_colour, 'points_required': reward.points_required}
-
-def normalize_string(full_string):
-    """Normalize a string by removing punctuation and splitting it into components"""
-    full_string = re.sub(r'[^\w\s]', '', full_string)
-    return set(full_string.lower().split())
-
-def is_string_match(query_string, reference_string):
-    """
-    check if any component of the search string matches any component of the
-    another string, no matter the order.
-    """
-    normalized_search = normalize_string(query_string)
-    # print("strmatchfunction input: ", normalized_search) # debugging
-    normalized_reference = normalize_string(reference_string)
-    # print("strmatchfunction reference: ", normalized_reference) # debugging
-    return (
-            normalized_search.issubset(normalized_reference) or
-            normalized_reference.issubset(normalized_search) or
-            normalized_search == normalized_reference
-    )

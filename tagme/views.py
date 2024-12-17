@@ -118,25 +118,12 @@ def search_results(request, requested_page_number):
 
     # TODO: Code for parsing AND/OR/NOT/*/? --> Investigate pyparsing & Shunting Yard algorithm
 
-    search_string = request.GET.get('search_string')
-    results_on_page = []
-    pagination: None
-    type_indicator = request.GET.get('search_type')
-    match request.GET.get('search_type'):
-        case "Keyword":
-            results_on_page, pagination = query_loc_gateway(search_string, requested_page_number, type_indicator)
-            # TODO: For Keyword searchNeed to also search our UserContribution model
-        case "Tag":
-            print("placeholder code")  # Replace with Django queries
-        case "Title" | "Author" | "Subject":
-            results_on_page, pagination = query_loc_gateway(search_string, requested_page_number, type_indicator)
-        #case "Author":
-        #    results_on_page, pagination = query_loc_gateway(search_string, requested_page_number, type_indicator)
-        #case "Subject":
-            # results_on_page, pagination = query_loc_gateway(search_string, requested_page_number, type_indicator)
-        case _:
-            print("search type received: '{type_indicator}'")
-            raise Http404("Invalid search type")
+    # Check that it's a valid search_type
+    if request.GET.get('search_type') not in VALID_SEARCH_TYPES:
+        raise Http404(f"Invalid search type: {request.GET.get('search_type')}")
+
+    pagination = SearchQuery.get_paginated_results(request.GET.get('search_string'), request.GET.get('search_type'))
+    results_on_page = pagination.get_page(requested_page_number).object_list
 
     # Add "is_pinned" to every item in results_on_page
     # Get user's tags for each pinned item in current results
@@ -156,7 +143,7 @@ def search_results(request, requested_page_number):
     request.session['results_on_page'] = {item['item_id']: item for item in results_on_page}
 
     return render(request, 'search_results.html', {
-        'current_page': results_on_page,
+        'current_page': pagination.get_page(requested_page_number),
         'pagination': pagination,
         'forms': page_forms,
         'synonymous_tags': synonymous_tags,

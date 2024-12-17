@@ -10,6 +10,7 @@ from django.db.models import Count
 from django.contrib.auth import PermissionDenied
 from django.db.models.signals import post_save, post_delete, post_migrate
 from django.dispatch import receiver
+from django.core.paginator import Paginator
 import requests
 from .apps import TagMeConfig
 from .helper_functions import *
@@ -344,25 +345,96 @@ def query_datamuse_related_words(word):
 
 ########################################################################################################################
 # LOC API QUERIES
+class SearchQuery:
+    """
+    Class for storing the most recent search results to avoid having to query LOC if only the page number changes.
+    All SearchResults objects share the same variables (i.e., only one "instance" of each variable)
+    """
+    search_string = ""
+    search_type = ""
+    loc_page_to_get = -1
+    relevant_results = None
+    pagination = None
 
-def query_loc_gateway(search_string, requested_page_number, type_indicator):
-    """Exists as medium between users and direct query to LOC API"""
-    # TODO: Perform input cleaning here so people can't inject API manipulation
-    return _query_loc_api(search_string, requested_page_number, type_indicator)
+    @classmethod
+    def is_safe_query(cls, search_string):
+        """Perform input cleaning here so people can't inject API manipulation"""
+        # TODO: Perform input cleaning here so people can't inject API manipulation
+        return True
+
+    @classmethod
+    def is_new_search(cls, search_string, search_type):
+        """Check if search_string or search_type has changed"""
+        if cls.search_string != search_string or cls.search_type != search_type:
+            return True
+        return False
+
+    @classmethod
+    def get_paginated_results(cls, search_string, search_type):
+        """Get all relevant search results in a Django Paginator object"""
+        if cls.is_new_search(search_string, search_type) and cls.is_safe_query(search_string):
+            cls.search_string = search_string
+            cls.search_type = search_type
+            cls.loc_page_to_get = 1  # Reset for new search
+            cls.perform_new_search()
+            cls.pagination = Paginator(cls.relevant_results, 15)
+        return cls.pagination
+
+    @classmethod
+    def perform_new_search(cls):
+        """Determine which type of query to send to LOC API && get the relevant results"""
+        match cls.search_type:
+            case "Keyword":
+                cls.relevant_results = cls.query_loc_keyword()
+                # TODO: For Keyword search --> Need to also search our UserContribution model
+            case "Tag":
+                print("placeholder code")  # Replace with Django queries
+            case "Title":
+                cls.relevant_results = cls.query_loc_title()
+            case "Author":
+                cls.relevant_results = cls.query_loc_author()
+            case "Subject":
+                cls.relevant_results = cls.query_loc_subject()
+            case _:
+                cls.relevant_results = None
+
+    @classmethod
+    def query_loc_keyword(cls):
+        """Keyword search of LOC API (first 1,000 results only)"""
+        return _query_loc_api(cls.search_string)
+
+    @classmethod
+    def query_loc_title(cls):
+        """Title search of LOC API"""
+        print(f"TODO (placeholder code)")
+
+    @classmethod
+    def query_loc_author(cls):
+        """Author search of LOC API"""
+        relevant_results = []
+        for result in _query_loc_api(cls.search_string):
+            if cls.search_string.lower() in result.get("authors").lower():
+                relevant_results.append(result)
+        return relevant_results
+
+    @classmethod
+    def query_loc_subject(cls):
+        """Subject search of LOC API"""
+
+        print(f"TODO (placeholder code))")
 
 
-def _query_loc_api(search_string, requested_page_number, type_indicator):
+def _query_loc_api(search_string):
     """Actual query to LOC API (PRIVATE FUNCTION)"""
     params = {
         "q": search_string,
         "fa": "partof:catalog",
         "fo": "json",
-        "c":  15, # Return max. 15 items per query (makes results load faster)
-        "sp": requested_page_number
+        "c":  15,  # 500 results per query (for faster loading) (max supported is 1,000 <-- very slow)
     }
     query = "?"
 
-    for param_key in params.keys(): # pylint: disable=consider-iterating-dictionary
+    for param_key in params.keys():
         query += param_key + "=" + quote(str(params.get(param_key)), safe=":") + "&"  # Do not encode ":" of "fa" params
     query = query[:-1]  # Remove ending "&" from query
     query_url = quote(query, safe=":?=&%")
@@ -373,31 +445,10 @@ def _query_loc_api(search_string, requested_page_number, type_indicator):
         response.raise_for_status()  # Raise an error if the request fails
         data = response.json()  # Parse the JSON response
 
-        print("queryURL:", endpoint + query_url)    # for debugging
-        # print("API Response:", response.json())
-
-        results_on_page = []
+        results = []
         for item in data.get("results", []):
             if item.get('number_lccn') is None:
                 continue
-
-            if type_indicator == "Author":
-                contributors = item.get('contributor', []) #DEBUGGING: Returns nothing?
-                if not any(is_string_match(search_string, contributor) for contributor in contributors):
-                    # print("Contributor non-match"),
-                    continue
-            if type_indicator == "Subject":
-                subject = item.get('subject', [])
-                if not any(is_string_match(search_string, subject) for subject in subject):
-                    # print("Subject non-match"),
-                    continue
-            if type_indicator == "Title":
-                title = item.get('title', [])
-                if not any(is_string_match(search_string, title) for title in title):
-                    # print("Title non-match"),
-                    continue
-            # TODO: is_string_match currently checks if *any* of the search is in *any* of the field data. not optimal
-            # TODO: Make this set of if statements more efficient (definitely possible)
 
             item_id = item.get('number_lccn')[0]
             title = decode_unicode(strip_punctuation(item.get("item").get('title', 'No title available')))
@@ -406,12 +457,12 @@ def _query_loc_api(search_string, requested_page_number, type_indicator):
 
             authors = item.get('contributor', ['Unknown'])
             for i in range(len(authors)):
-                authors[i] = decode_unicode(to_firstname_lastname(authors[i]))
+                authors[i] = decode_unicode(authors[i])  # TODO: switch to firstname_lastname format?
 
             covers = item.get('image_url', None)
             cover = covers[0] if covers else None
 
-            results_on_page.append({
+            results.append({
                 'item_id': item_id,
                 'title': to_title_case(title),
                 'authors': to_title_case('; '.join(authors)),  # Combine authors into a single string
@@ -420,11 +471,11 @@ def _query_loc_api(search_string, requested_page_number, type_indicator):
                 'cover': cover,
             })
 
-        return results_on_page, data.get("pagination")
+        return results
 
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
-        return [], 0
+        return []
 
 
 # Comprehension is actually necessary, or Django crashes
