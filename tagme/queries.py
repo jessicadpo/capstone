@@ -362,7 +362,7 @@ def _query_loc_api(search_string, requested_page_number, type_indicator):
     }
     query = "?"
 
-    for param_key in params.keys():
+    for param_key in params.keys(): # pylint: disable=consider-iterating-dictionary
         query += param_key + "=" + quote(str(params.get(param_key)), safe=":") + "&"  # Do not encode ":" of "fa" params
     query = query[:-1]  # Remove ending "&" from query
     query_url = quote(query, safe=":?=&%")
