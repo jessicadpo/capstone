@@ -185,17 +185,23 @@ def item_page(request, item_id):
     # If POST request for adding a comment
     elif request.method == 'POST' and ('comment' in request.POST):
         process_comment_form(request, item_id)
+        return HttpResponse(status=204)  # NOT a render() so that page doesn't reload
 
-    page_forms = {"search_form": SearchForm(), "tags_form": TagsForm(), "report_form": ReportForm(), "equip_form": EquipForm()}
+    page_forms = {"search_form": SearchForm(),
+                  "tags_form": TagsForm(),
+                  "comment_form": CommentForm(),
+                  "report_form": ReportForm(),
+                  "equip_form": EquipForm()}
     results_on_search_page = request.session.get('results_on_page', {})  # Retrieve search results from the session
     item_data = results_on_search_page.get(str(item_id))  # Get the specific item's LOC API data using the item ID
     item_data['tags'] = get_all_tags_for_item(item_id)
-    item_data['comments'] = get_all_comments_for_item(item_id)
+    item_data['comments'] = get_all_comments_for_item(item_id, user=request.user, exclude_request_user=True)
 
     if request.user.is_authenticated:
         user_public_tags, user_private_tags = get_user_tags_for_item(request.user, item_id)
         item_data['user_public_tags'] = user_public_tags
         item_data['user_private_tags'] = user_private_tags
+        item_data['user_comment'] = get_user_comment_for_item(request.user, item_id)
         item_data['is_pinned'] = get_is_item_pinned(request.user, item_id)
         item_data['points_earned'] = get_user_points_for_item(request.user, item_data["item_id"])
 

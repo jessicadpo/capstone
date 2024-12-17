@@ -25,7 +25,17 @@
     </div>
 
     <div class="comment-text">
-        <p>{{ comment.text }}</p>
-        <button class="comment-read-more">Read more <i class="fa fa-angle-down" aria-hidden="true"></i></button>
+        {% for text in comment.paragraphs %}
+            <p>{{ text }}</p>
+        {% endfor %}
     </div>
+
+    <button class="comment-read-more read-more-button">
+        Read more
+        <i class="fa fa-angle-down" aria-hidden="true"></i>
+    </button>
+
+    {% if comment.username == request.user.username %}
+        {% include 'components/comment_form.html' %}
+    {% endif %}
 </div>

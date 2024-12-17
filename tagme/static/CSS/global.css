@@ -31,7 +31,66 @@ b, strong {
 }
 
 /**********************************************************************************************************************/
+/* ANIMATIONS */
+@keyframes bobbing-up {
+    0%   {transform: translate(0, 0);}
+    50%  {transform: translate(0, -3px);}
+    100% {transform: translate(0, 0);}
+}
+
+@keyframes bobbing-down {
+    0%   {transform: translate(0, 0);}
+    50%  {transform: translate(0, 3px);}
+    100% {transform: translate(0, 0);}
+}
+
+@keyframes bobbing-left {
+    0%   {transform: translate(0, 0);}
+    50%  {transform: translate(-5px, 0);}
+    100% {transform: translate(0, 0);}
+}
+
+@keyframes bobbing-right {
+    0%   {transform: translate(0, 0);}
+    50%  {transform: translate(5px, 0);}
+    100% {transform: translate(0, 0);}
+}
+
+/**********************************************************************************************************************/
 /* MISC. BUTTONS */
+.read-more-button {
+    width: fit-content;
+    padding: 5px 20px;
+    margin-top: 5px;
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: #537A00;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    display: none; /* Hidden by default */
+    & i {
+        font-size: 1.4rem;
+        color: #537A00;
+    }
+}
+
+.read-more-button:hover {
+    color: #3B6000;
+    & i.fa-angle-down {
+        color: #3B6000;
+        animation-name: bobbing-down;
+        animation-duration: 1.1s;
+        animation-iteration-count: infinite;
+    }
+
+    & i.fa-angle-up {
+        color: #3B6000;
+        animation-name: bobbing-up;
+        animation-duration: 1.1s;
+        animation-iteration-count: infinite;
+    }
+}
 
 .pin-item-button { /* Partially overwritten in search_results.css */
     width: 100%;

@@ -1,0 +1,8 @@
+<form id="comment-form" method="POST">
+    {% csrf_token %}
+    {{ forms.comment_form }} <!-- The textarea widget -->
+    <div id="comment-buttons-row">
+        <button id="cancel-comment-button">Cancel</button>
+        <button id="post-comment-button">Post</button>
+    </div>
+</form>

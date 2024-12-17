@@ -58,7 +58,7 @@ def get_all_tags_for_item(item_id):
     return None
 
 
-def get_all_comments_for_item(item_id):
+def get_all_comments_for_item(item_id, user=None, exclude_request_user=False):
     """Function for getting all comments for a particular item_id"""
     item = Item.objects.filter(item_id=item_id)
     if item.exists():
@@ -68,12 +68,16 @@ def get_all_comments_for_item(item_id):
                                    .exclude(comment__isnull=True)
                                    .order_by('comment_datetime'))
 
+        # Exclude the comment of the user making the request
+        if exclude_request_user and user is not None and user.is_authenticated:
+            comment_contributions = comment_contributions.exclude(user=user)
+
         # Return an array of dicts, each dict contains:
         # comment's text, comment_datetime, contributing user's username, contributing user's equipped titles
         comments = []
         for contrib in comment_contributions:
             equipped_1, equipped_2 = get_equipped_titles(contrib.user)
-            comment = {'text': contrib.comment,
+            comment = {'paragraphs': contrib.comment.split('\r\n\r\n'),
                        'datetime': localtime(contrib.comment_datetime).strftime('%B %m, %Y %H:%M %p'),
                        'username': contrib.user.username,
                        'equipped_title_1': equipped_1,
@@ -101,6 +105,23 @@ def get_user_tags_for_item(user, item_id):
 
         return user_public_tags, user_private_tags
     return None, None
+
+
+def get_user_comment_for_item(user, item_id):
+    """Function for retrieving a user's comment for a particular item"""
+    if not user.is_authenticated:
+        raise PermissionDenied("User must be logged in")
+
+    user_contrib = UserContribution.objects.filter(user_id=user.id, item_id=item_id)
+    if user_contrib.exists():
+        equipped_1, equipped_2 = get_equipped_titles(user)
+        comment = {'paragraphs': user_contrib[0].comment.split('\r\n\r\n'),
+                   'datetime': localtime(user_contrib[0].comment_datetime).strftime('%B %m, %Y %H:%M %p'),
+                   'username': user.username,
+                   'equipped_title_1': equipped_1,
+                   'equipped_title_2': equipped_2}
+        return comment
+    return None
 
 
 def get_user_points_for_item(user, item_id):

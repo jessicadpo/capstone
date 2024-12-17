@@ -35,6 +35,12 @@ class EquipForm(forms.Form):
                                    widget=forms.Select(attrs={'id': 'equip-slot-input'}))
 
 
+class CommentForm(forms.Form):
+    """ Form for adding/editing a comment """
+    comment = forms.CharField(label=False, min_length=1, strip=True, widget=forms.Textarea(
+        attrs={'id': 'user-comment-input', 'placeholder': 'Add comment...', 'rows': '0', 'cols': '0'}))
+
+
 class TagsForm(forms.Form):
     """ Form for add/edit tags modal """
     # Need to use a CharField instead of BooleanField because

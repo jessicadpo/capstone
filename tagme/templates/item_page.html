@@ -53,7 +53,10 @@
                         {% endfor %}
                     </div>
                 </div>
-                <button id="column2-read-more-button">Read more <i class="fa fa-angle-down" aria-hidden="true"></i></button>
+                <button id="column2-read-more-button" class="read-more-button">
+                    Read more
+                    <i class="fa fa-angle-down" aria-hidden="true"></i>
+                </button>
             </div>
 
             <div class="column3">
@@ -83,8 +86,16 @@
         <div id="comments-section">
             <h1>Comments</h1>
             <div id="comments-pane">
-                <textarea placeholder="Add comment..."></textarea>
+                <!-- Comment form + The user's comment (if there is one) (always put user's own comment at top) -->
+                {% if item.user_comment != null %}
+                    {% with item.user_comment as comment %}
+                        {% include 'components/user_comment.html' %}
+                    {% endwith %}
+                {% else %}
+                    {% include 'components/comment_form.html' %}
+                {% endif %}
 
+                <!-- All other comments -->
                 {% for comment in item.comments %}
                     {% include 'components/user_comment.html' %}
                 {% endfor %}
@@ -134,6 +145,7 @@
     <script type="text/javascript" src="../../static/JavaScript/report_modal.js"></script>
     <script type="text/javascript" src="../../static/JavaScript/tag_modal.js"></script>
     <script type="text/javascript" src="../../static/JavaScript/new_reward_modal.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/user_comment.js"></script>
     <script type="text/javascript" src="../../static/JavaScript/item_page.js"></script>
 </body>
 </html>

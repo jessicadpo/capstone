@@ -17,30 +17,6 @@ h1 {
     font-weight: 500;
 }
 
-@keyframes bobbing-up {
-    0%   {transform: translate(0, 0);}
-    50%  {transform: translate(0, -3px);}
-    100% {transform: translate(0, 0);}
-}
-
-@keyframes bobbing-down {
-    0%   {transform: translate(0, 0);}
-    50%  {transform: translate(0, 3px);}
-    100% {transform: translate(0, 0);}
-}
-
-@keyframes bobbing-left {
-    0%   {transform: translate(0, 0);}
-    50%  {transform: translate(-5px, 0);}
-    100% {transform: translate(0, 0);}
-}
-
-@keyframes bobbing-right {
-    0%   {transform: translate(0, 0);}
-    50%  {transform: translate(5px, 0);}
-    100% {transform: translate(0, 0);}
-}
-
 /* -------------------------------------------------------------------------------------------------------------------*/
 /* BACK LINK */
 #back-link {
@@ -190,40 +166,6 @@ h1 {
     }
 }
 
-#column2-read-more-button {
-    width: fit-content;
-    padding: 5px 20px;
-    margin-top: 5px;
-    font-size: 1.3rem;
-    font-weight: 500;
-    color: #537A00;
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    display: none; /* Hidden by default */
-    & i {
-        font-size: 1.4rem;
-        color: #537A00;
-    }
-}
-
-#column2-read-more-button:hover {
-    color: #3B6000;
-    & i.fa-angle-down {
-        color: #3B6000;
-        animation-name: bobbing-down;
-        animation-duration: 1.1s;
-        animation-iteration-count: infinite;
-    }
-
-    & i.fa-angle-up {
-        color: #3B6000;
-        animation-name: bobbing-up;
-        animation-duration: 1.1s;
-        animation-iteration-count: infinite;
-    }
-}
-
 /* -----------COLUMN 3-------------*/
 .column3 {
     max-height: 100%;
@@ -321,17 +263,30 @@ h1 {
 /* -------------------------------------------------------------------------------------------------------------------*/
 /* COMMENTS SECTION */
 #comments-section {
+    box-sizing: border-box;
     border-top: solid 1px #8A8A8A;
     display: flex;
     flex-direction: row; /* Main axis = Horizontal */
 }
 
 #comments-section h1 {
-    width: 20%;
+    box-sizing: border-box;
+    padding: 30px;
+    min-width: 20%;
+    max-width: 20%;
+    overflow: hidden;
+    text-overflow: ellipsis; /* TODO: Deal with overflowing text a different way? (diff. layout / etc. ?) */
 }
 
 #comments-pane {
+    box-sizing: border-box;
+    width: 80%;
     flex-grow: 1;
+    padding: 30px;
+
+    & > *:first-of-type {
+        padding-top: 0px; /* Remove the top-padding of the first comment/form in comments-pane */
+    }
 }
 
 /* -------------------------------------------------------------------------------------------------------------------*/

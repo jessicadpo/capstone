@@ -22,6 +22,13 @@ const reportedTagComponent = document.querySelector('#report-tag-dialog .tag-con
 
 let isReadingMore = false;
 
+function setMaxHeight() {
+    // Set max-height of column2-main-content based on height of Read More button
+    const readMoreButtonHeight = readMoreButton.offsetHeight;
+    const maxHeight = 510 - readMoreButtonHeight; // 510px is the height of column-3
+    column2MainContent.style.maxHeight = maxHeight + 'px';
+}
+
 function toggleReadMore() {
     if (isReadingMore) {
         // If user is reading more --> button should say "Read Less"
@@ -39,13 +46,6 @@ function toggleReadMore() {
     }
 }
 
-function setMaxHeight() {
-    // Set max-height of column2-main-content based on height of Read More button
-    const readMoreButtonHeight = readMoreButton.offsetHeight;
-    const maxHeight = 510 - readMoreButtonHeight; // Set the max-height of div1 to 510px minus the sibling's height
-    column2MainContent.style.maxHeight = maxHeight + 'px';
-}
-
 function checkColumn2Overflow() {
     // If column 2 is overflowing on page load or resize --> show "Read More" button
     let thresholdHeight = Math.ceil(parseFloat(window.getComputedStyle(entireItemSection).minHeight));
@@ -54,7 +54,7 @@ function checkColumn2Overflow() {
         readMoreButton.style.display = 'inline-block';
         isReadingMore = false;
         toggleReadMore();
-    } else { // If column 2 is overflowing --> don't need to show "Read More" button
+    } else { // If column 2 is NOT overflowing --> don't need to show "Read More" button
         readMoreButton.style.display = 'none';
         isReadingMore = true; // Is technically "reading more" because everything is visible (no overflow)
         toggleReadMore();
