@@ -354,11 +354,13 @@ def query_loc_gateway(search_string, requested_page_number, type_indicator):
 def _query_loc_api(search_string, requested_page_number, type_indicator):
     """Actual query to LOC API (PRIVATE FUNCTION)"""
 
+    # setting variables for looping page-filling
     items_per_page = 15
     current_results = []
     api_page_number = int(requested_page_number)
     fetched_items = 0
 
+    # setting query parameters
     params = {
         "q": search_string,
         "fa": "partof:catalog",
@@ -368,16 +370,15 @@ def _query_loc_api(search_string, requested_page_number, type_indicator):
     }
     query = "?"
 
+    # building api query
     for param_key in params.keys(): # pylint: disable=consider-iterating-dictionary
         query += param_key + "=" + quote(str(params.get(param_key)), safe=":") + "&"  # Do not encode ":" of "fa" params
     query = query[:-1]  # Remove ending "&" from query
     query_url = quote(query, safe=":?=&%")
-
     endpoint = "https://www.loc.gov/books/"  # API rate limit = 20 queries per 10 seconds && 80 queries per 1 minute
 
-
-
     try:
+        # loop to make sure each page of results is full after filtering
         while len(current_results) < items_per_page:
             response = requests.get(endpoint + query_url)
             response.raise_for_status()  # Raise an error if the request fails
@@ -394,7 +395,7 @@ def _query_loc_api(search_string, requested_page_number, type_indicator):
                 if item.get('number_lccn') is None:
                     continue
 
-                #filter items according to search type (if necessary)
+                #filter items according to search type (if required)
                 if type_indicator == "Author":
                     contributors = item.get('contributor', []) #DEBUGGING: Returns nothing?
                     if not any(is_string_match(search_string, contributor) for contributor in contributors):
@@ -410,21 +411,23 @@ def _query_loc_api(search_string, requested_page_number, type_indicator):
                     if not any(is_string_match(search_string, title) for title in title):
                         # print("Title non-match"),
                         continue
-                # TODO: is_string_match currently checks if *any* of the search is in *any* of the field data. not optimal
+                # TODO: is_string_match currently checks if *any* of the search is in *any* of the field data.
+                #  this is not optimal
+
                 # TODO: Make this set of if statements more efficient (definitely possible)
 
+                # getting current item data from returned json for display
                 item_id = item.get('number_lccn')[0]
                 title = decode_unicode(strip_punctuation(item.get("item").get('title', 'No title available')))
                 publication_date = decode_unicode(item.get('date', 'No publication date available'))
                 description = decode_unicode('\n'.join(item.get('description', 'No description available')))
-
                 authors = item.get('contributor', ['Unknown'])
                 for i in range(len(authors)):
                     authors[i] = decode_unicode(to_firstname_lastname(authors[i]))
-
                 covers = item.get('image_url', None)
                 cover = covers[0] if covers else None
 
+                # adding item data to search results list to be displayed
                 current_results.append({
                     'item_id': item_id,
                     'title': to_title_case(title),
@@ -434,9 +437,11 @@ def _query_loc_api(search_string, requested_page_number, type_indicator):
                     'cover': cover,
                 })
 
+            # quit if finished looping to fill page
             if fetched_items >= data.get("pagination", {}).get("total", 0):
                 break
 
+            # move on to next api page to gather more results if not finished
             api_page_number += 1
             fetched_items += len(data.get("results", []))
 
