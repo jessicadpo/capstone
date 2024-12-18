@@ -7,6 +7,7 @@ main {
 /* -------------------------------------------------------------------------------------------------------------------*/
 /* SIDE BAR (SYNONYMOUS & RELATED TAGS) */
 #sidebar {
+    box-sizing: border-box;
     height: 100%;
     width: 15%;
     padding: 1vh 1vw;
@@ -21,11 +22,10 @@ main {
     }
 }
 
-
-
 /* -------------------------------------------------------------------------------------------------------------------*/
 /* RESULTS SECTION */
 #results-section {
+    box-sizing: border-box;
     height: 100%;
     width: 85%;
     padding: 1vh 1vw;
