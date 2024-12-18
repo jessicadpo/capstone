@@ -359,11 +359,32 @@ class SearchResults:
         return False
 
     @classmethod
-    def paginate_results(cls, relevant_results):
-        """
-        Organize LOC API results in a Django Paginator object
-        when all relevant search results (across all pages) are known
-        """
+    def paginate_results(cls, search_string, filter_field, params):
+        """Organize all relevant LOC API results in first 500 results in a Django Paginator object"""
+        relevant_results = []
+        page_to_query = 1
+        page_contains_relevant_results = False
+        query_count = 0  # REMINDER: API rate limit --> 20 queries per 10 seconds
+
+        results_on_page, hit_count = _query_loc_api(params, page_to_query, 50)
+        query_count += 1
+        for result in results_on_page:
+            if search_string.lower() in result.get(filter_field).lower():
+                page_contains_relevant_results = True
+                relevant_results.append(result)
+
+        # TODO: Investigate use of httpx and asyncio to speed this up
+        while page_contains_relevant_results and query_count < 10:  # Max. 500 results possible
+            page_to_query = str(int(page_to_query) + 1)
+            results_on_next_page, hit_count_next = _query_loc_api(params, page_to_query, 50)
+            page_contains_relevant_results = False  # Reset since queried a new page
+            query_count += 1
+
+            for result in results_on_next_page:
+                if search_string.lower() in result.get(filter_field).lower():
+                    page_contains_relevant_results = True
+                    relevant_results.append(result)
+
         cls.pagination = Paginator(relevant_results, 15)
 
     @classmethod
@@ -407,32 +428,8 @@ def query_loc_title(search_string):
 
     # Do not need to redo query if this is the same search, just requesting a different page
     if SearchResults.is_new_search(search_string, ValidSearchTypes.TITLE.value):
-        relevant_results = []
-        page_to_query = 1
-        page_contains_relevant_results = False
-        query_count = 0  # REMINDER: API rate limit --> 20 queries per 10 seconds
-
         params = {"q": search_string}
-        results_on_page, hit_count = _query_loc_api(params, page_to_query, 50)
-        query_count += 1
-
-        for result in results_on_page:
-            if search_string.lower() in result.get('title').lower():
-                page_contains_relevant_results = True
-                relevant_results.append(result)
-
-        # TODO: Investigate use of httpx and asyncio to speed this up
-        while page_contains_relevant_results and query_count < 10:  # Max. 500 results possible
-            page_to_query = str(int(page_to_query) + 1)
-            results_on_next_page, hit_count_next = _query_loc_api(params, page_to_query, 50)
-            page_contains_relevant_results = False  # Reset since queried a new page
-            query_count += 1
-
-            for result in results_on_next_page:
-                if search_string.lower() in result.get('title').lower():
-                    page_contains_relevant_results = True
-                    relevant_results.append(result)
-        SearchResults.paginate_results(relevant_results)
+        SearchResults.paginate_results(search_string, 'title', params)
     return SearchResults.pagination
 
 
