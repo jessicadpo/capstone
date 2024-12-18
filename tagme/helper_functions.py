@@ -2,7 +2,6 @@
 import html
 import re
 import string
-from django.core.paginator import Paginator
 
 
 def decode_unicode(text_string):
@@ -55,5 +54,3 @@ def to_firstname_lastname(name):
 def reward_to_dict_format(reward):
     """Convert a Reward object to a front-end readable dict format"""
     return {'title': reward.title, 'colour': reward.hex_colour, 'points_required': reward.points_required}
-
-

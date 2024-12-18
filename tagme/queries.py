@@ -10,6 +10,7 @@ from django.db.models import Count
 from django.contrib.auth import PermissionDenied
 from django.db.models.signals import post_save, post_delete, post_migrate
 from django.dispatch import receiver
+from django.core.paginator import Paginator
 import requests
 from .apps import TagMeConfig
 from .helper_functions import *
@@ -344,12 +345,14 @@ def query_datamuse_related_words(word):
 ########################################################################################################################
 # LOC API QUERIES
 class SearchResults:
+    """Class for converting (& storing) LOC API results into a Django Paginator object"""
     search_string = ""
     search_type = ""
     pagination = None
 
     @classmethod
     def is_new_search(cls, search_string, search_type):
+        """Check if new search is being performed + Reset SearchResults class variables if yes"""
         if search_string != cls.search_string or search_type != cls.search_type:
             # Reset this class when a new search is performed
             cls.search_string = search_string
@@ -366,7 +369,7 @@ class SearchResults:
         page_contains_relevant_results = False
         query_count = 0  # REMINDER: API rate limit --> 20 queries per 10 seconds
 
-        results_on_page, hit_count = _query_loc_api(params, page_to_query, 50)
+        results_on_page = _query_loc_api(params, page_to_query, 50)[0]
         query_count += 1
         for result in results_on_page:
             if search_string.lower() in result.get(filter_field).lower():
@@ -376,7 +379,7 @@ class SearchResults:
         # TODO: Investigate use of httpx and asyncio to speed this up
         while page_contains_relevant_results and query_count < 10:  # Max. 500 results possible
             page_to_query = str(int(page_to_query) + 1)
-            results_on_next_page, hit_count_next = _query_loc_api(params, page_to_query, 50)
+            results_on_next_page = _query_loc_api(params, page_to_query, 50)[0]
             page_contains_relevant_results = False  # Reset since queried a new page
             query_count += 1
 
@@ -394,7 +397,7 @@ class SearchResults:
         (only tracks the search results on the requested page)
         """
         full_size_results_list = [None] * (total_hit_count - len(results_on_page))
-        insert_index = ((int(page_number_to_populate) - 1) * 15)
+        insert_index = (int(page_number_to_populate) - 1) * 15
         for result in results_on_page:
             full_size_results_list.insert(insert_index, result)
             insert_index += 1
@@ -404,6 +407,7 @@ class SearchResults:
 def is_safe_query(search_string):
     """Perform input cleaning here so people can't inject API manipulation"""
     # TODO: Perform input cleaning here so people can't inject API manipulation
+    print(f"Placeholder code - {search_string}")
     return True
 
 
@@ -463,7 +467,7 @@ def _query_loc_api(params, requested_page_number, per_page=15):
     else:
         params["fa"] = "partof:catalog"
     params["fo"] = "json"
-    params["c"] = per_page  # 15 results per query (for faster loading) (max is 1000, but is slow even at a 100)
+    params["c"] = per_page  # Default: 15 results per query (for faster loading) (max is 1000, but is slow even at a 100)
     params["sp"] = requested_page_number
 
     query = "?"

@@ -24,6 +24,7 @@ REWARD_LIST = {
 
 
 class ValidSearchTypes(enum.Enum):
+    """Enum class for the types of searches that can be performed by users"""
     KEYWORD = "Keyword"
     TAG = "Tag"
     TITLE = "Title"
