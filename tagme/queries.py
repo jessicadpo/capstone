@@ -356,7 +356,7 @@ def _query_loc_api(search_string, requested_page_number, type_indicator):
 
     # setting variables for looping page-filling
     items_per_page = 15
-    current_results = []
+    unique_items = []
     api_page_number = int(requested_page_number)
     fetched_items = 0
 
@@ -379,7 +379,7 @@ def _query_loc_api(search_string, requested_page_number, type_indicator):
 
     try:
         # loop to make sure each page of results is full after filtering
-        while len(current_results) < items_per_page:
+        while len(unique_items) < items_per_page:
             response = requests.get(endpoint + query_url)
             response.raise_for_status()  # Raise an error if the request fails
             data = response.json()  # Parse the JSON response
@@ -388,10 +388,14 @@ def _query_loc_api(search_string, requested_page_number, type_indicator):
             # print("API Response:", response.json())
 
             for item in data.get("results", []):
-                if len(current_results) >= items_per_page:
+                if len(unique_items) >= items_per_page:
                     break
 
-                #filter items without a catalogue number
+                # filter out duplicate items
+                if item.get('number_lccn')[0] in unique_items:
+                    continue
+
+                # filter items without a catalogue number
                 if item.get('number_lccn') is None:
                     continue
 
