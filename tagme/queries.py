@@ -353,11 +353,17 @@ def query_loc_gateway(search_string, requested_page_number, type_indicator):
 
 def _query_loc_api(search_string, requested_page_number, type_indicator):
     """Actual query to LOC API (PRIVATE FUNCTION)"""
+
+    items_per_page = 15
+    current_results = []
+    api_page_number = int(requested_page_number)
+    fetched_items = 0
+
     params = {
         "q": search_string,
         "fa": "partof:catalog",
         "fo": "json",
-        "c":  15, # Return max. 15 items per query (makes results load faster)
+        "c":  items_per_page, # Return max. 15 items per query (makes results load faster)
         "sp": requested_page_number
     }
     query = "?"
@@ -368,59 +374,73 @@ def _query_loc_api(search_string, requested_page_number, type_indicator):
     query_url = quote(query, safe=":?=&%")
 
     endpoint = "https://www.loc.gov/books/"  # API rate limit = 20 queries per 10 seconds && 80 queries per 1 minute
+
+
+
     try:
-        response = requests.get(endpoint + query_url)
-        response.raise_for_status()  # Raise an error if the request fails
-        data = response.json()  # Parse the JSON response
+        while len(current_results) < items_per_page:
+            response = requests.get(endpoint + query_url)
+            response.raise_for_status()  # Raise an error if the request fails
+            data = response.json()  # Parse the JSON response
 
-        print("queryURL:", endpoint + query_url)    # for debugging
-        # print("API Response:", response.json())
+            print("queryURL:", endpoint + query_url)    # for debugging
+            # print("API Response:", response.json())
 
-        results_on_page = []
-        for item in data.get("results", []):
-            if item.get('number_lccn') is None:
-                continue
+            for item in data.get("results", []):
+                if len(current_results) >= items_per_page:
+                    break
 
-            if type_indicator == "Author":
-                contributors = item.get('contributor', []) #DEBUGGING: Returns nothing?
-                if not any(is_string_match(search_string, contributor) for contributor in contributors):
-                    # print("Contributor non-match"),
+                #filter items without a catalogue number
+                if item.get('number_lccn') is None:
                     continue
-            if type_indicator == "Subject":
-                subject = item.get('subject', [])
-                if not any(is_string_match(search_string, subject) for subject in subject):
-                    # print("Subject non-match"),
-                    continue
-            if type_indicator == "Title":
-                title = item.get('title', [])
-                if not any(is_string_match(search_string, title) for title in title):
-                    # print("Title non-match"),
-                    continue
-            # TODO: is_string_match currently checks if *any* of the search is in *any* of the field data. not optimal
-            # TODO: Make this set of if statements more efficient (definitely possible)
 
-            item_id = item.get('number_lccn')[0]
-            title = decode_unicode(strip_punctuation(item.get("item").get('title', 'No title available')))
-            publication_date = decode_unicode(item.get('date', 'No publication date available'))
-            description = decode_unicode('\n'.join(item.get('description', 'No description available')))
+                #filter items according to search type (if necessary)
+                if type_indicator == "Author":
+                    contributors = item.get('contributor', []) #DEBUGGING: Returns nothing?
+                    if not any(is_string_match(search_string, contributor) for contributor in contributors):
+                        # print("Contributor non-match"),
+                        continue
+                if type_indicator == "Subject":
+                    subject = item.get('subject', [])
+                    if not any(is_string_match(search_string, subject) for subject in subject):
+                        # print("Subject non-match"),
+                        continue
+                if type_indicator == "Title":
+                    title = item.get('title', [])
+                    if not any(is_string_match(search_string, title) for title in title):
+                        # print("Title non-match"),
+                        continue
+                # TODO: is_string_match currently checks if *any* of the search is in *any* of the field data. not optimal
+                # TODO: Make this set of if statements more efficient (definitely possible)
 
-            authors = item.get('contributor', ['Unknown'])
-            for i in range(len(authors)):
-                authors[i] = decode_unicode(to_firstname_lastname(authors[i]))
+                item_id = item.get('number_lccn')[0]
+                title = decode_unicode(strip_punctuation(item.get("item").get('title', 'No title available')))
+                publication_date = decode_unicode(item.get('date', 'No publication date available'))
+                description = decode_unicode('\n'.join(item.get('description', 'No description available')))
 
-            covers = item.get('image_url', None)
-            cover = covers[0] if covers else None
+                authors = item.get('contributor', ['Unknown'])
+                for i in range(len(authors)):
+                    authors[i] = decode_unicode(to_firstname_lastname(authors[i]))
 
-            results_on_page.append({
-                'item_id': item_id,
-                'title': to_title_case(title),
-                'authors': to_title_case('; '.join(authors)),  # Combine authors into a single string
-                'publication_date': publication_date,
-                'description': description,
-                'cover': cover,
-            })
+                covers = item.get('image_url', None)
+                cover = covers[0] if covers else None
 
-        return results_on_page, data.get("pagination")
+                current_results.append({
+                    'item_id': item_id,
+                    'title': to_title_case(title),
+                    'authors': to_title_case('; '.join(authors)),  # Combine authors into a single string
+                    'publication_date': publication_date,
+                    'description': description,
+                    'cover': cover,
+                })
+
+            if fetched_items >= data.get("pagination", {}).get("total", 0):
+                break
+
+            api_page_number += 1
+            fetched_items += len(data.get("results", []))
+
+        return current_results, data.get("pagination")
 
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
