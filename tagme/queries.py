@@ -360,7 +360,7 @@ class SearchResults:
 
     @classmethod
     def paginate_results(cls, search_string, filter_field, params):
-        """Organize all relevant LOC API results in first 500 results in a Django Paginator object"""
+        """Organize all relevant LOC API results in the first 500 to a Django Paginator object"""
         relevant_results = []
         page_to_query = 1
         page_contains_relevant_results = False
@@ -391,7 +391,7 @@ class SearchResults:
     def insert_results(cls, results_on_page, total_hit_count, page_number_to_populate):
         """
         Organize LOC API results in a Django Paginator object
-        when only know the search results on the requested page
+        (only tracks the search results on the requested page)
         """
         full_size_results_list = [None] * (total_hit_count - len(results_on_page))
         insert_index = ((int(page_number_to_populate) - 1) * 15)
@@ -411,6 +411,7 @@ def query_loc_keyword(search_string, requested_page_number):
     """Keyword search of LOC API, in a Django Pagination object"""
     if not is_safe_query(search_string):
         return None
+    SearchResults.is_new_search(search_string, ValidSearchTypes.KEYWORD.value)  # So can properly detect new searches later
     params = {"q": search_string}  # Default parameters set in _query_loc_api() function
     results_on_page, hit_count = _query_loc_api(params, requested_page_number)
     SearchResults.insert_results(results_on_page, hit_count, requested_page_number)
@@ -437,6 +438,7 @@ def query_loc_author(search_string, requested_page_number):
     """Author search of LOC API, in a Django Pagination object"""
     if not is_safe_query(search_string):
         return None
+    SearchResults.is_new_search(search_string, ValidSearchTypes.AUTHOR.value)  # So can properly detect new searches later
     params = {"fa": "contributor:" + search_string}
     results_on_page, hit_count = _query_loc_api(params, requested_page_number)
     SearchResults.insert_results(results_on_page, hit_count, requested_page_number)
@@ -447,6 +449,7 @@ def query_loc_subject(search_string, requested_page_number):
     """Subject search of LOC API, in a Django Pagination object"""
     if not is_safe_query(search_string):
         return None
+    SearchResults.is_new_search(search_string, ValidSearchTypes.SUBJECT.value)  # So can properly detect new searches later
     params = {"fa": "subject:" + search_string}
     results_on_page, hit_count = _query_loc_api(params, requested_page_number)
     SearchResults.insert_results(results_on_page, hit_count, requested_page_number)
