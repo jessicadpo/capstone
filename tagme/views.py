@@ -218,11 +218,32 @@ def process_tags_form(request, score_data):
 
 
 def process_equip_form(request):
-    """Function for processing "Equip Title" form"""
+    """Function for processing \"Equip Title\" form"""
     equip_form = EquipForm(request.POST)
     if equip_form.is_valid():
-        # TODO: Call Django query for equipping a title here
-        print('placeholder code')
+        title_to_equip = equip_form.cleaned_data.get('title_to_equip')
+        slot = equip_form.cleaned_data.get('slot')  # Can be '1' or '2'
+
+        if not title_to_equip or slot not in ['1', '2']:
+            return JsonResponse({'error': 'Invalid input'}, status=400)
+
+        user_profile = get_object_or_404(UserProfile, user=request.user)
+        reward = get_object_or_404(Reward, title=title_to_equip)
+
+        # Check if the user has enough points to equip this title
+        if reward.points_required > user_profile.points:
+            return JsonResponse({'error': 'Insufficient points to equip this title'}, status=403)
+
+        # Equip the title in the specified slot
+        if slot == '1':
+            user_profile.equipped_title_1 = reward
+        elif slot == '2':
+            user_profile.equipped_title_2 = reward
+
+        user_profile.save()
+        return JsonResponse({'success': f'Title \"{title_to_equip}\" equipped in slot {slot}.'})
+
+    return JsonResponse({'error': 'Invalid form data'}, status=400)
 
 
 def process_report_form(request, item_id):
@@ -236,3 +257,26 @@ def process_comment_form(request, item_id):
     """Function for processing "Add Comment" form"""
     # TODO
     print(f'placeholder code{request, item_id}')
+
+
+
+
+def unequip_title(request):
+    """Function for unequipping a title."""
+    if request.method == 'POST':
+        slot = request.POST.get('slot')  # Can be '1' or '2'
+
+        if slot not in ['1', '2']:
+            return JsonResponse({'error': 'Invalid request'}, status=400)
+
+        user_profile = get_object_or_404(UserProfile, user=request.user)
+
+        # Unequip the title in the specified slot
+        if slot == '1':
+            user_profile.equipped_title_1 = None
+        elif slot == '2':
+            user_profile.equipped_title_2 = None
+
+        user_profile.save()
+        return JsonResponse({'success': f'Title unequipped from slot {slot}.'})
+

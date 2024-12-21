@@ -28,7 +28,7 @@ class EquipForm(forms.Form):
     """ Form for equipping a title """
     title_choices = list(Reward.objects.all().values_list('title', 'title'))  # pylint: disable=no-member
     title_choices.append(("Empty", "Empty"))
-    title_choices = tuple(title_choices)
+    title_choices = tuple(title_choices) 
     title_to_equip = forms.ChoiceField(label=False, choices=title_choices,
                                        required=True, widget=forms.Select(attrs={'id': 'title-to-equip-input'}))
     equip_slot = forms.ChoiceField(label=False, choices=(("1", "1"), ("2", "2")), required=True,

@@ -294,12 +294,12 @@ def set_reward_list(sender, **kwargs):  # pylint: disable=unused-argument
             points_required += 50
 
 
-# Automatically set global blacklist & rewards if database already exists (i.e., already migrated)
+'''"# Automatically set global blacklist & rewards if database already exists (i.e., already migrated)
 if "tagme_tag" in connection.introspection.table_names():
     set_global_blacklist(sender=TagMeConfig)
 
 if "tagme_reward" in connection.introspection.table_names():
-    set_reward_list(sender=TagMeConfig)
+    set_reward_list(sender=TagMeConfig) '''
 
 
 @receiver(post_save, sender=User)
