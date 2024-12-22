@@ -218,11 +218,10 @@ def process_tags_form(request, score_data):
 
 
 def process_equip_form(request):
-    """Function for processing "Equip Title" form"""
+    """Function for processing \"Equip Title\" form"""
     equip_form = EquipForm(request.POST)
     if equip_form.is_valid():
-        # TODO: Call Django query for equipping a title here
-        print('placeholder code')
+        set_equipped_title(request.user, equip_form)
 
 
 def process_report_form(request, item_id):

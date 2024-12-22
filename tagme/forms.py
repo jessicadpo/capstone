@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from django.core.validators import EMPTY_VALUES
+from django.db import connection
 from .models import Reward
 
 SEARCH_TYPES = (
@@ -26,11 +27,12 @@ class SearchForm(forms.Form):
 
 class EquipForm(forms.Form):
     """ Form for equipping a title """
-    title_choices = list(Reward.objects.all().values_list('title', 'title'))  # pylint: disable=no-member
-    title_choices.append(("Empty", "Empty"))
-    title_choices = tuple(title_choices)
-    title_to_equip = forms.ChoiceField(label=False, choices=title_choices,
-                                       required=True, widget=forms.Select(attrs={'id': 'title-to-equip-input'}))
+    if "tagme_reward" in connection.introspection.table_names():
+        title_choices = list(Reward.objects.all().values_list('title', 'title'))  # pylint: disable=no-member
+        title_choices.append(("Empty", "Empty"))
+        title_choices = tuple(title_choices)
+        title_to_equip = forms.ChoiceField(label=False, choices=title_choices,
+                                           required=True, widget=forms.Select(attrs={'id': 'title-to-equip-input'}))
     equip_slot = forms.ChoiceField(label=False, choices=(("1", "1"), ("2", "2")), required=True,
                                    widget=forms.Select(attrs={'id': 'equip-slot-input'}))
 
