@@ -391,7 +391,7 @@ def _query_loc_api(search_string, requested_page_number, type_indicator):
                 if len(current_results) >= items_per_page:
                     break
 
-                # filter items without a catalogue number
+                #filter items without a catalogue number
                 if item.get('number_lccn') is None:
                     continue
 
