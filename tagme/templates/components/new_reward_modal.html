@@ -5,7 +5,6 @@
 <div class="firework invisible"></div>
 
 <dialog id="new-reward-modal" class="modal">
-    <!-- TODO: Need to redesign to allow choosing of equip slot (1 or 2) + if 2 new rewards at the same time -->
     <div class="modal-content"> <!-- Need this because can't apply display=flex to <dialog> directly -->
         <h1>Congrats!</h1>
         <p>You've reached {{ score_data.user_points }} points and earned:</p>
@@ -32,7 +31,8 @@
 
         <div class="modal-footer">
             <button id="skip-equip-button" class="modal-footer-button">Not right now</button>
-            <button id="yes-equip-button" class="modal-footer-button" autofocus>Yes</button>
+            <button id="slot-1-equip-button" class="modal-footer-button" autofocus>Equip in Slot #1</button>
+            <button id="slot-2-equip-button" class="modal-footer-button">Equip in Slot #2</button>
         </div>
     </div>
 

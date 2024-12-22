@@ -241,6 +241,7 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
     font-weight: 400;
     border-radius: 10px;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 /**********************************************************************************************************************/

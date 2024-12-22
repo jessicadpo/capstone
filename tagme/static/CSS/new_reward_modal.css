@@ -52,21 +52,26 @@
 }
 
 #new-reward-modal .modal-footer { /* Overrides global.css */
-    gap: 25%;
+    gap: 30px;
+}
+
+#new-reward-modal .modal-footer-button { /* Overrides global.css */
+    white-space: nowrap;
+    width: fit-content;
+    min-width: fit-content;
+    padding: 10px;
 }
 
 #skip-equip-button {
     background: none;
     border: none;
-    white-space: nowrap;
-    width: fit-content;
 
     &:hover {
         text-decoration: underline;
     }
 }
 
-#yes-equip-button {
+#slot-1-equip-button, #slot-2-equip-button {
     border: solid 2px #537A00;
     color: white;
     background-color: #537A00;
@@ -76,7 +81,6 @@
         background-color: #3B6000;
     }
 }
-
 
 /**********************************************************************************************************************/
 /* FIREWORKS ANIMATION (from: https://alvaromontoro.com/blog/68002/creating-a-firework-effect-with-css) */
