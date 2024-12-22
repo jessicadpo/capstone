@@ -351,7 +351,7 @@ def query_loc_gateway(search_string, requested_page_number, type_indicator):
     return _query_loc_api(search_string, requested_page_number, type_indicator)
 
 
-def _query_loc_api(search_string, requested_page_number, type_indicator):
+def _query_loc_api(search_string, requested_page_number, type_indicator): # pylint: disable=too-many-branches
     """Actual query to LOC API (PRIVATE FUNCTION)"""
 
     # setting variables for looping page-filling
