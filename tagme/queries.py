@@ -369,73 +369,107 @@ def query_datamuse_related_words(word):
 ########################################################################################################################
 # LOC API QUERIES
 
-def query_loc_keyword(search_string, requested_page_number):
-    """Keyword search to LOC API"""
-    params = {
-        "q": search_string,  # Default parameters set in _query_loc_api() function
-    }
-    return _query_loc_api(params, requested_page_number)
+def query_loc_gateway(search_string, requested_page_number, type_indicator):
+    """Exists as medium between users and direct query to LOC API"""
+    # TODO: Perform input cleaning here so people can't inject API manipulation
+    return _query_loc_api(search_string, requested_page_number, type_indicator)
 
 
-def query_loc_title(search_string, requested_page_number):
-    """Title search to LOC API"""
-    print(f"TODO (placeholder code) {search_string} {requested_page_number}")
-
-
-def query_loc_author(search_string, requested_page_number):
-    """Author search to LOC API"""
-    print(f"TODO (placeholder code) {search_string} {requested_page_number}")
-
-
-def query_loc_subject(search_string, requested_page_number):
-    """Subject search to LOC API"""
-    print(f"TODO (placeholder code)) {search_string} {requested_page_number}")
-
-
-def _query_loc_api(params, requested_page_number):
+def _query_loc_api(search_string, requested_page_number, type_indicator): # pylint: disable=too-many-branches
     """Actual query to LOC API (PRIVATE FUNCTION)"""
-    params["fa"] = "partof:catalog"
-    params["fo"] = "json"
-    params["c"] = 15  # Return max. 15 items per query (makes results load faster)
-    params["sp"] = requested_page_number
 
+    # setting variables for looping page-filling
+    items_per_page = 15
+    current_results = []
+    api_page_number = int(requested_page_number)
+    fetched_items = 0
+
+    # setting query parameters
+    params = {
+        "q": search_string,
+        "fa": "partof:catalog",
+        "fo": "json",
+        "c":  items_per_page, # Return max. 15 items per query (makes results load faster)
+        "sp": requested_page_number
+    }
     query = "?"
-    for param_key in params.keys():
+
+    # building api query
+    for param_key in params.keys(): # pylint: disable=consider-iterating-dictionary
         query += param_key + "=" + quote(str(params.get(param_key)), safe=":") + "&"  # Do not encode ":" of "fa" params
     query = query[:-1]  # Remove ending "&" from query
     query_url = quote(query, safe=":?=&%")
-
     endpoint = "https://www.loc.gov/books/"  # API rate limit = 20 queries per 10 seconds && 80 queries per 1 minute
+
     try:
-        response = requests.get(endpoint + query_url)
-        response.raise_for_status()  # Raise an error if the request fails
-        data = response.json()  # Parse the JSON response
+        # loop to make sure each page of results is full after filtering
+        while len(current_results) < items_per_page:
+            response = requests.get(endpoint + query_url)
+            response.raise_for_status()  # Raise an error if the request fails
+            data = response.json()  # Parse the JSON response
 
-        results_on_page = []
-        for item in data.get("results", []):
+            print("queryURL:", endpoint + query_url)    # for debugging
+            # print("API Response:", response.json())
 
-            item_id = item.get('number_lccn')[0]
-            title = decode_unicode(strip_punctuation(item.get("item").get('title', 'No title available')))
-            publication_date = decode_unicode(item.get('date', 'No publication date available'))
-            description = decode_unicode('\n'.join(item.get('description', 'No description available')))
+            for item in data.get("results", []):
+                if len(current_results) >= items_per_page:
+                    break
 
-            authors = item.get('contributor', ['Unknown'])
-            for i in range(len(authors)):
-                authors[i] = decode_unicode(to_firstname_lastname(authors[i]))
+                #filter items without a catalogue number
+                if item.get('number_lccn') is None:
+                    continue
 
-            covers = item.get('image_url', None)
-            cover = covers[0] if covers else None
+                #filter items according to search type (if required)
+                if type_indicator == "Author":
+                    contributors = item.get('contributor', []) #DEBUGGING: Returns nothing?
+                    if not any(is_string_match(search_string, contributor) for contributor in contributors):
+                        # print("Contributor non-match"),
+                        continue
+                if type_indicator == "Subject":
+                    subject = item.get('subject', [])
+                    if not any(is_string_match(search_string, subject) for subject in subject):
+                        # print("Subject non-match"),
+                        continue
+                if type_indicator == "Title":
+                    title = item.get('title', [])
+                    if not any(is_string_match(search_string, title) for title in title):
+                        # print("Title non-match"),
+                        continue
+                # TODO: is_string_match currently checks if *any* of the search is in *any* of the field data.
+                #  this is not optimal
 
-            results_on_page.append({
-                'item_id': item_id,
-                'title': to_title_case(title),
-                'authors': to_title_case('; '.join(authors)),  # Combine authors into a single string
-                'publication_date': publication_date,
-                'description': description,
-                'cover': cover,
-            })
+                # TODO: Make this set of if statements more efficient (definitely possible)
 
-        return results_on_page, data.get("pagination")
+                # getting current item data from returned json for display
+                item_id = item.get('number_lccn')[0]
+                title = decode_unicode(strip_punctuation(item.get("item").get('title', 'No title available')))
+                publication_date = decode_unicode(item.get('date', 'No publication date available'))
+                description = decode_unicode('\n'.join(item.get('description', 'No description available')))
+                authors = item.get('contributor', ['Unknown'])
+                for i in range(len(authors)):
+                    authors[i] = decode_unicode(to_firstname_lastname(authors[i]))
+                covers = item.get('image_url', None)
+                cover = covers[0] if covers else None
+
+                # adding item data to search results list to be displayed
+                current_results.append({
+                    'item_id': item_id,
+                    'title': to_title_case(title),
+                    'authors': to_title_case('; '.join(authors)),  # Combine authors into a single string
+                    'publication_date': publication_date,
+                    'description': description,
+                    'cover': cover,
+                })
+
+            # quit if finished looping to fill page
+            if fetched_items >= data.get("pagination", {}).get("total", 0):
+                break
+
+            # move on to next api page to gather more results if not finished
+            api_page_number += 1
+            fetched_items += len(data.get("results", []))
+
+        return current_results, data.get("pagination")
 
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
