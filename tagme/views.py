@@ -18,8 +18,8 @@ def homepage(request):
 def signup_login(request):
     """View for Sign up/Login page"""
     page_forms = {}
-    if request.method != 'POST':
-        page_forms = {"signup_form": SignUpForm(), "login_form": LoginForm()}  # If request.method == 'GET'
+    if request.method == 'GET':
+        page_forms = {"signup_form": SignUpForm(), "login_form": LoginForm()}
 
     # NOTE: USERNAMES MUST BE UNIQUE
     elif request.method == 'POST' and ('signup-submit' in request.POST):
@@ -32,10 +32,10 @@ def signup_login(request):
             login(request, user)
 
             # Ensure next_url is safe or default to home page
-            next_url = request.POST.get('next', request.GET.get('next', '/'))
+            next_url = request.POST.get('referrer')
             parsed_url = urlparse(next_url)
-            if not parsed_url.netloc and is_valid_path(next_url):
-                return redirect(next_url)  # TODO: This isn't working
+            if parsed_url.netloc and is_valid_path(parsed_url.path):
+                return redirect(next_url)
             return redirect("/")
         page_forms = {"signup_form": signup_form, "login_form": LoginForm()}  # If login_form is invalid
 
@@ -48,10 +48,10 @@ def signup_login(request):
             login(request, user)
 
             # Ensure next_url is safe or default to home page
-            next_url = request.POST.get('next', request.GET.get('next', '/'))
+            next_url = request.POST.get('referrer')
             parsed_url = urlparse(next_url)
-            if not parsed_url.netloc and is_valid_path(next_url):
-                return redirect(next_url)  # TODO: This isn't working
+            if parsed_url.netloc and is_valid_path(parsed_url.path):
+                return redirect(next_url)
             return redirect("/")
         page_forms = {"signup_form": SignUpForm(), "login_form": login_form}  # If login_form is invalid
 
@@ -99,7 +99,8 @@ def logout_view(request):
 
 def about(request):
     """View for About page"""
-    return render(request, 'about.html')
+    page_forms = {"search_form": SearchForm()}
+    return render(request, 'about.html', {'forms': page_forms})
 
 
 def search_results(request, requested_page_number):
@@ -114,6 +115,7 @@ def search_results(request, requested_page_number):
     # If POST request for equipping a title
     elif request.method == "POST" and ('title_to_equip' in request.POST):
         #  Note: Page needs to reload if equipping a title from a search_results page (to update added tags, etc.)
+        # TODO: Check --> actually CAN return 204 if from search_results page? (tags already updated from previous post request?)
         process_equip_form(request)
 
     # TODO: Code for parsing AND/OR/NOT/*/? --> Investigate pyparsing & Shunting Yard algorithm
@@ -150,7 +152,7 @@ def search_results(request, requested_page_number):
     synonymous_tags = get_synonymous_tags(request.GET.get('search_string'))
     related_tags = get_related_tags(request.GET.get('search_string'))
 
-    # Store results in session # TODO: Double-check I did this for the "Return to Search Results" button in item page
+    # Store results in session
     request.session['results_on_page'] = {item['item_id']: item for item in results_on_page}
 
     return render(request, 'search_results.html', {
@@ -173,7 +175,8 @@ def item_page(request, item_id):
 
     # If POST request for equipping a title
     elif request.method == "POST" and ('title_to_equip' in request.POST):
-        #  Note: Page needs to reload if equipping a title from a search_results page (to update added tags, etc.)
+        # Note: Page needs to reload if equipping a title from an item page in case user has comment
+        # for whom the equipped_titles need to be updated
         process_equip_form(request)
 
     # If POST request for reporting a tag
@@ -184,15 +187,21 @@ def item_page(request, item_id):
     elif request.method == 'POST' and ('comment' in request.POST):
         process_comment_form(request, item_id)
 
-    page_forms = {"search_form": SearchForm(), "tags_form": TagsForm(), "report_form": ReportForm(), "equip_form": EquipForm()}
+    page_forms = {"search_form": SearchForm(),
+                  "tags_form": TagsForm(),
+                  "comment_form": CommentForm(),
+                  "report_form": ReportForm(),
+                  "equip_form": EquipForm()}
     results_on_search_page = request.session.get('results_on_page', {})  # Retrieve search results from the session
-    item_data = results_on_search_page.get(str(item_id))  # Get the specific item using the item ID
+    item_data = results_on_search_page.get(str(item_id))  # Get the specific item's LOC API data using the item ID
     item_data['tags'] = get_all_tags_for_item(item_id)
+    item_data['comments'] = get_all_comments_for_item(item_id, user=request.user, exclude_request_user=True)
 
     if request.user.is_authenticated:
         user_public_tags, user_private_tags = get_user_tags_for_item(request.user, item_id)
         item_data['user_public_tags'] = user_public_tags
         item_data['user_private_tags'] = user_private_tags
+        item_data['user_comment'] = get_user_comment_for_item(request.user, item_id)
         item_data['is_pinned'] = get_is_item_pinned(request.user, item_id)
         item_data['points_earned'] = get_user_points_for_item(request.user, item_data["item_id"])
 
@@ -233,5 +242,9 @@ def process_report_form(request, item_id):
 
 def process_comment_form(request, item_id):
     """Function for processing "Add Comment" form"""
-    # TODO
-    print(f'placeholder code{request, item_id}')
+    comment_form = CommentForm(request.POST)
+    if comment_form.is_valid():
+        if comment_form.cleaned_data.get("request_delete_comment"):
+            delete_user_comment_for_item(request.user, item_id)
+        else:
+            set_user_comment_for_item(request.user, item_id, comment_form.cleaned_data)

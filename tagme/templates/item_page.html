@@ -14,8 +14,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <link rel="stylesheet" href="../../static/CSS/global.css">
+    <link rel="stylesheet" href="../../static/CSS/report_modal.css">
     <link rel="stylesheet" href="../../static/CSS/tag_modal.css">
     <link rel="stylesheet" href="../../static/CSS/new_reward_modal.css">
+    <link rel="stylesheet" href="../../static/CSS/user_comment.css">
     <link rel="stylesheet" href="../../static/CSS/item_page.css">
 </head>
 
@@ -24,7 +26,10 @@
     {% include "components/new_reward_modal.html" %}
 
     <main id="main-content"> <!-- Need the main-content id for JavaScript -->
-        <a id="back-link" href="#" aria-label="Back to search results"><i class="fa fa-angle-left" aria-hidden="true"></i>Back to Search Results</a>
+        <a id="back-link" href="#" aria-label="Back to search results"> <!-- Link set via JavaScript -->
+            <i class="fa fa-angle-left" aria-hidden="true"></i>
+            Back to Search Results
+        </a>
 
         <!-- Need <div> result-item class for "Save Item" button JavaScript behaviour (tag_modal.js) -->
         <div id="item-info-section" class="result-item">
@@ -39,11 +44,22 @@
                     <p id="item-title" class="item-title"> {{ item.title }}</p>
                     <p id="item-authors">by <b>{{ item.authors }}</b></p>
                     <p id="item-pub-date">{{ item.publication_date }}</p>
-
-                    <h1 id="description-header">Description</h1>
+                    <h1>Description</h1>
                     <p id="item-description">{{ item.description }}</p>
+
+                    {% if item.subjects %}
+                        <h1>Subject Headings</h1>
+                        <div id="item-subject-headings">
+                            {% for subject in item.subjects %}
+                                <a href="#" class="subject-heading-link">{{ subject }}</a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
-                <button id="column2-read-more-button">Read more <i class="fa fa-angle-down" aria-hidden="true"></i></button>
+                <button id="column2-read-more-button" class="read-more-button">
+                    Read more
+                    <i class="fa fa-angle-down" aria-hidden="true"></i>
+                </button>
             </div>
 
             <div class="column3">
@@ -73,22 +89,21 @@
         <div id="comments-section">
             <h1>Comments</h1>
             <div id="comments-pane">
-                <textarea placeholder="Add comment..."></textarea>
+                <!-- Comment form + The user's comment (if there is one) (always put user's own comment at top) -->
+                {% if item.user_comment != null %}
+                    {% with item.user_comment as comment %}
+                        {% include 'components/user_comment.html' %}
+                    {% endwith %}
+                {% else %}
+                    {% include 'components/comment_form.html' %}
+                {% endif %}
 
-                <!-- TODO: For loop for each comment on current page -->
-                <div class="comment">
-                    <div class="comment-header">
-                        <p>Username</p>
-                        <p><i class="fa fa-star" aria-hidden="true"></i>Reward Title 1</p>
-                        <p><i class="fa fa-star" aria-hidden="true"></i>Reward Title 2</p>
-                        <button><i class="fa fa-pencil-square-o" aria-hidden="true"></i>Edit comment</button>
-                    </div>
-                    <p>Date</p>
-                    <p>Comment</p>
-                    <button>Read more <i class="fa fa-angle-down" aria-hidden="true"></i></button>
-                </div>
+                <!-- All other comments -->
+                {% for comment in item.comments %}
+                    {% include 'components/user_comment.html' %}
+                {% endfor %}
 
-                <p>1 to 15 of 999,999,999 comments</p>
+                <!--<p>1 to 15 of 999,999,999 comments</p>-->
                 <!-- TODO: Paste similar pagination as in search results page -->
             </div>
         </div>
@@ -122,34 +137,7 @@
         </div>
     </aside>
 
-    <dialog id="report-tag-dialog">
-        <form id="report-tag-form" method="POST">
-            <div class="header-with-x-button">
-                <h1>Report Tag</h1>
-                <button formmethod="dialog" id="close-report-modal-button" class="close-x-button" aria-label="Close Report Tag form">✖</button>
-            </div>
-
-            {% include "components/tag.html" %}
-
-            <h2>What is wrong with this tag?</h2>
-            {% csrf_token %}
-            {% for field in forms.report_form %}
-                <div>
-                    {{ field }}
-                    {% if field.label != False %}
-                        <label for="{{ field.id_for_label }}">
-                            <span class="fake-checkbox"></span> <!-- Because actual checkboxes can't be styled as easily -->
-                            {{ field.label }}
-                        </label>
-                    {% endif %}
-                </div>
-            {% endfor %}
-            <div id="report-form-footer">
-                <button id="cancel-tag-report-button" class="form-footer-button" formmethod="dialog">Cancel</button>
-                <input id="submit-tag-report-button" class="form-footer-button" type="submit" value="Report">
-            </div>
-        </form>
-    </dialog>
+    {% include "components/report_modal.html" %}
 
     {% include "components/tag_modal.html" %}
 
@@ -157,8 +145,10 @@
 
     <!-- JavaScript -->
     <script type="text/javascript" src="../../static/JavaScript/global.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/report_modal.js"></script>
     <script type="text/javascript" src="../../static/JavaScript/tag_modal.js"></script>
     <script type="text/javascript" src="../../static/JavaScript/new_reward_modal.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/user_comment.js"></script>
     <script type="text/javascript" src="../../static/JavaScript/item_page.js"></script>
 </body>
 </html>

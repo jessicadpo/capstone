@@ -1,3 +1,5 @@
+const backLink = document.getElementById('back-link');
+
 const entireItemSection = document.getElementById('item-info-section');
 const column2MainContent = document.getElementById('column2-main-content');
 const readMoreButton = document.getElementById('column2-read-more-button');
@@ -17,10 +19,15 @@ const sidebar = document.getElementById('tag-sidebar');
 const reportButtons = document.querySelectorAll('.report-button');
 const reportTagDialog = document.getElementById('report-tag-dialog');
 const reportedTagComponent = document.querySelector('#report-tag-dialog .tag-content a');
-const reportTagForm = document.getElementById('report-tag-form');
-
 
 let isReadingMore = false;
+
+function setMaxHeight() {
+    // Set max-height of column2-main-content based on height of Read More button
+    const readMoreButtonHeight = readMoreButton.offsetHeight;
+    const maxHeight = 510 - readMoreButtonHeight; // 510px is the height of column-3
+    column2MainContent.style.maxHeight = maxHeight + 'px';
+}
 
 function toggleReadMore() {
     if (isReadingMore) {
@@ -39,13 +46,6 @@ function toggleReadMore() {
     }
 }
 
-function setMaxHeight() {
-    // Set max-height of column2-main-content based on height of Read More button
-    const readMoreButtonHeight = readMoreButton.offsetHeight;
-    const maxHeight = 510 - readMoreButtonHeight; // Set the max-height of div1 to 510px minus the sibling's height
-    column2MainContent.style.maxHeight = maxHeight + 'px';
-}
-
 function checkColumn2Overflow() {
     // If column 2 is overflowing on page load or resize --> show "Read More" button
     let thresholdHeight = Math.ceil(parseFloat(window.getComputedStyle(entireItemSection).minHeight));
@@ -54,7 +54,7 @@ function checkColumn2Overflow() {
         readMoreButton.style.display = 'inline-block';
         isReadingMore = false;
         toggleReadMore();
-    } else { // If column 2 is overflowing --> don't need to show "Read More" button
+    } else { // If column 2 is NOT overflowing --> don't need to show "Read More" button
         readMoreButton.style.display = 'none';
         isReadingMore = true; // Is technically "reading more" because everything is visible (no overflow)
         toggleReadMore();
@@ -74,6 +74,29 @@ function checkTagsOverflow() {
             tag.style.display = "flex";
         }
     });
+}
+
+function setBackLink() {
+    // Store link to search results page in sessionStorage
+    // ONLY store links that include "/search/#/?search_type=..." in the URL
+    const search_results_URL_pattern = /\/search\/\d+\/\?search_type=/;
+
+    if (search_results_URL_pattern.test(document.referrer)) {
+        sessionStorage.setItem("search_results_referrer", document.referrer);
+    }
+    // If document.referrer is NOT a search_results page, NOT signup-login page, NOR the item page itself (i.e., due to page reload)
+    // --> Remove "search_results_referrer" from sessionStorage
+    else if (document.referrer != "" && (new URL(document.referrer)).pathname != '/signup-login' && document.URL != document.referrer) {
+        sessionStorage.removeItem("search_results_referrer");
+    }
+
+    // Show & set href link of "Back to Search Results link only if there's a "search_results_referrer" in sessionStorage
+    if (sessionStorage.getItem("search_results_referrer")) {
+        backLink.setAttribute("href", sessionStorage.getItem("search_results_referrer"))
+        backLink.style.display = "flex";
+    } else {
+        backLink.style.display = "none";
+    }
 }
 
 function openSidebar() {
@@ -97,6 +120,9 @@ function closeSidebar() {
 
 // Triggers after DOM content is finished loading
 document.addEventListener("DOMContentLoaded", function () {
+    // Determine if "Back to Search Results" link should be displayed + (if yes) set its link
+    setBackLink();
+
     // Determine if "Read More" button should be displayed or not
     checkColumn2Overflow();
     checkTagsOverflow();
@@ -106,12 +132,6 @@ document.addEventListener("DOMContentLoaded", function () {
         isReadingMore = isReadingMore === true ? false : true;
         toggleReadMore();
     });
-
-    // Set href of "Back to Search Results" link
-    // TODO: If user submits a POST form --> referrer becomes the page itself (can no longer go back to prev page)
-    // TODO: Fix --> prevent POST forms from reloading page? (possible?)
-    const backLink = document.getElementById('back-link');
-    backLink.href = document.referrer;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Disable link (keyboard navigation) of reportedTagElement
@@ -134,7 +154,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // Reset form if open for a different tag
             if (reportButton != lastButton) {
-                reportTagForm.reset();
+                document.getElementById('report-tag-form').reset();
                 lastButton = reportButton;
             }
 

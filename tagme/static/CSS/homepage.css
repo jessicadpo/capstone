@@ -12,8 +12,9 @@ main {
 
 #slogan {
     text-align: center;
-    font-size: 2em;
+    font-size: 2rem;
     margin: 20px 20px 5vh 20px;
+    transform: translate(-20px, 0px); /* Center more with the logo */
 }
 
 #search-bar {

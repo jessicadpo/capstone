@@ -5,6 +5,7 @@ Module for querying models AND Library of Congress & Datamuse APIs
 RATE LIMIT FOR LIBRARY OF CONGRESS API: 20 queries per 10 seconds && 80 queries per 1 minute
 """
 from urllib.parse import quote
+from django.utils.timezone import localtime
 from django.db import connection
 from django.db.models import Count
 from django.contrib.auth import PermissionDenied
@@ -53,7 +54,36 @@ def get_all_tags_for_item(item_id):
         for tag_dict in public_tags_with_counts:
             tag_dict['tag'] = tag_dict.pop('public_tags')
 
-        return public_tags_with_counts
+        return list(public_tags_with_counts)
+    return None
+
+
+def get_all_comments_for_item(item_id, user=None, exclude_request_user=False):
+    """Function for getting all comments for a particular item_id"""
+    item = Item.objects.filter(item_id=item_id)
+    if item.exists():
+        # Exclude contributions with 0 comments
+        comment_contributions = (UserContribution.objects
+                                   .filter(item_id=item_id)
+                                   .exclude(comment__isnull=True)
+                                   .order_by('comment_datetime'))
+
+        # Exclude the comment of the user making the request
+        if exclude_request_user and user is not None and user.is_authenticated:
+            comment_contributions = comment_contributions.exclude(user=user)
+
+        # Return an array of dicts, each dict contains:
+        # comment's text, comment_datetime, contributing user's username, contributing user's equipped titles
+        comments = []
+        for contrib in comment_contributions:
+            equipped_1, equipped_2 = get_equipped_titles(contrib.user)
+            comment = {'paragraphs': contrib.comment.split('\r\n\r\n'),
+                       'datetime': localtime(contrib.comment_datetime).strftime('%B %m, %Y %H:%M %p'),
+                       'username': contrib.user.username,
+                       'equipped_title_1': equipped_1,
+                       'equipped_title_2': equipped_2}
+            comments.append(comment)
+        return comments
     return None
 
 
@@ -75,6 +105,23 @@ def get_user_tags_for_item(user, item_id):
 
         return user_public_tags, user_private_tags
     return None, None
+
+
+def get_user_comment_for_item(user, item_id):
+    """Function for retrieving a user's comment for a particular item"""
+    if not user.is_authenticated:
+        raise PermissionDenied("User must be logged in")
+
+    user_contrib = UserContribution.objects.filter(user_id=user.id, item_id=item_id)
+    if user_contrib.exists() and user_contrib[0].comment is not None:
+        equipped_1, equipped_2 = get_equipped_titles(user)
+        comment = {'paragraphs': user_contrib[0].comment.split('\r\n\r\n'),
+                   'datetime': localtime(user_contrib[0].comment_datetime).strftime('%B %m, %Y %H:%M %p'),
+                   'username': user.username,
+                   'equipped_title_1': equipped_1,
+                   'equipped_title_2': equipped_2}
+        return comment
+    return None
 
 
 def get_user_points_for_item(user, item_id):
@@ -231,7 +278,7 @@ def set_user_tags_for_item(user, tags_data):
     # Get the Item model object (or create it if it doesn't already exist in the Item model)
     item = Item.objects.get_or_create(item_id=item_id)
 
-    # Check if user already has tags for this item
+    # Check if user already has tags/a comment for this item
     user_contrib = UserContribution.objects.filter(user=user, item=item)
     if user_contrib.exists():
         user_contrib = user_contrib[0]
@@ -264,6 +311,39 @@ def set_user_tags_for_item(user, tags_data):
         user_contrib.save()
         user_contrib.public_tags.add(*new_public_tags)
         user_contrib.private_tags.add(*new_private_tags)
+
+
+def set_user_comment_for_item(user, item_id, comment_data):
+    """Function for adding/updating a user's comment for a particular item"""
+    # Get the Item model object (or create it if it doesn't already exist in the Item model)
+    item = Item.objects.get_or_create(item_id=item_id)
+
+    # Check if user already has tags/a comment for this item
+    user_contrib = UserContribution.objects.filter(user=user, item=item)
+    if user_contrib.exists():
+        user_contrib = user_contrib[0]
+        user_contrib.comment = comment_data.get('comment')
+        user_contrib.save_comment()
+        user_contrib.save()
+    else:
+        user_contrib = UserContribution(user=user, item_id=item_id, comment=comment_data.get('comment'))
+        user_contrib.save_comment()
+        user_contrib.save()
+
+
+def delete_user_comment_for_item(user, item_id):
+    """Function for delete a user's comment for a particular item"""
+    # Get the Item model object
+    item = Item.objects.filter(item_id=item_id)[0]
+
+    # Check if user already has tags/a comment for this item
+    # (they should, if they were able to request a comment delete)
+    user_contrib = UserContribution.objects.filter(user=user, item=item)
+    if user_contrib.exists():
+        user_contrib = user_contrib[0]
+        user_contrib.comment = None
+        user_contrib.save_comment()  # Save the time the comment was deleted
+        user_contrib.save()
 
 
 def create_tag_report(user, item_id, report_data):
@@ -315,7 +395,7 @@ def set_reward_list(sender, **kwargs):  # pylint: disable=unused-argument
         for title in REWARD_LIST:
             hex_colour = REWARD_LIST.get(title)
             Reward.objects.get_or_create(title=title, hex_colour=hex_colour, points_required=points_required)
-            points_required += 50
+            points_required += 60
 
 
 # Automatically set global blacklist & rewards if database already exists (i.e., already migrated)
@@ -413,15 +493,18 @@ def _query_loc_api(params, requested_page_number):
 
         results_on_page = []
         for item in data.get("results", []):
-
-            item_id = item.get('number_lccn')[0]
+            item_id = item.get('number_lccn')[0] if item.get('number_lccn') is not None else item.get('id')[item.get('id').rfind('/')+1:]
             title = decode_unicode(strip_punctuation(item.get("item").get('title', 'No title available')))
             publication_date = decode_unicode(item.get('date', 'No publication date available'))
             description = decode_unicode('\n'.join(item.get('description', 'No description available')))
 
+            subjects = item.get('subject', [])
+            for i in range(len(subjects)):
+                subjects[i] = to_title_case(subjects[i])
+
             authors = item.get('contributor', ['Unknown'])
             for i in range(len(authors)):
-                authors[i] = decode_unicode(to_firstname_lastname(authors[i]))
+                authors[i] = decode_unicode(authors[i])
 
             covers = item.get('image_url', None)
             cover = covers[0] if covers else None
@@ -432,6 +515,7 @@ def _query_loc_api(params, requested_page_number):
                 'authors': to_title_case('; '.join(authors)),  # Combine authors into a single string
                 'publication_date': publication_date,
                 'description': description,
+                'subjects': subjects,
                 'cover': cover,
             })
 

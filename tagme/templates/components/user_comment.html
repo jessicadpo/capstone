@@ -1,0 +1,41 @@
+<div class="comment">
+    <div class="comment-header">
+        <h2>{{ comment.username }}</h2>
+
+        {% if comment.equipped_title_1 != null %}
+            {% with comment.equipped_title_1 as reward %}
+                {% include 'components/reward_title.html' %}
+            {% endwith %}
+        {% endif %}
+
+        {% if comment.equipped_title_2 != null %}
+            {% with comment.equipped_title_2 as reward %}
+                {% include 'components/reward_title.html' %}
+            {% endwith %}
+        {% endif %}
+
+        <span class="comment-date">{{ comment.datetime }}</span>
+
+        {% if comment.username == request.user.username %}
+            <button id="edit-comment-button">
+                <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                <span>Edit comment</span>
+            </button>
+        {% endif %}
+    </div>
+
+    <div class="comment-text">
+        {% for text in comment.paragraphs %}
+            <p>{{ text }}</p>
+        {% endfor %}
+    </div>
+
+    <button class="comment-read-more read-more-button">
+        Read more
+        <i class="fa fa-angle-down" aria-hidden="true"></i>
+    </button>
+
+    {% if comment.username == request.user.username %}
+        {% include 'components/comment_form.html' %}
+    {% endif %}
+</div>

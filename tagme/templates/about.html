@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en ">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TagMe - About Us</title>
+
+    <!-- Roboto font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="../static/CSS/global.css">
+    <link rel="stylesheet" href="../static/CSS/about.css">
+</head>
+
+<body>
+    {% include "components/top_bar.html" %}
+
+    <main>
+        <div id="website-info-section">
+            <div class="content-box">
+                <h1>What is TagMe?</h1>
+                <p>
+                    TagMe is a social bookmarking website for Library of Congress books. Its purpose is to showcase
+                    <b>a library-focused design solution for promoting and boosting user engagement in tagging activities.</b>
+                    TagMe provides a folksonomic tagging system that:
+                </p>
+                <ul>
+                    <li>Proactively incentivizes users to engage with the system via gamification</li>
+                    <li>Meets user needs for public descriptor and private personal tags
+                        <sup><a href="#ref-13">13</a>,</sup>
+                        <sup><a href="#ref-16">16</a>,</sup>
+                        <sup><a href="#ref-21">21</a></sup>
+                    </li>
+                    <li>Minimizes the problems inherent to folksonomic tagging (i.e., synonymy, polysemy, homonymy,
+                        and plurality)
+                        <sup><a href="ref-19">19</a></sup>
+                        via the use of the word-finding DataMuse API</li>
+                </ul>
+                <p><b>Folksonomic tagging</b> refers to “the assignment of one or more tags to a specific resource,
+                    commonly within some kind of collection, . . . [that do] not originate from any kind of controlled
+                    indexing language or authority-controlled procedure [but rather] represent the thoughts,
+                    experiences and expectations of the common user” - Gerolimos, 2013, p. 6.
+                </p>
+                <p>A <b>tag</b> refers to a word, phrase, number, or any form of characters assigned to a resource by
+                    humans for the purpose of describing the content of a particular resource.
+                    <sup><a href="#ref-8">8</a></sup>
+                </p>
+            </div>
+
+            <div class="content-box">
+                <h1>What's the point?</h1>
+                <p>With respect to libraries, benefits of folksonomic tagging systems include:</p>
+                <ul>
+                    <li><b>Enhanced discoverability</b> by making resources easier to search and find through users' own
+                        vocabulary, terms, jargon, and understanding of their own research needs</li>
+                    <li>
+                        <b>Faster adaptation</b> to cultural and linguistic changes vs. that of controlled vocabularies
+                        <sup><a href="#ref-19">19</a></sup>
+                    </li>
+                    <li><b>Greater community involvement</b> in describing catalog resources and supplementing metadata</li>
+                </ul>
+                <p>
+                    However, despite the benefits, several studies have demonstrated that
+                    <b>tagging activity is remarkably low in library settings</b>.
+                    <sup><a href="#ref-15">15</a>,</sup>
+                    <sup><a href="#ref-18">18</a>,</sup>
+                    <sup><a href="#ref-21">21</a></sup>
+                </p>
+
+                <p>Therefore, we decided to use <b>gamification</b> to boost user participation in tagging activities.
+                    Compared to other user engagement strategies like website pop-ups, email prompts, and user
+                    education/awareness campaigns, gamification has a stronger body of research supporting its
+                    consistency and effectiveness in engaging users and increasing task completion.
+                    <sup><a href="#ref-1">1</a>,</sup>
+                    <sup><a href="#ref-2">2</a>,</sup>
+                    <sup><a href="#ref-3">3</a>,</sup>
+                    <sup><a href="#ref-4">4</a>,</sup>
+                    <sup><a href="#ref-5">5</a>,</sup>
+                    <sup><a href="#ref-6">6</a>,</sup>
+                    <sup><a href="#ref-7">7</a>,</sup>
+                    <sup><a href="#ref-9">9</a>,</sup>
+                    <sup><a href="#ref-10">10</a>,</sup>
+                    <sup><a href="#ref-11">11</a>,</sup>
+                    <sup><a href="#ref-12">12</a>,</sup>
+                    <sup><a href="#ref-14">14</a>,</sup>
+                    <sup><a href="#ref-17">17</a>,</sup>
+                    <sup><a href="#ref-20">20</a></sup>
+                </p>
+            </div>
+        </div>
+
+        <h1>Meet the Team</h1>
+        <div id="team-info-section">
+            <div class="content-box">
+                <img src="../../static/icons/this-is-fine.jpg"/>
+                <div> <!-- To prevent long descriptions from wrapping under pic -->
+                    <h2>Jessica Delorme-Po</h2>
+                    <p>Team Lead, Designer & Full-Stack Developer</p>
+                </div>
+            </div>
+
+            <div class="content-box">
+                <img src="../../static/icons/patrick.jpg"/>
+                <div> <!-- To prevent long descriptions from wrapping under pic -->
+                    <h2>Patrick Mossman</h2>
+                    <p>Back-End Developer (Search Engine & Database)</p>
+                </div>
+            </div>
+
+            <div class="content-box">
+                <img src="../../static/icons/ammar.jpg"/>
+                <div> <!-- To prevent long descriptions from wrapping under pic -->
+                    <h2>Ammar Abdurahman</h2>
+                    <p>Back-End Developer (Gamification)</p>
+                </div>
+            </div>
+
+            <div class="content-box">
+                <img src="../../static/icons/micah.jpg"/>
+                <div> <!-- To prevent long descriptions from wrapping under pic -->
+                    <h2>Micah VanEwyk</h2>
+                    <p>Back-End Developer (Admin Panel & Reports)</p>
+                </div>
+            </div>
+
+            <div class="content-box">
+                <img src="../../static/icons/malcolm.jpg"/>
+                <div> <!-- To prevent long descriptions from wrapping under pic -->
+                    <h2>Malcolm Ward</h2>
+                    <p>Back-End Developer (Tag Management)</p>
+                </div>
+            </div>
+        </div>
+
+
+        <h1>References</h1>
+        <div id="references-section">
+            <ol>
+                <li id="ref-1">Agachi, E., Bijmolt, T. H. A., Van Ittersum, K., & Mierau, J. O. (2023). The effect of periodic email prompts on participant engagement with a behavior change mHealth app: Longitudinal study. <em>JMIR mHealth and uHealth, 11,</em> e43033. https://doi.org/10.2196/43033</li>
+                <li id="ref-2">Albayram, Y., Khan, M. M. H., & Fagan, M. (2017). A study on designing video tutorials for promoting security features: A case study in the context of two-factor authentication (2FA). <em>International Journal of Human–Computer Interaction, 33</em>(11), 927–942. https://doi.org/10.1080/10447318.2017.1306765</li>
+                <li id="ref-3">Bahr, G. S., & Ford, R. A. (2011). How and why pop-ups don’t work: Pop-up prompted eye movements, user affect and decision making. <em>Computers in Human Behavior, 27</em>(2), 776–783. https://doi.org/10.1016/j.chb.2010.10.030</li>
+                <li id="ref-4">Bjørseth, B., Simensen, J. O., Bjørnethun, A., Griffiths, M. D., Erevik, E. K., Leino, T., & Pallesen, S. (2021). The effects of responsible gambling pop-up messages on gambling behaviors and cognitions: A systematic review and meta-analysis. <em>Frontiers in Psychiatry, 11,</em> 601800. https://doi.org/10.3389/fpsyt.2020.601800</li>
+                <li id="ref-5">Bradley, S. L., Tieman, J. J., Woodman, R. J., & Phillips, P. A. (2017). Which online format is most effective for assisting Baby Boomers to complete advance directives? A randomised controlled trial of email prompting versus online education module. <em>BMC Palliative Care, 16</em>(1), 43. https://doi.org/10.1186/s12904-017-0225-9</li>
+                <li id="ref-6">Cechanowicz, J., Gutwin, C., Brownell, B., & Goodfellow, L. (2013). Effects of gamification on participation and data quality in a real-world market research domain. <em>Proceedings of the First International Conference on Gameful Design, Research, and Applications,</em> 58–65. https://doi.org/10.1145/2583008.2583016</li>
+                <li id="ref-7">Chiranov, M. (2011). Applying pop‐up survey software to incorporate users’ feedback into public library computing service management. <em>Performance Measurement and Metrics, 12</em>(1), 50–65. https://doi.org/10.1108/14678041111124298</li>
+                <li id="ref-8">Gerolimos, M. (2013). Tagging for libraries: A review of the effectiveness of tagging systems for library catalogs. <em>Journal of Library Metadata, 13</em>>(1), 36–58. https://doi.org/10.1080/19386389.2013.778730</li>
+                <li id="ref-9">Ghai, A., & Tandon, U. (2023). Integrating gamification and instructional design to enhance usability of online learning. <em>Education and Information Technologies, 28</em>(2), 2187–2206. https://doi.org/10.1007/s10639-022-11202-5</li>
+                <li id="ref-10">Goncalves, J., Hosio, S., Ferreira, D., & Kostakos, V. (2014). Game of words: Tagging places through crowdsourcing on public displays. <em>Proceedings of the 2014 Conference on Designing Interactive Systems,</em> 705–714. https://doi.org/10.1145/2598510.2598514</li>
+                <li id="ref-11">Greenberg, H. J. (2024). <em>Heed the warning signs: The effectiveness of message popup warnings for deterring the spread of misinformation</em> (Publication No. 30995690) [Doctoral dissertation, Nova Southeastern University]. ProQuest Dissertations & Theses Global.</li>
+                <li id="ref-12">Lee, J., & Hammer, J. (2011). Gamification in education: What, how, why bother? <em>Academic Exchange Quarterly, 15</em>(2), 1–5. https://www.researchgate.net/publication/258697764_Gamification_in_Education_What_How_Why_Bother</li>
+                <li id="ref-13">Lu, C., Park, J., & Hu, X. (2010). User tags versus expert-assigned subject terms: A comparison of LibraryThing tags and Library of Congress Subject Headings. <em>Journal of Information Science, 36</em>(6), 763–779. https://doi.org/10.1177/0165551510386173</li>
+                <li id="ref-14">Newall, P. W. S., Hayes, T., Singmann, H., Weiss-Cohen, L., Ludvig, E. A., & Walasek, L. (2023). Evaluation of the ‘take time to think’ safer gambling message: A randomised, online experimental study. <em>Behavioural Public Policy,</em> 1–18. https://doi.org/10.1017/bpp.2023.2</li>
+                <li id="ref-15">Peterson, E. (2009). Patron preferences for folksonomy tags: Research findings when both hierarchial subject headings and folksonomy tags are used. <em>Evidence Based Library and Information Practice, 4</em>(1), 53–56. https://doi.org/10.18438/B8WP60</li>
+                <li id="ref-16">Puglisi, S., Parra-Arnau, J., Forné, J., & Rebollo-Monedero, D. (2015). On content-based recommendation and user privacy in social-tagging systems. <em>Computer Standards & Interfaces, 41,</em> 17–27. https://doi.org/10.1016/j.csi.2015.01.004</li>
+                <li id="ref-17">Schneider, F., De Vries, H., Candel, M., Van De Kar, A., & Van Osch, L. (2013). Periodic email prompts to re-use an Internet-delivered computer-tailored lifestyle program: Influence of prompt content and timing. <em>Journal of Medical Internet Research, 15</em>(1), e23. https://doi.org/10.2196/jmir.2151</li>
+                <li id="ref-18">Spiteri, L. F., & Tarulli, L. (2012). Social discovery systems in public libraries: If we build them, will they come? <em>Library Trends, 61</em>(1), 132–147. https://doi.org/10.1353/lib.2012.0019</li>
+                <li id="ref-19">Steele, T. (2009). The new cooperative cataloging. <em>Library Hi Tech, 27</em>(1), 68–77. https://doi.org/10.1108/07378830910942928</li>
+                <li id="ref-20">Stevens, V. J., Funk, K. L., Brantley, P. J., Erlinger, T. P., Myers, V. H., Champagne, C. M., Bauck, A., Samuel-Hodge, C. D., & Hollis, J. F. (2008). Design and implementation of an interactive website to support long-term maintenance of weight loss. <em>Journal of Medical Internet Research, 10</em>(1), e1. https://doi.org/10.2196/jmir.931</li>
+                <li id="ref-21">Wu, D., Xu, X., & Yu, W. (2016). Comparing collaborative annotations on books between libraries and social community sites: A case study. <em>The Electronic Library, 34</em>(2), 178–195. https://doi.org/10.1108/EL-09-2014-0171</li>
+            </ol>
+        </div>
+
+
+    </main>
+
+    {% include "components/footer.html" %}
+
+    <!-- JavaScript -->
+    <script type="text/javascript" src="../static/JavaScript/global.js"></script>
+</body>
+</html>

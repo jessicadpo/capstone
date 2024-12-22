@@ -1,0 +1,28 @@
+<dialog id="report-tag-dialog">
+    <form id="report-tag-form" method="POST">
+        <div class="header-with-x-button">
+            <h1>Report Tag</h1>
+            <button formmethod="dialog" id="close-report-modal-button" class="close-x-button" aria-label="Close Report Tag form">✖</button>
+        </div>
+
+        {% include "components/tag.html" %}
+
+        <h2>What is wrong with this tag?</h2>
+        {% csrf_token %}
+        {% for field in forms.report_form %}
+            <div>
+                {{ field }}
+                {% if field.label != False %}
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <div id="other-required-error">* Required</div>
+        <div id="report-form-footer">
+            <button id="cancel-tag-report-button" class="form-footer-button" formmethod="dialog">Cancel</button>
+            <input id="submit-tag-report-button" class="form-footer-button" type="submit" value="Report">
+        </div>
+    </form>
+</dialog>
