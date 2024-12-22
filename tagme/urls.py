@@ -27,6 +27,4 @@ urlpatterns = [
     path('search/<str:requested_page_number>/', search_results, name="search_results"),
     path('item/<str:item_id>/', item_page, name="item_page"),
     path('about', about),
-    path('equip-title/', process_equip_form, name='equip_title'),
-    path('unequip-title/', unequip_title, name='unequip_title'),
 ]

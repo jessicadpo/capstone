@@ -108,10 +108,10 @@ def get_equipped_titles(user):
         equipped_title_2_object = Reward.objects.filter(title=user_profile[0].equipped_title_2)
 
         if equipped_title_1_object.exists():
-            equipped_title_1 = reward_to_dict_format(equipped_title_1_object)
+            equipped_title_1 = reward_to_dict_format(equipped_title_1_object[0])
 
         if equipped_title_2_object.exists():
-            equipped_title_2 = reward_to_dict_format(equipped_title_2_object)
+            equipped_title_2 = reward_to_dict_format(equipped_title_2_object[0])
 
     return equipped_title_1, equipped_title_2
 
@@ -186,6 +186,30 @@ def get_related_tags(search_string):
 
 #######################################################
 # SETTERS
+def set_equipped_title(user, equip_form):
+    """Function for equipping/unequipping titles"""
+    title_to_equip = equip_form.cleaned_data.get('title_to_equip')
+    slot = equip_form.cleaned_data.get('equip_slot')  # Can be '1' or '2'
+    user_profile = UserProfile.objects.filter(user=user)[0]
+    equipped_title_1, equipped_title_2 = get_equipped_titles(user)
+
+    if slot == '1':
+        if title_to_equip == "Empty":
+            user_profile.equipped_title_1 = None  # Unequip title
+        elif equipped_title_1 is not None and title_to_equip == equipped_title_1.get('title'):
+            return
+        else:
+            user_profile.equipped_title_1 = Reward.objects.filter(title=title_to_equip)[0]
+    else:
+        if title_to_equip == "Empty":
+            user_profile.equipped_title_2 = None  # Unequip title
+        elif equipped_title_2 is not None and title_to_equip == equipped_title_2.get('title'):
+            return
+        else:
+            user_profile.equipped_title_2 = Reward.objects.filter(title=title_to_equip)[0]
+
+    user_profile.save()
+
 
 def set_user_tags_for_item(user, tags_data):
     """Function for adding/updating a user's tags for a particular item"""
@@ -294,12 +318,12 @@ def set_reward_list(sender, **kwargs):  # pylint: disable=unused-argument
             points_required += 50
 
 
-'''"# Automatically set global blacklist & rewards if database already exists (i.e., already migrated)
+# Automatically set global blacklist & rewards if database already exists (i.e., already migrated)
 if "tagme_tag" in connection.introspection.table_names():
     set_global_blacklist(sender=TagMeConfig)
 
 if "tagme_reward" in connection.introspection.table_names():
-    set_reward_list(sender=TagMeConfig) '''
+    set_reward_list(sender=TagMeConfig)
 
 
 @receiver(post_save, sender=User)
