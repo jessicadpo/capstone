@@ -95,6 +95,7 @@ class Report(models.Model):
         ITEM_BLACKLIST = "item_blacklist"
         GLOBAL_WHITELIST = "global_whitelist"
         ITEM_WHITELIST = "item_whitelist"
+        IGNORE_REPORT = "ignore_report"
         # ReportDecision.GLOBAL_BLACKLIST.label --> returns "Global Blacklist"
 
     report_id = models.BigAutoField(primary_key=True, blank=False, null=False)
