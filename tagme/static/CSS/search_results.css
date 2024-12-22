@@ -21,8 +21,6 @@ main {
     }
 }
 
-
-
 /* -------------------------------------------------------------------------------------------------------------------*/
 /* RESULTS SECTION */
 #results-section {
@@ -198,6 +196,9 @@ main {
     height: 100%;
     width: 100%;
     color: #8A8A8A; /* Text color if no cover found */
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Center-align text if no cover found */
 }
 
 .pin-item-button { /* Partially overrides styling in global.css */
@@ -205,6 +206,7 @@ main {
     height: 20%;
     margin: 20px;
     padding: 25px 30px 25px 25px;
+    flex-shrink: 0;
     & span {
         flex-grow: 1;
     }

@@ -2,10 +2,25 @@ main {
     border-top: solid 1px #8A8A8A;
     padding: 3vh 2vw;
 
-    & > h1 {
-        padding: 15px 0px;
+    & h1 {
+        padding-bottom: 15px;
         border-bottom: solid 1px #8A8A8A;
+        font-weight: 400;
+        font-size: 1.8em;
     }
+
+    & > h1 {
+        padding-top: 15px;
+    }
+}
+
+main a {
+    font-size: 0.8rem;
+
+    &:hover {
+        color: #3B6000;
+    }
+
 }
 
 .content-box {
@@ -20,8 +35,12 @@ main {
         font-size: 1.8em;
     }
 
-    & p {
+    & p, li {
         font-size: 1.2rem;
+    }
+
+    & li {
+        margin-bottom: 10px;
     }
 }
 
@@ -64,14 +83,11 @@ main {
         aspect-ratio: 1 / 1;
     }
 
-    & h3 {
+    & p {
         margin: 5px 0px;
         font-weight: 500;
         color: #3B6000;
         font-size: 1rem;
-    }
-
-    & p {
         white-space: normal;
         word-wrap: break-all;
     }
@@ -80,3 +96,7 @@ main {
 
 /* -------------------------------------------------------------------------------------------------------------------*/
 /* REFERENCES SECTION */
+#references-section li {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}

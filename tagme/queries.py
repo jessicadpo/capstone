@@ -113,7 +113,7 @@ def get_user_comment_for_item(user, item_id):
         raise PermissionDenied("User must be logged in")
 
     user_contrib = UserContribution.objects.filter(user_id=user.id, item_id=item_id)
-    if user_contrib.exists():
+    if user_contrib.exists() and user_contrib[0].comment is not None:
         equipped_1, equipped_2 = get_equipped_titles(user)
         comment = {'paragraphs': user_contrib[0].comment.split('\r\n\r\n'),
                    'datetime': localtime(user_contrib[0].comment_datetime).strftime('%B %m, %Y %H:%M %p'),
@@ -338,7 +338,7 @@ def set_reward_list(sender, **kwargs):  # pylint: disable=unused-argument
         for title in REWARD_LIST:
             hex_colour = REWARD_LIST.get(title)
             Reward.objects.get_or_create(title=title, hex_colour=hex_colour, points_required=points_required)
-            points_required += 50
+            points_required += 60
 
 
 # Automatically set global blacklist & rewards if database already exists (i.e., already migrated)
@@ -447,7 +447,7 @@ def _query_loc_api(params, requested_page_number):
 
             authors = item.get('contributor', ['Unknown'])
             for i in range(len(authors)):
-                authors[i] = decode_unicode(to_firstname_lastname(authors[i]))
+                authors[i] = decode_unicode(authors[i])
 
             covers = item.get('image_url', None)
             cover = covers[0] if covers else None

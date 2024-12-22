@@ -116,6 +116,7 @@ def search_results(request, requested_page_number):
     # If POST request for equipping a title
     elif request.method == "POST" and ('title_to_equip' in request.POST):
         #  Note: Page needs to reload if equipping a title from a search_results page (to update added tags, etc.)
+        # TODO: Check --> actually CAN return 204 if from search_results page? (tags already updated from previous post request?)
         process_equip_form(request)
 
     # TODO: Code for parsing AND/OR/NOT/*/? --> Investigate pyparsing & Shunting Yard algorithm
@@ -175,7 +176,8 @@ def item_page(request, item_id):
 
     # If POST request for equipping a title
     elif request.method == "POST" and ('title_to_equip' in request.POST):
-        #  Note: Page needs to reload if equipping a title from a search_results page (to update added tags, etc.)
+        # Note: Page needs to reload if equipping a title from an item page in case user has comment
+        # for whom the equipped_titles need to be updated
         process_equip_form(request)
 
     # If POST request for reporting a tag

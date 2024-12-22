@@ -26,6 +26,10 @@ b, strong {
     font-weight: 500;
 }
 
+em {
+    font-style: italic;
+}
+
 .invisible {
     display: none;
 }

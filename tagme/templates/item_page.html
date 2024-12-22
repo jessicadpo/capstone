@@ -46,12 +46,15 @@
                     <p id="item-pub-date">{{ item.publication_date }}</p>
                     <h1>Description</h1>
                     <p id="item-description">{{ item.description }}</p>
-                    <h1>Subject Headings</h1>
-                    <div id="item-subject-headings">
-                        {% for subject in item.subjects %}
-                            <a href="#" class="subject-heading-link">{{ subject }}</a>
-                        {% endfor %}
-                    </div>
+
+                    {% if item.subjects %}
+                        <h1>Subject Headings</h1>
+                        <div id="item-subject-headings">
+                            {% for subject in item.subjects %}
+                                <a href="#" class="subject-heading-link">{{ subject }}</a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
                 <button id="column2-read-more-button" class="read-more-button">
                     Read more
@@ -100,7 +103,7 @@
                     {% include 'components/user_comment.html' %}
                 {% endfor %}
 
-                <p>1 to 15 of 999,999,999 comments</p>
+                <!--<p>1 to 15 of 999,999,999 comments</p>-->
                 <!-- TODO: Paste similar pagination as in search results page -->
             </div>
         </div>
