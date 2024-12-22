@@ -10,6 +10,7 @@ admin.site.register(Reward)
 admin.site.register(UserProfile)
 admin.site.register(UserContribution)
 
+
 class ReportAdmin(admin.ModelAdmin):
     '''
     Admin view for reporting.
