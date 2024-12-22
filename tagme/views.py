@@ -117,41 +117,44 @@ def search_results(request, requested_page_number):
         process_equip_form(request)
 
     # TODO: Code for parsing AND/OR/NOT/*/? --> Investigate pyparsing & Shunting Yard algorithm
-
     search_string = request.GET.get('search_string')
-    results_on_page = []
-    pagination: None
+    pagination = None
+    results_on_page = None
+
     match request.GET.get('search_type'):
-        case "Keyword":
-            results_on_page, pagination = query_loc_keyword(search_string, requested_page_number)
+        case ValidSearchTypes.KEYWORD.value:
+            pagination = query_loc_keyword(search_string, requested_page_number)
             # TODO: Need to also search our UserContribution model
-        case "Tag":
-            print("placeholder code")  # Replace with Django queries
-        case "Title":
-            print("placeholder code")  # Replace with API call
-        case "Author":
-            print("placeholder code")  # Replace with API call
-        case "Subject":
-            print("placeholder code")  # Replace with API call
+        case ValidSearchTypes.TAG.value:
+            print("placeholder code")  # TODO: Replace with Django queries
+        case ValidSearchTypes.TITLE.value:
+            pagination = query_loc_title(search_string)
+        case ValidSearchTypes.AUTHOR.value:
+            pagination = query_loc_author(search_string, requested_page_number)
+        case ValidSearchTypes.SUBJECT.value:
+            pagination = query_loc_subject(search_string, requested_page_number)
         case _:
             raise Http404("Invalid search type")
 
-    # Add "is_pinned" to every item in results_on_page
-    # Get user's tags for each pinned item in current results
-    if request.user.is_authenticated:
-        for item_data in results_on_page:
-            user_public_tags, user_private_tags = get_user_tags_for_item(request.user, item_data["item_id"])
-            item_data['user_public_tags'] = user_public_tags
-            item_data['user_private_tags'] = user_private_tags
-            item_data['is_pinned'] = get_is_item_pinned(request.user, item_data["item_id"])
-            item_data['points_earned'] = get_user_points_for_item(request.user, item_data["item_id"])
+    if pagination is not None:
+        results_on_page = pagination.get_page(requested_page_number)
+
+        # Add "is_pinned" to every item in results_on_page
+        # Get user's tags for each pinned item in current results
+        if request.user.is_authenticated:
+            for item_data in results_on_page.object_list:
+                user_public_tags, user_private_tags = get_user_tags_for_item(request.user, item_data["item_id"])
+                item_data['user_public_tags'] = user_public_tags
+                item_data['user_private_tags'] = user_private_tags
+                item_data['is_pinned'] = get_is_item_pinned(request.user, item_data["item_id"])
+                item_data['points_earned'] = get_user_points_for_item(request.user, item_data["item_id"])
+
+        # Store results in session
+        request.session['results_on_page'] = {item['item_id']: item for item in results_on_page}
 
     # Get lists of synonymous & related tags
     synonymous_tags = get_synonymous_tags(request.GET.get('search_string'))
     related_tags = get_related_tags(request.GET.get('search_string'))
-
-    # Store results in session # TODO: Double-check I did this for the "Return to Search Results" button in item page
-    request.session['results_on_page'] = {item['item_id']: item for item in results_on_page}
 
     return render(request, 'search_results.html', {
         'current_page': results_on_page,

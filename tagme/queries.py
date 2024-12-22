@@ -10,6 +10,7 @@ from django.db.models import Count
 from django.contrib.auth import PermissionDenied
 from django.db.models.signals import post_save, post_delete, post_migrate
 from django.dispatch import receiver
+from django.core.paginator import Paginator
 import requests
 from .apps import TagMeConfig
 from .helper_functions import *
@@ -355,7 +356,6 @@ def update_user_profile_points_on_delete(sender, instance, **kwargs):  # pylint:
 ########################################################################################################################
 # DATAMUSE API QUERIES
 
-
 def query_datamuse_synonyms(word):
     """Function for synonyms of a given word (may or may NOT exist as tags in our database)"""
     return list(f"placeholder code {word}")
@@ -368,35 +368,130 @@ def query_datamuse_related_words(word):
 
 ########################################################################################################################
 # LOC API QUERIES
+class SearchResults:
+    """Class for converting (& storing) LOC API results into a Django Paginator object"""
+    search_string = ""
+    search_type = ""
+    pagination = None
+
+    @classmethod
+    def is_new_search(cls, search_string, search_type):
+        """Check if new search is being performed + Reset SearchResults class variables if yes"""
+        if search_string != cls.search_string or search_type != cls.search_type:
+            # Reset this class when a new search is performed
+            cls.search_string = search_string
+            cls.search_type = search_type
+            cls.pagination = None
+            return True
+        return False
+
+    @classmethod
+    def paginate_results(cls, search_string, filter_field, params):
+        """Organize all relevant LOC API results in the first 500 to a Django Paginator object"""
+        relevant_results = []
+        page_to_query = 1
+        page_contains_relevant_results = False
+        query_count = 0  # REMINDER: API rate limit --> 20 queries per 10 seconds
+
+        results_on_page = _query_loc_api(params, page_to_query, 50)[0]
+        query_count += 1
+        for result in results_on_page:
+            if search_string.lower() in result.get(filter_field).lower():
+                page_contains_relevant_results = True
+                relevant_results.append(result)
+
+        # TODO: Investigate use of httpx and asyncio to speed this up
+        while page_contains_relevant_results and query_count < 10:  # Max. 500 results possible
+            page_to_query = str(int(page_to_query) + 1)
+            results_on_next_page = _query_loc_api(params, page_to_query, 50)[0]
+            page_contains_relevant_results = False  # Reset since queried a new page
+            query_count += 1
+
+            for result in results_on_next_page:
+                if search_string.lower() in result.get(filter_field).lower():
+                    page_contains_relevant_results = True
+                    relevant_results.append(result)
+
+        cls.pagination = Paginator(relevant_results, 15)
+
+    @classmethod
+    def insert_results(cls, results_on_page, total_hit_count, page_number_to_populate):
+        """
+        Organize LOC API results in a Django Paginator object
+        (only tracks the search results on the requested page)
+        """
+        full_size_results_list = [None] * (total_hit_count - len(results_on_page))
+        insert_index = (int(page_number_to_populate) - 1) * 15
+        for result in results_on_page:
+            full_size_results_list.insert(insert_index, result)
+            insert_index += 1
+        cls.pagination = Paginator(full_size_results_list, 15)
+
+
+def is_safe_query(search_string):
+    """Perform input cleaning here so people can't inject API manipulation"""
+    # TODO: Perform input cleaning here so people can't inject API manipulation
+    print(f"Placeholder code - {search_string}")
+    return True
+
 
 def query_loc_keyword(search_string, requested_page_number):
-    """Keyword search to LOC API"""
-    params = {
-        "q": search_string,  # Default parameters set in _query_loc_api() function
-    }
-    return _query_loc_api(params, requested_page_number)
+    """Keyword search of LOC API, in a Django Pagination object"""
+    if not is_safe_query(search_string):
+        return None
+    SearchResults.is_new_search(search_string, ValidSearchTypes.KEYWORD.value)  # So can properly detect new searches later
+    params = {"q": search_string}  # Default parameters set in _query_loc_api() function
+    results_on_page, hit_count = _query_loc_api(params, requested_page_number)
+    SearchResults.insert_results(results_on_page, hit_count, requested_page_number)
+    return SearchResults.pagination
 
 
-def query_loc_title(search_string, requested_page_number):
-    """Title search to LOC API"""
-    print(f"TODO (placeholder code) {search_string} {requested_page_number}")
+def query_loc_title(search_string):
+    """
+    Title search of LOC API, in a Django Pagination object
+    - Keyword search returns items with search_string in title first (deemed more relevant)
+    - If page_to_query contains 0 relevant results --> Assume next pages also won't have any
+    """
+    if not is_safe_query(search_string):
+        return None
+
+    # Do not need to redo query if this is the same search, just requesting a different page
+    if SearchResults.is_new_search(search_string, ValidSearchTypes.TITLE.value):
+        params = {"q": search_string}
+        SearchResults.paginate_results(search_string, 'title', params)
+    return SearchResults.pagination
 
 
 def query_loc_author(search_string, requested_page_number):
-    """Author search to LOC API"""
-    print(f"TODO (placeholder code) {search_string} {requested_page_number}")
+    """Author search of LOC API, in a Django Pagination object"""
+    if not is_safe_query(search_string):
+        return None
+    SearchResults.is_new_search(search_string, ValidSearchTypes.AUTHOR.value)  # So can properly detect new searches later
+    params = {"fa": "contributor:" + search_string}
+    results_on_page, hit_count = _query_loc_api(params, requested_page_number)
+    SearchResults.insert_results(results_on_page, hit_count, requested_page_number)
+    return SearchResults.pagination
 
 
 def query_loc_subject(search_string, requested_page_number):
-    """Subject search to LOC API"""
-    print(f"TODO (placeholder code)) {search_string} {requested_page_number}")
+    """Subject search of LOC API, in a Django Pagination object"""
+    if not is_safe_query(search_string):
+        return None
+    SearchResults.is_new_search(search_string, ValidSearchTypes.SUBJECT.value)  # So can properly detect new searches later
+    params = {"fa": "subject:" + search_string}
+    results_on_page, hit_count = _query_loc_api(params, requested_page_number)
+    SearchResults.insert_results(results_on_page, hit_count, requested_page_number)
+    return SearchResults.pagination
 
 
-def _query_loc_api(params, requested_page_number):
+def _query_loc_api(params, requested_page_number, per_page=15):
     """Actual query to LOC API (PRIVATE FUNCTION)"""
-    params["fa"] = "partof:catalog"
+    if "fa" in params.keys():
+        params["fa"] = params["fa"] + "|partof:catalog"
+    else:
+        params["fa"] = "partof:catalog"
     params["fo"] = "json"
-    params["c"] = 15  # Return max. 15 items per query (makes results load faster)
+    params["c"] = per_page  # Default: 15 results per query (for faster loading) (max is 1000, but is slow even at a 100)
     params["sp"] = requested_page_number
 
     query = "?"
@@ -413,15 +508,14 @@ def _query_loc_api(params, requested_page_number):
 
         results_on_page = []
         for item in data.get("results", []):
-
-            item_id = item.get('number_lccn')[0]
+            item_id = item.get('number_lccn')[0] if item.get('number_lccn') is not None else item.get('id')[item.get('id').rfind('/')+1:]
             title = decode_unicode(strip_punctuation(item.get("item").get('title', 'No title available')))
             publication_date = decode_unicode(item.get('date', 'No publication date available'))
             description = decode_unicode('\n'.join(item.get('description', 'No description available')))
 
             authors = item.get('contributor', ['Unknown'])
             for i in range(len(authors)):
-                authors[i] = decode_unicode(to_firstname_lastname(authors[i]))
+                authors[i] = decode_unicode(authors[i])  # TODO: switch to firstname_lastname format?
 
             covers = item.get('image_url', None)
             cover = covers[0] if covers else None
@@ -429,17 +523,17 @@ def _query_loc_api(params, requested_page_number):
             results_on_page.append({
                 'item_id': item_id,
                 'title': to_title_case(title),
-                'authors': to_title_case('; '.join(authors)),  # Combine authors into a single string
+                'authors': to_title_case(' ; '.join(authors)),  # Combine authors into a single string
                 'publication_date': publication_date,
                 'description': description,
                 'cover': cover,
             })
 
-        return results_on_page, data.get("pagination")
+        return results_on_page, data.get("search").get("hits")
 
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
-        return [], 0
+        return []
 
 
 # Comprehension is actually necessary, or Django crashes
