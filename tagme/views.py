@@ -5,7 +5,6 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.urls import is_valid_path, reverse
 from django.http import Http404, HttpResponse
-from django.utils.http import is_same_domain
 from .forms import *
 from .queries import *
 

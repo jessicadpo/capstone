@@ -332,6 +332,7 @@ def set_user_comment_for_item(user, item_id, comment_data):
 
 
 def delete_user_comment_for_item(user, item_id):
+    """Function for delete a user's comment for a particular item"""
     # Get the Item model object
     item = Item.objects.filter(item_id=item_id)[0]
 
