@@ -2,8 +2,9 @@ const commentContainers = document.querySelectorAll('.comment');
 const editCommentButton = document.getElementById('edit-comment-button');
 const commentForm = document.getElementById('comment-form');
 const commentFormTextarea = document.getElementById('user-comment-input');
+const commentFormRequestDelete = document.getElementById('id_request_delete_comment');
+const deleteCommentButton = document.getElementById('delete-comment-button');
 const cancelCommentButton = document.getElementById('cancel-comment-button');
-const postCommentButton = document.getElementById('post-comment-button');
 
 let isReadingMoreComment = false;
 
@@ -59,8 +60,6 @@ function autofillCommentTextarea(userCommentTextDiv) {
 }
 
 function updateCommentText(userCommentTextDiv) {
-    // TODO: CONTROL FOR WHEN COMMENT IS EMPTIED OUT --> treat as "delete comment" (?)
-    // TODO: Add "Delete" button on left-most side of form buttons instead? (& treat empty as form error? or also as delete?)
     // Doing this in JavaScript instead of requiring a page reload (smoother experience)
     userCommentTextDiv.innerHTML = ''; // Empty out userCommentTextDiv
     const paragraphs = commentFormTextarea.value.split("\n\n");
@@ -70,7 +69,7 @@ function updateCommentText(userCommentTextDiv) {
         lineBreaks.forEach(line => {
             textLine = document.createTextNode(line);
             p.appendChild(textLine);
-            p.appendChild(document.createElement("br"));
+            p.appendChild(document.createElement("br"));s
         })
         userCommentTextDiv.appendChild(p);
     });
@@ -84,7 +83,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const userCommentTextDiv = editCommentButton.parentNode.parentNode.querySelector('.comment-text');
         const userCommentReadMoreButton = editCommentButton.parentNode.parentNode.querySelector('.comment-read-more');
 
-        // Display "Cancel" comment button in form (i.e., will be visible whenever form is visible)
+        // Display "Delete" & "Cancel" comment button in form (i.e., will be visible whenever form is visible)
+        deleteCommentButton.style.display = 'block';
         cancelCommentButton.style.display = 'block';
 
         // Set "Edit comment" button behaviour
@@ -95,6 +95,14 @@ document.addEventListener("DOMContentLoaded", function () {
             commentForm.style.display = 'flex';
         });
 
+        // Set "Delete" button behaviour for commentForm
+        deleteCommentButton.addEventListener('click', function(event) {
+            // Blank comments will be deleted by the server (empty comments straight up not processed)
+            event.preventDefault();
+            commentFormRequestDelete.checked = true;
+            commentForm.submit();
+        });
+
         // Set "Cancel" button behaviour for commentForm
         cancelCommentButton.addEventListener('click', function(event) {
             event.preventDefault();
@@ -103,19 +111,9 @@ document.addEventListener("DOMContentLoaded", function () {
             checkCommentOverflow(userCommentTextDiv, userCommentReadMoreButton);
         });
 
-        // Set "Post" button behaviour for commentForm
-        postCommentButton.addEventListener('click', function(event) {
-            // No need to prevent default --> Button will submit the form & JavaScript will update page (no page reload)
-            commentForm.style.display = 'none';
-            userCommentTextDiv.style.display = 'block';
-            updateCommentText(userCommentTextDiv);
-            checkCommentOverflow(userCommentTextDiv, userCommentReadMoreButton);
-        });
+        // No need to set "Post" button behaviour for commentForm --> Default is what we need
     } else {
-        // Make commentForm visible
-        commentForm.style.display = 'flex';
-
-        // TODO: Set Post button behaviour --> just reload page to apply changes??
+        commentForm.style.display = 'flex'; // Make commentForm visible
     }
 
     // Set "Read More" button behaviour (for comments)

@@ -38,7 +38,8 @@ class EquipForm(forms.Form):
 
 
 class CommentForm(forms.Form):
-    """ Form for adding/editing a comment """
+    """ Form for adding/editing/deleting a comment """
+    request_delete_comment = forms.BooleanField(label=False, required=False, initial=False)
     comment = forms.CharField(label=False, min_length=1, strip=True, widget=forms.Textarea(
         attrs={'id': 'user-comment-input', 'placeholder': 'Add comment...', 'rows': '0', 'cols': '0'}))
 

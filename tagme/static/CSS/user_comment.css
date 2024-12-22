@@ -19,6 +19,10 @@
     font-size: 1.1rem;
 }
 
+div:has(>#id_request_delete_comment) {
+    display: none;
+}
+
 #comment-buttons-row {
     width: 100%;
     display: flex;
@@ -30,29 +34,43 @@
     & > button {
         width: 120px;
         padding: 8px 0px;
-        background-color: #537A00;
         border: none;
         border-radius: 10px;
         color: white;
         font-size: 1.1rem;
         font-weight: 400;
     }
+}
 
-    & > button:hover {
+#cancel-comment-button, #post-comment-button {
+    background-color: #537A00;
+
+    &:hover {
         background-color: #3B6000;
         cursor: pointer;
     }
 
-    & > button:focus {
+    &:focus {
         background-color: #3B6000;
         cursor: pointer;
     }
 }
 
-#cancel-comment-button {
+#delete-comment-button {
+    background-color: #B52801;
+
+    &:hover {
+        background-color: #952101;
+    }
+
+    &:focus {
+        background-color: #952101;
+    }
+}
+
+#cancel-comment-button, #delete-comment-button {
     display: none; /* Changed to 'block' via JavaScript (user_comment.js) if user already posted a comment previously*/
 }
-
 
 /* -------------------------------------------------------------------------------------------------------------------*/
 /* ACTUAL COMMENTS */
@@ -150,4 +168,5 @@
 .comment-read-more {
     align-self: end;
 }
+
 

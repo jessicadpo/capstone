@@ -187,7 +187,6 @@ def item_page(request, item_id):
     # If POST request for adding a comment
     elif request.method == 'POST' and ('comment' in request.POST):
         process_comment_form(request, item_id)
-        return HttpResponse(status=204)  # NOT a render() so that page doesn't reload
 
     page_forms = {"search_form": SearchForm(),
                   "tags_form": TagsForm(),
@@ -244,5 +243,9 @@ def process_report_form(request, item_id):
 
 def process_comment_form(request, item_id):
     """Function for processing "Add Comment" form"""
-    # TODO
-    print(f'placeholder code{request, item_id}')
+    comment_form = CommentForm(request.POST)
+    if comment_form.is_valid():
+        if comment_form.cleaned_data.get("request_delete_comment"):
+            delete_user_comment_for_item(request.user, item_id)
+        else:
+            set_user_comment_for_item(request.user, item_id, comment_form.cleaned_data)

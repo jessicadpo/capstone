@@ -278,7 +278,7 @@ def set_user_tags_for_item(user, tags_data):
     # Get the Item model object (or create it if it doesn't already exist in the Item model)
     item = Item.objects.get_or_create(item_id=item_id)
 
-    # Check if user already has tags for this item
+    # Check if user already has tags/a comment for this item
     user_contrib = UserContribution.objects.filter(user=user, item=item)
     if user_contrib.exists():
         user_contrib = user_contrib[0]
@@ -311,6 +311,38 @@ def set_user_tags_for_item(user, tags_data):
         user_contrib.save()
         user_contrib.public_tags.add(*new_public_tags)
         user_contrib.private_tags.add(*new_private_tags)
+
+
+def set_user_comment_for_item(user, item_id, comment_data):
+    """Function for adding/updating a user's comment for a particular item"""
+    # Get the Item model object (or create it if it doesn't already exist in the Item model)
+    item = Item.objects.get_or_create(item_id=item_id)
+
+    # Check if user already has tags/a comment for this item
+    user_contrib = UserContribution.objects.filter(user=user, item=item)
+    if user_contrib.exists():
+        user_contrib = user_contrib[0]
+        user_contrib.comment = comment_data.get('comment')
+        user_contrib.save_comment()
+        user_contrib.save()
+    else:
+        user_contrib = UserContribution(user=user, item_id=item_id, comment=comment_data.get('comment'))
+        user_contrib.save_comment()
+        user_contrib.save()
+
+
+def delete_user_comment_for_item(user, item_id):
+    # Get the Item model object
+    item = Item.objects.filter(item_id=item_id)[0]
+
+    # Check if user already has tags/a comment for this item
+    # (they should, if they were able to request a comment delete)
+    user_contrib = UserContribution.objects.filter(user=user, item=item)
+    if user_contrib.exists():
+        user_contrib = user_contrib[0]
+        user_contrib.comment = None
+        user_contrib.save_comment()  # Save the time the comment was deleted
+        user_contrib.save()
 
 
 def create_tag_report(user, item_id, report_data):
