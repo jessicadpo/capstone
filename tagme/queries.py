@@ -233,6 +233,30 @@ def get_related_tags(search_string):
 
 #######################################################
 # SETTERS
+def set_equipped_title(user, equip_form):
+    """Function for equipping/unequipping titles"""
+    title_to_equip = equip_form.cleaned_data.get('title_to_equip')
+    slot = equip_form.cleaned_data.get('equip_slot')  # Can be '1' or '2'
+    user_profile = UserProfile.objects.filter(user=user)[0]
+    equipped_title_1, equipped_title_2 = get_equipped_titles(user)
+
+    if slot == '1':
+        if title_to_equip == "Empty":
+            user_profile.equipped_title_1 = None  # Unequip title
+        elif equipped_title_1 is not None and title_to_equip == equipped_title_1.get('title'):
+            return
+        else:
+            user_profile.equipped_title_1 = Reward.objects.filter(title=title_to_equip)[0]
+    else:
+        if title_to_equip == "Empty":
+            user_profile.equipped_title_2 = None  # Unequip title
+        elif equipped_title_2 is not None and title_to_equip == equipped_title_2.get('title'):
+            return
+        else:
+            user_profile.equipped_title_2 = Reward.objects.filter(title=title_to_equip)[0]
+
+    user_profile.save()
+
 
 def set_user_tags_for_item(user, tags_data):
     """Function for adding/updating a user's tags for a particular item"""
