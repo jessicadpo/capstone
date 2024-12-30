@@ -363,7 +363,7 @@ def create_tag_report(user, item_id, report_data):
         ('Offensive', is_offensive),
         ('Misinformation', is_misinformation),
         ('Other', is_other),
-    ] if selected), None)
+    ] if selected), "No reason given.")
     if other_text:  # If other_text is not empty
         reason += other_text
 

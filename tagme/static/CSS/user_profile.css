@@ -222,7 +222,7 @@ main {
         background-color: rgba(0, 105, 150, 0.25); /* Same blue colour, but more transparent */
     }
 
-    & > .reward-title::after { /* TODO: TEST */
+    & > .reward-title::after {
         height: inherit;
         width: inherit;
         position: absolute;

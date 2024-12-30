@@ -68,15 +68,6 @@ class ReportForm(forms.Form):
     other_text = forms.CharField(label=False, required=False, min_length=1, max_length=999, widget=forms.TextInput(
         attrs={'id': 'other-input', 'placeholder': 'Please specify', 'label': 'If other, please specify'}))
 
-    def clean(self):  # TODO: This isn't working
-        """If other is checked, something must be entered in the other_text field"""
-        cleaned_data = super().clean()
-        is_other = cleaned_data.get('is_other', False)
-        other_text = cleaned_data.get('other_text', None)
-        if is_other and (other_text in EMPTY_VALUES):
-            self.add_error("other_text", "Please fill out this field.")
-        return cleaned_data
-
 
 class SignUpForm(UserCreationForm):  # pylint: disable=too-many-ancestors
     """
