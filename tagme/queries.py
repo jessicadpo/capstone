@@ -9,7 +9,7 @@ from django.utils.timezone import localtime
 from django.db import connection
 from django.db.models import Count
 from django.contrib.auth import PermissionDenied
-from django.db.models.signals import post_save, post_delete, post_migrate
+from django.db.models.signals import post_save, pre_delete, post_delete, post_migrate
 from django.dispatch import receiver
 import requests
 from .apps import TagMeConfig
@@ -64,9 +64,9 @@ def get_all_comments_for_item(item_id, user=None, exclude_request_user=False):
     if item.exists():
         # Exclude contributions with 0 comments
         comment_contributions = (UserContribution.objects
-                                   .filter(item_id=item_id)
-                                   .exclude(comment__isnull=True)
-                                   .order_by('comment_datetime'))
+                                 .filter(item_id=item_id)
+                                 .exclude(comment__isnull=True)
+                                 .order_by('comment_datetime'))
 
         # Exclude the comment of the user making the request
         if exclude_request_user and user is not None and user.is_authenticated:
@@ -224,7 +224,7 @@ def get_related_tags(search_string):
         related_tag = Tag.objects.filter(tag=related_word)
         if related_tag.exists():
             # Need to format it as a dict to stay consistent with return format of get_all_tags_for_item()
-            related_tags.append({"tag" : related_tag[0].tag})
+            related_tags.append({"tag": related_tag[0].tag})
 
     # TODO: Need a way to determine which tags more relevant (so can list the most relevant ones first)
 
@@ -379,6 +379,13 @@ def create_tag_report(user, item_id, report_data):
     report.save()
 
 
+def delete_user(user):
+    """
+    Function for deleting a User object from the database
+    Note: Related objects in other models are automatically deleted via on_delete=models.CASCADE or Django signals
+    """
+    user.delete()
+
 @receiver(post_migrate)
 def set_global_blacklist(sender, **kwargs):  # pylint: disable=unused-argument
     """Function for creating the list of globally-blacklisted tags in the database automatically after db is created"""
@@ -429,8 +436,17 @@ def update_user_profile_points_on_delete(sender, instance, **kwargs):  # pylint:
     user_profile = UserProfile.objects.get(user=instance.user)
     user_profile.update_points()
 
-# pylint: enable=no-member
 
+@receiver(pre_delete, sender=UserProfile)
+def delete_user_contributions_on_profile_delete(sender, instance, **kwargs):  # pylint: disable=unused-argument
+    """
+    Use Django signals to automatically delete all relevant user contributions BEFORE a user profile is deleted.
+    Otherwise, impossible to delete a User (website crashes instead).
+    """
+    UserContribution.objects.filter(user=instance.user).delete()
+
+
+# pylint: enable=no-member
 
 ########################################################################################################################
 # DATAMUSE API QUERIES

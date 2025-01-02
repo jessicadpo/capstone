@@ -10,7 +10,7 @@ main {
     background-color: #3B6000;
     color: white;
 
-    & i {
+    & * {
         color: white !important; /* Use !important to guarantee override of global.css */
     }
 
@@ -73,11 +73,7 @@ main {
     }
 }
 
-.content-box {
-    background-color: white;
-    padding: 20px 30px;
-    border-radius: 20px;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15);
+.content-box {  /* Extends global.css */
     display: flex;
     flex-direction: column; /* Main axis = Vertical */
     align-items: start;
@@ -246,28 +242,6 @@ main {
         color: #8A8A8A;
         font-weight: 400;
         font-size: 1.1em;
-    }
-}
-
-
-.edit-button {
-    width: auto; /* Override CSS of .dropdown-button (global.css) */
-    height: auto;
-    padding: 0px;
-    background: none;
-    border: none;
-    cursor: pointer;
-
-    & i {
-        color: #8A8A8A;
-        font-size: 2rem;
-    }
-}
-
-.edit-button:hover, .edit-button:focus {
-    background: none; /* Override CSS of .dropdown-button (global.css) */
-    & i {
-        color: black;
     }
 }
 

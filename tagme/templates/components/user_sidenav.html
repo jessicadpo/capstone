@@ -1,0 +1,18 @@
+<!-- Sidebar navigation for the private user pages (i.e., My Profile, Pinned Items, Account Settings) -->
+<nav id="user-account-sidebar">
+    <a id="my-profile-sidebar-link" href="/profile/{{ request.user.username }}">
+        <i class="fa fa-user-o" aria-hidden="true"></i>
+        <span>My Profile</span>
+    </a>
+    <a id="pinned-items-sidebar-link" href="/pinned-items/{{ request.user.username }}">
+        <i class="fa fa-thumb-tack" aria-hidden="true"></i>
+        <span>Pinned Items</span>
+    </a>
+    <a id="account-settings-sidebar-link" href="/account-settings/{{ request.user.username }}">
+        <i class="fa fa-cog" aria-hidden="true"></i>
+        <span>Account Settings</span>
+    </a>
+    <a id="logout-sidebar-link" href="/logout"><i class="fa fa-sign-out" aria-hidden="true"></i>
+        <span>Log Out</span>
+    </a>
+</nav>

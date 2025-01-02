@@ -58,6 +58,12 @@ def signup_login(request):
     return render(request, 'signup_login.html', {'forms': page_forms})
 
 
+def logout_view(request):
+    """View for Logout Functionality"""
+    logout(request)
+    return redirect("homepage")
+
+
 @login_required
 def user_profile(request, username):
     """View for a user's "My Profile" page"""
@@ -91,10 +97,56 @@ def user_profile(request, username):
     })
 
 
-def logout_view(request):
-    """View for Logout Functionality"""
-    logout(request)
-    return redirect("homepage")
+@login_required
+def pinned_items(request, username):
+    """View for a user's "Pinned Items" page"""
+    page_forms = {"search_form": SearchForm()}
+
+    # Redirect user to their own Pinned Items page if they try to access someone else's
+    if request.user.username != username:
+        return redirect(reverse('pinned_items', args=[request.user.username]))
+
+    # TODO
+
+    return render(request, 'pinned_items.html', {
+        'forms': page_forms
+    })
+
+
+@login_required
+def account_settings(request, username):
+    """View for a user's "Account Settings" page"""
+    # Default page_forms (e.g., if GET request)
+    page_forms = {"search_form": SearchForm(),
+                  "username_change_form": UsernameChangeForm(request.user),
+                  "email_change_form": EmailChangeForm(request.user),
+                  "password_change_form": CustomPasswordChangeForm(request.user)}
+
+    # Redirect user to their own Account Settings page if they try to access someone else's
+    if request.user.username != username:
+        return redirect(reverse('account_settings', args=[request.user.username]))
+
+    # If POST request for changing user's username
+    if request.method == 'POST' and ('new_username' in request.POST):
+        page_forms['username_change_form'], change_success = process_username_change_form(request)
+        # Reload page with updated URL if username was successfully changed
+        # else (if failed): Continue to normal render (contains form with the detected form errors)
+        if change_success:
+            return redirect('account_settings', username=request.user.username)
+
+    elif request.method == 'POST' and ('new_email' in request.POST):
+        page_forms['email_change_form'] = process_email_change_form(request)
+
+    elif request.method == 'POST' and ('new_password1' in request.POST):
+        page_forms['password_change_form'] = process_password_change_form(request)
+
+    elif request.method == 'POST' and ('delete_account' in request.POST):
+        request.user.delete()
+        return redirect("/")  # Redirect to homepage (user will be logged out)
+
+    return render(request, 'account_settings.html', {
+        'forms': page_forms
+    })
 
 
 def about(request):
@@ -248,3 +300,34 @@ def process_comment_form(request, item_id):
             delete_user_comment_for_item(request.user, item_id)
         else:
             set_user_comment_for_item(request.user, item_id, comment_form.cleaned_data)
+
+
+def process_username_change_form(request):
+    """
+    Function for processing "Change Username" form
+    If successfully changed the username --> returns a new username_change_form && True
+    If failed to change username --> returns the username_change_form with the errors found && False
+    """
+    username_change_form = UsernameChangeForm(data=request.POST, user=request.user)
+    if username_change_form.is_valid():
+        username_change_form.save()
+        return UsernameChangeForm(request.user), True
+    return username_change_form, False  # If form is invalid
+
+
+def process_email_change_form(request):
+    """Function for processing "Change Email" form"""
+    email_change_form = EmailChangeForm(data=request.POST, user=request.user)
+    if email_change_form.is_valid():
+        email_change_form.save()
+        return EmailChangeForm(request.user)
+    return email_change_form  # If form is invalid
+
+
+def process_password_change_form(request):
+    """Function for processing "Change Password" form"""
+    password_change_form = CustomPasswordChangeForm(data=request.POST, user=request.user)
+    if password_change_form.is_valid():
+        password_change_form.save()
+        return CustomPasswordChangeForm(request.user)
+    return password_change_form  # If form is invalid

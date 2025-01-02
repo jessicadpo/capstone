@@ -2,11 +2,13 @@
 from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm, UserChangeForm
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
 from django.core.validators import EMPTY_VALUES
 from django.db import connection
 from .models import Reward
+from django.utils.translation import gettext_lazy as _
 
 SEARCH_TYPES = (
     ("Keyword", "Keyword"),
@@ -90,7 +92,7 @@ class SignUpForm(UserCreationForm):  # pylint: disable=too-many-ancestors
         fields = ('username', 'email', 'password1', 'password2')
 
     def clean_username(self):
-        """prevents duplicate usernames"""
+        """Prevents duplicate usernames (case-insensitive)"""
         username = self.cleaned_data['username'].lower()
         new = User.objects.filter(username=username)
         if new.count():
@@ -98,7 +100,7 @@ class SignUpForm(UserCreationForm):  # pylint: disable=too-many-ancestors
         return username
 
     def clean_email(self):
-        """prevents duplicate emails"""
+        """Prevents duplicate emails (case-insensitive)"""
         email = self.cleaned_data['email'].lower()
         new = User.objects.filter(email=email)
         if new.count():
@@ -106,16 +108,15 @@ class SignUpForm(UserCreationForm):  # pylint: disable=too-many-ancestors
         return email
 
     def clean_password2(self):
-        """prevents mismatching password/confirms"""
+        """Prevents mismatching password/confirms"""
         password1 = self.cleaned_data['password1']
         password2 = self.cleaned_data['password2']
-
         if password1 and password2 and password1 != password2:
             raise ValidationError("Passwords don't match.")
         return password2
 
     def save(self, commit=True):
-        """saves cleaned data for the form"""
+        """Saves cleaned data for the form"""
         user = User.objects.create_user(
             self.cleaned_data['username'],
             self.cleaned_data['email'],
@@ -126,10 +127,10 @@ class SignUpForm(UserCreationForm):  # pylint: disable=too-many-ancestors
 
 class LoginForm(forms.Form):
     """Copied from https://medium.com/@devsumitg/django-auth-user-signup-and-login-7b424dae7fab"""
-    username = forms.CharField(label=False, min_length=1, max_length=150,
-        widget=forms.TextInput(attrs={'class': 'login-input', 'placeholder': 'Username', 'label': 'Username'}))
-    password = forms.CharField(label=False,
-        widget=forms.PasswordInput(attrs={'class': 'login-input', 'placeholder': 'Password', 'label': 'Password'}))
+    username = forms.CharField(label=False, min_length=1, max_length=150, widget=forms.TextInput(
+        attrs={'class': 'login-input', 'placeholder': 'Username', 'label': 'Username'}))
+    password = forms.CharField(label=False, widget=forms.PasswordInput(
+        attrs={'class': 'login-input', 'placeholder': 'Password', 'label': 'Password'}))
 
     def clean(self):
         """Ensures password and username match"""
@@ -144,3 +145,76 @@ class LoginForm(forms.Form):
         if not user:
             self.add_error("password", "Password does not match our records.")
         return cleaned_data
+
+
+class UsernameChangeForm(forms.Form):
+    """
+    Form to let users change their account's username.
+
+    Each account setting is its own form because each field should be required if it's being changed
+    (but not if another setting is being changed)
+    """
+    new_username = forms.CharField(label="New username", required=True, min_length=1, max_length=150,
+                                   validators=[UnicodeUsernameValidator()],
+                                   widget=forms.TextInput(attrs={'label': 'New username'}))
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def clean_new_username(self):
+        """Prevents duplicate usernames (case-insensitive)"""
+        new_username = self.cleaned_data['new_username'].lower()
+        users = User.objects.filter(username=new_username)
+        if users.count():
+            raise ValidationError("Username already exists.")
+        return new_username
+
+    def save(self, commit=True):
+        # TODO: Only set if field not empty
+        self.user.username = self.cleaned_data['new_username']
+        if commit:
+            self.user.save()
+        return self.user
+
+
+class EmailChangeForm(forms.Form):
+    """
+    Form to let users change their account's email address.
+
+    Each account setting is its own form because each field should be required if it's being changed
+    (but not if another setting is being changed)
+    """
+    new_email = forms.EmailField(label="New email address", required=True, widget=forms.EmailInput(
+        attrs={'label': 'New email'}))
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def clean_new_email(self):
+        """Prevents duplicate emails (case-insensitive)"""
+        new_email = self.cleaned_data['new_email'].lower()
+        users = User.objects.filter(email=new_email)
+        if users.count():
+            raise ValidationError("Email belongs to existing user.")
+        return new_email
+
+    def save(self, commit=True):
+        # TODO: Only set if field not empty
+        self.user.email = self.cleaned_data['new_email']
+        if commit:
+            self.user.save()
+        return self.user
+
+
+class CustomPasswordChangeForm(PasswordChangeForm):
+    """
+    Form to let users change their account's email address.
+
+    Overrides parts of default Django PasswordChangeForm.
+
+    Each account setting is its own form because each field should be required if it's being changed
+    (but not if another setting is being changed)
+    """
+    PasswordChangeForm.base_fields['new_password2'].label = 'Confirm new password'

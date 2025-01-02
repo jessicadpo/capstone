@@ -30,8 +30,16 @@ em {
     font-style: italic;
 }
 
-.invisible {
+.invisible { /* Overwritten in account_settings.css */
     display: none;
+}
+
+.content-box {
+    position: relative; /* So can absolute position the elements inside it, if necessary */
+    background-color: white;
+    padding: 20px 30px;
+    border-radius: 20px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 /**********************************************************************************************************************/
@@ -58,6 +66,83 @@ em {
     0%   {transform: translate(0, 0);}
     50%  {transform: translate(5px, 0);}
     100% {transform: translate(0, 0);}
+}
+
+/**********************************************************************************************************************/
+/* DROPDOWN MENUS (GENERAL - CAN BE OVERWRITTEN FOR SPECIFIC MENUS) */
+/* MUST BE PLACED BEFORE CSS FOR EDIT BUTTONS (FOR user_profile PAGE) */
+.dropdown-button {
+    height: 100%;
+    width: 100%;
+    padding: 0px 15px;
+    background-color: #537A00;
+    border: solid #3B6000 1px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    & > * {
+        color: white;
+    }
+
+    & > span {
+        flex-grow: 1;
+    }
+}
+
+.dropdown-button:hover, .dropdown-button:focus {
+    background-color: #3B6000;
+}
+
+/* Applies to the dropdown-button only when "show" class is added to dropdown-options */
+.dropdown-button:has(~.show) {
+    border-radius: 10px 10px 0px 0px;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Hidden by Default */
+.dropdown-options {
+    display: none;
+    position: absolute;
+    z-index: 1;
+    box-sizing: border-box; /* Sizing includes padding & border */
+    width: 100%;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    border: solid 1px #3B6000;
+    border-radius: 0px 0px 10px 10px;
+    overflow: hidden;
+}
+
+.dropdown-options > * {
+    display: block;
+    margin: 0px;
+    padding: 12px 16px;
+    background-color: white;
+    border-bottom: solid 1px #3B6000;
+    color: black;
+    text-decoration: none;
+    font-size: 1.1em;
+}
+
+.dropdown-options > *:last-of-type {
+    border-radius: 0px 0px 10px 10px;
+    border-bottom: none;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-options > *:hover {
+    background-color: #E0EEAC;
+}
+
+/* Show the dropdown menu ("show" class added to .dropdown-options using JavaScript */
+.show {
+    display:block;
 }
 
 /**********************************************************************************************************************/
@@ -179,6 +264,36 @@ em {
 
 .close-x-button:hover {
     color: #537A00;
+}
+
+.edit-button {
+    width: auto; /* Override CSS of .dropdown-button */
+    height: auto;
+    padding: 0px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+
+    & i {
+        color: #8A8A8A;
+        font-size: 2rem;
+    }
+
+    & span {
+        color: #8A8A8A;
+        font-size: 1rem;
+    }
+}
+
+.edit-button:hover, .edit-button:focus {
+    background: none; /* Override CSS of .dropdown-button */
+    & i, span {
+        color: black;
+    }
 }
 
 /**********************************************************************************************************************/
@@ -498,6 +613,15 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
 }
 
 .tooltip-bubble.bubble-on-right {
+    /*
+    - Width of .bubble-content (15vw)
+    - Left + Right padding of bubble-content (10px each, 20px total)
+    - Left + Right border width of bubble-content (1px each, 2px total)
+    - Left margin of bubble-tail (15px)
+    - Position of bubble-tail-outline (2px)
+    - 6px of spacing (arbitrarily-decided)
+    - Total = -15vw - 20px - 15px - 2px - 2px - 6px = -15vw - 45px
+    */
     right: calc(-15vw - 45px);
     & .bubble-tail-outline {
         left: -2px;
@@ -508,6 +632,15 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
 }
 
 .tooltip-bubble.bubble-on-left {
+    /*
+    - Width of .bubble-content (15vw)
+    - Left + Right padding of bubble-content (10px each, 20px total)
+    - Left + Right border width of bubble-content (1px each, 2px total)
+    - Right margin of bubble-tail (15px)
+    - Position of bubble-tail-outline (2px)
+    - 6px of spacing (arbitrarily-decided)
+    - Total = -15vw - 20px - 15px - 2px - 2px - 6px = -15vw - 45px
+    */
     left: calc(-15vw - 45px);
     & .bubble-tail-outline {
         right: -17px;
@@ -528,82 +661,6 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
     display: flex;
     flex-direction: row;
     align-items: center;
-}
-
-/**********************************************************************************************************************/
-/* DROPDOWN MENUS (GENERAL - CAN BE OVERWRITTEN FOR SPECIFIC MENUS) */
-.dropdown-button {
-    height: 100%;
-    width: 100%;
-    padding: 0px 15px;
-    background-color: #537A00;
-    border: solid #3B6000 1px;
-    border-radius: 10px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-
-    & > * {
-        color: white;
-    }
-
-    & > span {
-        flex-grow: 1;
-    }
-}
-
-.dropdown-button:hover, .dropdown-button:focus {
-    background-color: #3B6000;
-}
-
-/* Applies to the dropdown-button only when "show" class is added to dropdown-options */
-.dropdown-button:has(~.show) {
-    border-radius: 10px 10px 0px 0px;
-}
-
-.dropdown {
-    position: relative;
-    display: inline-block;
-}
-
-/* Hidden by Default */
-.dropdown-options {
-    display: none;
-    position: absolute;
-    z-index: 1;
-    box-sizing: border-box; /* Sizing includes padding & border */
-    width: 100%;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    border: solid 1px #3B6000;
-    border-radius: 0px 0px 10px 10px;
-    overflow: hidden;
-}
-
-.dropdown-options > * {
-    display: block;
-    margin: 0px;
-    padding: 12px 16px;
-    background-color: white;
-    border-bottom: solid 1px #3B6000;
-    color: black;
-    text-decoration: none;
-    font-size: 1.1em;
-}
-
-.dropdown-options > *:last-of-type {
-    border-radius: 0px 0px 10px 10px;
-    border-bottom: none;
-}
-
-/* Change color of dropdown links on hover */
-.dropdown-options > *:hover {
-    background-color: #E0EEAC;
-}
-
-/* Show the dropdown menu ("show" class added to .dropdown-options using JavaScript */
-.show {
-    display:block;
 }
 
 /**********************************************************************************************************************/
@@ -754,7 +811,7 @@ div:has(>#search-input) { /* Because Django puts every field in its own div... *
 }
 
 /**********************************************************************************************************************/
-/* SIDE BAR (USER PROFILE / SAVED ITEMS / ACCOUNT SETTIGNS) */
+/* SIDE BAR (USER PROFILE / SAVED ITEMS / ACCOUNT SETTINGS) */
 #user-account-sidebar {
     height: 100%;
     width: 15%;
@@ -766,7 +823,7 @@ div:has(>#search-input) { /* Because Django puts every field in its own div... *
 
 #user-account-sidebar a {
     padding: 15px 20px;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     font-weight: 300;
     text-decoration: none;
     border-bottom: solid 1px #537A00;
@@ -777,6 +834,12 @@ div:has(>#search-input) { /* Because Django puts every field in its own div... *
 
     & i {
         color: #537A00;
+    }
+
+    & span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     &:hover {
@@ -805,7 +868,3 @@ div:has(>#search-input) { /* Because Django puts every field in its own div... *
 #footer a:hover {
     text-decoration: underline;
 }
-
-
-
-
