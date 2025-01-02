@@ -1,0 +1,29 @@
+main {
+    display: flex;
+    flex-direction: row; /* Main axis = Horizontal */
+    border-top: solid 1px #8A8A8A;
+}
+
+/* -------------------------------------------------------------------------------------------------------------------*/
+/* SIDE BAR */
+#pinned-items-sidebar-link {
+    background-color: #3B6000;
+    color: white;
+
+    & * {
+        color: white !important; /* Use !important to guarantee override of global.css */
+    }
+
+    &:hover { /* No change on hover */
+        background-color: #3B6000 !important;
+        color: white !important;
+    }
+}
+
+/* -------------------------------------------------------------------------------------------------------------------*/
+/* PINNED ITEMS SECTION (MAIN CONTENT) */
+#main-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 20px 25px;
+}

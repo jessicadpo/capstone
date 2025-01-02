@@ -22,36 +22,16 @@ main {
 
 /* -------------------------------------------------------------------------------------------------------------------*/
 /* PROFILE SECTION (MAIN CONTENT) */
-#profile-section {
+#main-content {
     flex-grow: 1;
     overflow-y: auto;
+    padding: 30px;
     display: flex;
     flex-direction: column; /* Main axis = Vertical */
 }
 
-#profile-header {
-    background-color: #3B6000;
-    padding: 20px;
-    display: flex;
-    flex-direction: row; /* Main axis = Horizontal */
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-
-    & i {
-        font-size: 3rem;
-    }
-
-    & span {
-        font-size: 3rem;
-        font-weight: 500;
-        color: white;
-    }
-}
-
-#profile-content {
+#profile-section {
     flex-grow: 1;
-    padding: 30px;
     overflow-y: auto;
     display: flex;
     flex-direction: column; /* Main axis = Vertical */

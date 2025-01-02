@@ -23,13 +23,8 @@
     <main>
         {% include "components/user_sidenav.html" %}
 
-        <div id="profile-section">
-            <div id="profile-header"> <!-- TODO: Get rid of profile-header? (No need for it?) -->
-                <i class="fa fa-user-circle" aria-hidden="true"></i>
-                <span>{{ request.user.username }}</span>
-            </div>
-
-            <div id="profile-content">
+        <div id="main-content">
+            <div id="profile-section">
                 <div id="progress-equip-row">
                     <div class="content-box" id="progress-section">
                         <h1>Progress</h1>
