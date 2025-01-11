@@ -15,6 +15,12 @@ def homepage(request):
     return render(request, 'homepage.html', {'forms': page_forms})
 
 
+def about(request):
+    """View for About page"""
+    page_forms = {"search_form": SearchForm()}
+    return render(request, 'about.html', {'forms': page_forms})
+
+
 def signup_login(request):
     """View for Sign up/Login page"""
     page_forms = {}
@@ -98,22 +104,6 @@ def user_profile(request, username):
 
 
 @login_required
-def pinned_items(request, username):
-    """View for a user's "Pinned Items" page"""
-    page_forms = {"search_form": SearchForm()}
-
-    # Redirect user to their own Pinned Items page if they try to access someone else's
-    if request.user.username != username:
-        return redirect(reverse('pinned_items', args=[request.user.username]))
-
-    # TODO
-
-    return render(request, 'pinned_items.html', {
-        'forms': page_forms
-    })
-
-
-@login_required
 def account_settings(request, username):
     """View for a user's "Account Settings" page"""
     # Default page_forms (e.g., if GET request)
@@ -149,10 +139,58 @@ def account_settings(request, username):
     })
 
 
-def about(request):
-    """View for About page"""
-    page_forms = {"search_form": SearchForm()}
-    return render(request, 'about.html', {'forms': page_forms})
+@login_required
+def pinned_items(request, username):
+    """View for a user's "Pinned Items" page"""
+    page_forms = {"search_form": SearchForm(),
+                  "tags_form": TagsForm(),
+                  "equip_form": EquipForm()}  # SortFilterForm added AFTER POST requests are processed
+    score_data = {'user_points': -1, 'new_rewards': None}
+
+    # Redirect user to their own Pinned Items page if they try to access someone else's
+    if request.user.username != username:
+        return redirect(reverse('pinned_items', args=[request.user.username]))
+
+    # If POST request for adding/editing tags on an item
+    if request.method == 'POST' and ('tagged_item' in request.POST):
+        results_on_search_page = request.session.get('results_on_page', {})  # Set by the first GET request
+        item_data = results_on_search_page.get(str(request.POST['tagged_item']))
+        score_data = process_tags_form(request, item_data, score_data)
+
+    # If POST request for equipping a title
+    elif request.method == "POST" and ('title_to_equip' in request.POST):
+        #  Note: Tags already updated in front-end from a previous POST request
+        process_equip_form(request)
+        return HttpResponse(status=204)  # NOT a render() so that page doesn't reload AGAIN
+
+
+    # If all filters are empty/default values --> do NOT show "Clear Sort & Filter(s)" button #TODO
+    show_clear_filters = True
+    if is_default_sort_and_filter(request.GET):
+        show_clear_filters = False
+
+    # Create SortFilterForm AFTER any/all POST requests are done so that it uses correct tag counts
+    # (i.e., calculated AFTER processing tags form / adding tags to database)
+    filtered_pinned_items, filtered_contribs = get_filtered_user_pinned_items(request.user, request.GET)
+    user_contribution_types_with_item_counts = get_user_contribution_types_with_item_counts(request.user, filtered_contribs)
+    frequent_user_tags_with_item_counts = get_5_most_frequent_user_tags_with_item_counts(request.user, filtered_contribs)
+
+    page_forms['sort_filter_form'] = SortFilterForm(request.GET, user_contribution_types_with_item_counts)
+
+    # TODO: Paginate
+    # TODO: Set auto-complete of additional tags with only the tags of pinned items (?)
+
+    # Store results in session (if there are any)
+    if filtered_pinned_items is not None:
+        request.session['results_on_page'] = {item['item_id']: item for item in filtered_pinned_items}
+
+    return render(request, 'pinned_items.html', {
+        'forms': page_forms,
+        'pinned_items': filtered_pinned_items,
+        'frequent_user_tags': frequent_user_tags_with_item_counts,
+        'show_clear_filters': show_clear_filters,
+        'score_data': score_data,  # Need this so can trigger "Congrats!" popup
+    })
 
 
 def search_results(request, requested_page_number):
@@ -162,13 +200,15 @@ def search_results(request, requested_page_number):
 
     # If POST request for adding/editing tags on an item
     if request.method == 'POST' and ('tagged_item' in request.POST):
-        score_data = process_tags_form(request, score_data)
+        results_on_search_page = request.session.get('results_on_page', {})  # Set by the first GET request
+        item_data = results_on_search_page.get(str(request.POST['tagged_item']))
+        score_data = process_tags_form(request, item_data, score_data)
 
     # If POST request for equipping a title
     elif request.method == "POST" and ('title_to_equip' in request.POST):
-        #  Note: Page needs to reload if equipping a title from a search_results page (to update added tags, etc.)
-        # TODO: Check --> actually CAN return 204 if from search_results page? (tags already updated from previous post request?)
+        #  Note: Tags already updated in front-end from a previous POST request
         process_equip_form(request)
+        return HttpResponse(status=204)  # NOT a render() so that page doesn't reload AGAIN
 
     # TODO: Code for parsing AND/OR/NOT/*/? --> Investigate pyparsing & Shunting Yard algorithm
 
@@ -219,11 +259,13 @@ def search_results(request, requested_page_number):
 
 def item_page(request, item_id):
     """View for Item pages"""
+    results_on_search_page = request.session.get('results_on_page', {})  # Retrieve search results from the session
+    item_data = results_on_search_page.get(str(item_id))  # Get the specific item's LOC API data using the item ID
     score_data = {'user_points': -1, 'new_rewards': None}
 
     # If POST request for adding/editing tags on an item
     if request.method == 'POST' and ('tagged_item' in request.POST):
-        score_data = process_tags_form(request, score_data)
+        score_data = process_tags_form(request, item_data, score_data)
 
     # If POST request for equipping a title
     elif request.method == "POST" and ('title_to_equip' in request.POST):
@@ -237,15 +279,13 @@ def item_page(request, item_id):
 
     # If POST request for adding a comment
     elif request.method == 'POST' and ('comment' in request.POST):
-        process_comment_form(request, item_id)
+        process_comment_form(request, item_data)
 
     page_forms = {"search_form": SearchForm(),
                   "tags_form": TagsForm(),
                   "comment_form": CommentForm(),
                   "report_form": ReportForm(),
                   "equip_form": EquipForm()}
-    results_on_search_page = request.session.get('results_on_page', {})  # Retrieve search results from the session
-    item_data = results_on_search_page.get(str(item_id))  # Get the specific item's LOC API data using the item ID
     item_data['tags'] = get_all_tags_for_item(item_id)
     item_data['comments'] = get_all_comments_for_item(item_id, user=request.user, exclude_request_user=True)
 
@@ -267,11 +307,12 @@ def item_page(request, item_id):
     })
 
 
-def process_tags_form(request, score_data):
+def process_tags_form(request, item_data, score_data):
     """Function for processing "Add Tags" form"""
     tags_form = TagsForm(request.POST)
     if tags_form.is_valid():  # cleans form inputs
         prev_score = get_user_total_points(request.user)
+        set_item(item_data)
         set_user_tags_for_item(request.user, tags_form.cleaned_data)
         score_data['user_points'] = get_user_total_points(request.user)
         score_data['new_rewards'] = get_new_rewards(prev_score, score_data['user_points'])
@@ -292,14 +333,15 @@ def process_report_form(request, item_id):
         create_tag_report(request.user, item_id, report_form.cleaned_data)
 
 
-def process_comment_form(request, item_id):
+def process_comment_form(request, item_data):
     """Function for processing "Add Comment" form"""
     comment_form = CommentForm(request.POST)
     if comment_form.is_valid():
         if comment_form.cleaned_data.get("request_delete_comment"):
-            delete_user_comment_for_item(request.user, item_id)
+            delete_user_comment_for_item(request.user, item_data['item_id'])
         else:
-            set_user_comment_for_item(request.user, item_id, comment_form.cleaned_data)
+            set_item(item_data)
+            set_user_comment_for_item(request.user, item_data['item_id'], comment_form.cleaned_data)
 
 
 def process_username_change_form(request):

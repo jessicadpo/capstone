@@ -24,6 +24,7 @@ main {
 /* -------------------------------------------------------------------------------------------------------------------*/
 /* RESULTS SECTION */
 #results-section {
+    box-sizing: border-box; /* Height & Width include padding */
     height: 100%;
     width: 85%;
     padding: 1vh 1vw;
@@ -163,94 +164,11 @@ main {
 
 /* -----------MAIN LIST--------------*/
 #results-list {
+    flex-grow: 1; /* Occupy all remaining available height */
     width: 100%;
     display: flex;
     flex-direction: column; /* Main axis = Vertical */
     gap: 10px;
 }
 
-.result-item {
-    height: 22vh;
-    min-height: 200px;
-    background-color: white;
-    padding: 20px 30px;
-    border-radius: 20px;
-    display: flex;
-    flex-direction: row; /* Main axis = Horizontal */
-    gap: 20px;
-}
-
-.cover-container {
-    height: 100%;
-    min-width: 10%;
-    max-width: 10%;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: solid 1px black;
-    border-radius: 8px;
-}
-
-.result-cover {
-    height: 100%;
-    width: 100%;
-    color: #8A8A8A; /* Text color if no cover found */
-    display: flex;
-    align-items: center;
-    justify-content: center; /* Center-align text if no cover found */
-}
-
-.pin-item-button { /* Partially overrides styling in global.css */
-    width: 16%;
-    height: 20%;
-    margin: 20px;
-    padding: 25px 30px 25px 25px;
-    flex-shrink: 0;
-    & span {
-        flex-grow: 1;
-    }
-}
-
-.result-text-info {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column; /* Main axis = Vertical */
-    overflow: hidden;
-    font-size: 1.5em;
-    gap: 10px;
-    padding: 10px 0px;
-}
-
-.result-text-info * {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.media-type {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
-}
-
-.result-title {
-    font-size: 2.5rem;
-    font-weight: 600;
-    text-decoration: none;
-    margin: 5px 0px;
-}
-
-.result-title:hover, .result-title:focus {
-    color: #537A00;
-    text-decoration: underline;
-}
-
-.result-authors {
-    margin: 0;
-}
-
-.result-pub-date {
-    margin: 0;
-}
+/* Rest of styling in item_result.css */

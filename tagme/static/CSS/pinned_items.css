@@ -24,6 +24,152 @@ main {
 /* PINNED ITEMS SECTION (MAIN CONTENT) */
 #main-content {
     flex-grow: 1;
+    width: calc(100% - 13%);
     overflow-y: auto;
-    padding: 20px 25px;
+    display: flex;
+    flex-direction: row;
+}
+
+#pinned-items-section {
+    box-sizing: border-box;
+    flex-grow: 1;
+    width: calc(100% - 300px);
+    padding: 1vh 1vw;
+    display: flex;
+    flex-direction: column; /* Main axis = Horizontal */
+    gap: 10px;
+
+    & h1 {
+        margin: 10px 0px;
+        white-space: nowrap;
+    }
+}
+
+/* Rest of styling for individual pinned items in item_result.css */
+
+#filter-menu {
+    box-sizing: border-box;
+    width: 300px;
+    padding: 15px;
+    border-left: solid 1px #8A8A8A;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    & h2, h3 {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: 400;
+    }
+
+    & h3 {
+        margin: 5px 0px;
+    }
+
+    & p {
+        margin: 0px;
+    }
+
+    & #sort-order-select {
+        padding: 8px 10px;
+        border: solid 1px #595959; /* Dark Grey */
+        border-radius: 5px;
+        font-size: 0.9rem;
+        background-color: white;
+    }
+
+    & input[type="text"] { /* Override global.css */
+        margin: 10px 0px 15px 0px;
+    }
+
+    & input[type="text"]:last-of-type {
+        margin-bottom: 0px;
+    }
+
+    & input[type="submit"], #clear-filters-button {
+        cursor: pointer;
+        padding: 5px;
+        font-weight: 400;
+        font-size: 0.9rem;
+        border-radius: 5px;
+        border: solid 2px #006996; /* Blue */
+    }
+
+    & input[type="submit"] {
+        background-color: #006996; /* Blue */
+        color: white;
+    }
+
+    & #clear-filters-button {
+        width: 100%;
+        background-color: white;
+        color: #006996;
+    }
+
+    & input[type="submit"]:hover, input[type="submit"]focus {
+        background-color: #004868; /* Dark Blue */
+        border-color: #004868;
+    }
+
+    & #clear-filters-button:hover, #clear-filters-button:focus {
+        background-color: #E7F8FF; /* Light Blue */
+        border-color: #004868; /* Dark Blue */
+        color: #004868;
+    }
+}
+
+.form-section {
+    display: flex; /* So that direct child elements fill full width of this container */
+    flex-direction: column;
+
+    & > h2 {
+        padding-bottom: 5px;
+        border-bottom: solid 1px #8A8A8A;
+        margin: 5px 0px 10px 0px;
+    }
+
+    & .heading-container {
+        padding-bottom: 5px;
+        border-bottom: solid 1px #8A8A8A;
+        margin: 5px 0px 10px 0px;
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+    }
+
+    & .heading-container > h2 {
+        margin: 0px;
+    }
+
+    & .heading-container > .tooltip i {
+        color: #595959;
+        font-size: 1.3rem;
+    }
+}
+
+.tri-state-checkbox-container { /* Override global.css */
+    & input[type="checkbox"] {
+        border-width: 2px;
+        height: 25px;
+        width: 25px;
+        font-size: 1rem;
+    }
+
+    & label {
+        font-size: 1.2rem;
+    }
+
+    & .remove-filter-button {
+        background: none;
+        border: none;
+        color: #006996; /* Blue */
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+
+    & .remove-filter-button:hover {
+        text-decoration: underline;
+        color: #004868; /* Dark Blue */
+    }
 }

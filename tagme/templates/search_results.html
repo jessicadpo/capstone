@@ -16,13 +16,14 @@
     <link rel="stylesheet" href="../../static/CSS/global.css">
     <link rel="stylesheet" href="../../static/CSS/tag_modal.css">
     <link rel="stylesheet" href="../../static/CSS/new_reward_modal.css">
+    <link rel="stylesheet" href="../../static/CSS/item_result.css">
     <link rel="stylesheet" href="../../static/CSS/search_results.css">
 </head>
 
 <body>
+    {% load html_functions %}
     {% include "components/top_bar.html" %}
     {% include "components/new_reward_modal.html" %}
-    {% load html_math %}
 
     <main>
         <div id="sidebar">
@@ -69,31 +70,7 @@
 
             <div id="results-list">
                 {% for item in current_page %}
-                    <div class="result-item">
-                        <!-- TODO: Create default cover -->
-                        <div class="cover-container"> <!-- Div container necessary for consistent sizing -->
-                            <img class="result-cover" src="{{ item.cover }}" alt="{% if item.cover != None %} {{ item.title }} cover {% else %} Cover not found {% endif %}">
-                        </div>
-
-                        <div class="result-text-info">
-                            <div class="media-type"><i class="fa fa-book" aria-hidden="true"></i>Book</div>
-
-                            <!-- Need <a> item-title class for "Pin Item" button JavaScript behaviour (tag_modal.js) -->
-                            <a href="{% url 'item_page' item.item_id %}" class="result-title item-title"
-                               title="{{ item.title }} ({{ item.publication_date }}) by {{ item.authors }}"
-                               aria-label="{{ item.title }} ({{ item.publication_date }}) by {{ item.authors }}">
-                                {{ item.title }}
-                            </a>
-                            <p class="result-authors" title="{{ item.authors }}">by <b>{{ item.authors }}</b></p>
-                            <p class="result-pub-date">{{ item.publication_date }}</p>
-                        </div>
-
-                        {% if request.user.is_authenticated %}
-                            {% include "components/pin_item_button.html" %}
-                        {% endif %}
-
-
-                    </div>
+                    {% include "components/item_result.html" %}
                 {% empty %}
                     <p>No results found.</p>
                 {% endfor %}

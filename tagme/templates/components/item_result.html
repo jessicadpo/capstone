@@ -1,0 +1,54 @@
+<div class="result-item content-box">
+    <div class="item-data-section">
+        <!-- TODO: Create default cover -->
+        <div class="cover-container"> <!-- Div container necessary for consistent sizing -->
+            <img class="result-cover" src="{{ item.cover }}" alt="{% if item.cover != None %} {{ item.title }} cover {% else %} Cover not found {% endif %}">
+        </div>
+
+        <div class="result-text-info">
+            <div class="media-type"><i class="fa fa-book" aria-hidden="true"></i>Book</div>
+
+            <!-- Need <a> item-title class for "Pin Item" button JavaScript behaviour (tag_modal.js) -->
+            <a href="{% url 'item_page' item.item_id %}" class="result-title item-title"
+               title="{{ item.title }} ({{ item.publication_date }}) by {{ item.authors }}"
+               aria-label="{{ item.title }} ({{ item.publication_date }}) by {{ item.authors }}">
+                {{ item.title }}
+            </a>
+            <p class="result-authors" title="{{ item.authors }}">by <b>{{ item.authors }}</b></p>
+            <p class="result-pub-date">{{ item.publication_date }}</p>
+        </div>
+
+        {% if request.user.is_authenticated %}
+            {% include "components/pin_item_button.html" %}
+        {% endif %}
+    </div>
+
+    <!-- Show user's tags in pinned-items page (required loading of html_functions) -->
+    {% load html_functions %}
+    {% if request|url_contains_pinned_items %}
+        {% if item.user_public_tags %}
+            <div class="user-tags-section">
+                <p>Public Tags:</p>
+                <div class="tag-list-container"> <!-- Styling from tag_modal.css -->
+                    {% for tag in item.user_public_tags %}
+                        {% include 'components/tag.html' %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if item.user_private_tags %}
+            <div class="user-tags-section">
+                <p>Private Tags:</p>
+                <div class="tag-list-container"> <!-- Styling from tag_modal.css -->
+                    {% for tag in item.user_private_tags %}
+                        {% include 'components/tag.html' %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+
+
+
+</div>

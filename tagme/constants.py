@@ -19,3 +19,28 @@ REWARD_LIST = {
     "Elite Archivist": "#B63200",           # Orange
     "Metadata Master": "#820096",           # Purple
 }
+
+SEARCH_TYPES = (
+    ("Keyword", "Keyword"),
+    ("Tag", "Tag"),
+    ("Title", "Title"),
+    ("Author", "Author"),
+    ("Subject", "Subject")
+)
+
+SORT_OPTIONS = (
+    ("title_az", "Title (A to Z)"),
+    ("title_za", "Title (Z to A)"),
+    ("author_az", "Author (A to Z)"),
+    ("author_za", "Author (Z to A)"),
+    ("pubdate_no", "Date Published (Newest to Oldest)"),
+    ("pubdate_on", "Date Published (Oldest to Newest)"),
+    ("pindate_no", "Date Pinned (Newest to Oldest)"),
+    ("pindate_on", "Date Pinned (Oldest to Newest)")
+)
+
+FILTER_STATES = (
+    (-1, "None"),  # -1 is first so that -1/None (unchecked) is default
+    (0, "Exclude"),
+    (1, "Include")
+)

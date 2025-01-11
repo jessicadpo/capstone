@@ -7,9 +7,28 @@ from django.utils import timezone
 class Item(models.Model):
     """Class for Items database table"""
     item_id = models.TextField(primary_key=True, blank=False, null=False)  # The LOC API's item id
+    title = models.TextField(blank=False, null=False, default="No title available")
+    authors = models.TextField(blank=False, null=False, default="Unknown")
+    publication_date = models.TextField(blank=False, null=False, default="No publication date available")
+    description = models.TextField(blank=False, null=False, default="No description available")
+    _subjects = models.TextField(db_column='subjects', blank=True, null=True)  # String representing a list with \n delimitor
+    cover = models.TextField(blank=True, null=True)
+
+    @property
+    def subjects(self):
+        if isinstance(self._subjects, str):
+            return self._subjects.split("\\n")
+        return self._subjects
+
+    @subjects.setter
+    def subjects(self, subject_list):
+        if isinstance(subject_list, list):
+            self._subjects = '\\n'.join(subject_list)
+        else:
+            self._subjects = subject_list
 
     def __str__(self):
-        return str(self.item_id) # For proper display on admin site
+        return str(self.item_id)  # For proper display on admin site
 
 
 class Tag(models.Model):
@@ -50,10 +69,14 @@ class UserContribution(models.Model):
     item = models.ForeignKey(Item, default=None, on_delete=models.CASCADE)
 
     # Default is false because contribution can exist for a comment without the user ever pinning the item
+    # Do NOT use auto_now=True because pin_datetime should not update if a tag/comment is updated, but pin status doesn't change
     is_pinned = models.BooleanField(default=False, blank=False, null=False)
+    pin_datetime = models.DateTimeField(blank=True, null=True)  # Can be blank && null because comment can exist without pin
+
     public_tags = models.ManyToManyField(Tag, blank=True, related_name="public_tags")
     private_tags = models.ManyToManyField(Tag, blank=True, related_name="private_tags")
     points_earned = models.IntegerField(default=0, blank=False, null=False)  # To prevent point farming by deleting/re-adding
+
     comment = models.TextField(blank=True, null=True)
     comment_datetime = models.DateTimeField(blank=True, null=True)
     # Do NOT use auto_now=True because comment_datetime should not update if only tags are updated

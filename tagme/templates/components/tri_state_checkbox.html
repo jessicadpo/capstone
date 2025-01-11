@@ -1,0 +1,29 @@
+<!--
+IMPORTANT NOTE: The values of the <select> element MUST be -1, 0, and 1.
+-1 = Unchecked = Nothing in checkbox (Null / None)
+0 = Indeterminate = X in checkbox (No / Exclude)
+1 = Checked = Checkmark in checkbox (Yes / Include)
+-->
+<div class="tri-state-checkbox-container">
+    <input type="checkbox" class="tri-state-checkbox"/>
+    {% if select_element %}
+        {{ select_element }}
+        {{ select_element.label_tag }}
+    {% else %}
+        <!--
+        Sample / Template for creating/inserting new tri-state checkboxes via JavaScript
+        (Needs to be wrapped by a <template> element if used for this)
+         -->
+        <select>
+            <option value="-1">Unchecked</option>
+            <option value="1">Checked</option>
+            <option value="0">Indeterminate</option>
+        </select>
+
+        <!--
+        If there is a tag with a "count" attribute, store the tag's text (without any "(count)")
+        in an HTML attribute for later retrieval in JavaScript (e.g., see pinned_items.html)
+        -->
+        <label {% if tag.item_count >= 0 %} data-tag-text="{{ tag.tag }}" {% endif %}>{{ label_text }}</label>
+    {% endif %}
+</div>

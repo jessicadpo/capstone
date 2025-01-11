@@ -24,15 +24,14 @@ main {
 /* PROFILE SECTION (MAIN CONTENT) */
 #main-content {
     flex-grow: 1;
-    overflow-y: auto;
-    padding: 30px;
+    padding: 25px;
     display: flex;
     flex-direction: column; /* Main axis = Vertical */
 }
 
 #profile-section {
     flex-grow: 1;
-    overflow-y: auto;
+    padding: 5px; /* To give enough space for box-shadow */
     display: flex;
     flex-direction: column; /* Main axis = Vertical */
     gap: 15px;

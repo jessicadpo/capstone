@@ -2,21 +2,12 @@
 from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm, UserChangeForm
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
-from django.core.validators import EMPTY_VALUES
 from django.db import connection
 from .models import Reward
-from django.utils.translation import gettext_lazy as _
-
-SEARCH_TYPES = (
-    ("Keyword", "Keyword"),
-    ("Tag", "Tag"),
-    ("Title", "Title"),
-    ("Author", "Author"),
-    ("Subject", "Subject")
-)
+from .constants import *
 
 
 class SearchForm(forms.Form):
@@ -218,3 +209,47 @@ class CustomPasswordChangeForm(PasswordChangeForm):
     (but not if another setting is being changed)
     """
     PasswordChangeForm.base_fields['new_password2'].label = 'Confirm new password'
+
+
+class SortFilterForm(forms.Form):
+    """
+    Form for sorting & filtering pinned items in the Pinned Items page.
+    NOTE: Labels for filter fields are set in __init__
+    """
+    sort_order = forms.ChoiceField(label=False, choices=SORT_OPTIONS, initial="pindate_no", required=True,
+                                   widget=forms.Select(attrs={'id': 'sort-order-select'}))
+    public_tags = forms.ChoiceField(label=False, choices=FILTER_STATES, initial=None, required=True,
+                                    widget=forms.Select(attrs={'id': 'public-tags-filter'}))
+    private_tags = forms.ChoiceField(label=False, choices=FILTER_STATES, initial=None, required=True,
+                                     widget=forms.Select(attrs={'id': 'private-tags-filter'}))
+    comments = forms.ChoiceField(label=False, choices=FILTER_STATES, initial=None, required=True,
+                                 widget=forms.Select(attrs={'id': 'comments-filter'}))
+
+    # HIDDEN FROM USERS
+    include_tags = forms.CharField(label=False, required=False, widget=forms.Textarea(attrs={'id': 'include-tags-textarea'}))
+    exclude_tags = forms.CharField(label=False, required=False, widget=forms.Textarea(attrs={'id': 'exclude-tags-textarea'}))
+
+    def __init__(self, get_request, contribution_filter_counts):
+        super().__init__()
+
+        # Set form labels
+        self.fields['public_tags'].label = f"Public Tags ({str(contribution_filter_counts[0])})"
+        self.fields['private_tags'].label = f"Private Tags ({str(contribution_filter_counts[1])})"
+        self.fields['comments'].label = f"Comments ({str(contribution_filter_counts[2])})"
+
+        # Remove colon appended to the end of labels by Django, for all fields
+        for field_name, field in self.fields.items():
+            field.label_suffix = ''
+
+        # Set form initial values
+        if len(get_request) > 0:
+            # Retrieve all query parameters that aren't -1 (i.e., that are either Include (1) or Exclude (0))
+            user_selections = {key: value for key, value in get_request.items() if value != '-1'}
+            self.fields['sort_order'].initial = user_selections['sort_order']
+            for key in user_selections.keys():
+                if key in self.fields:
+                    self.fields[key].initial = user_selections[key]
+
+
+
+
