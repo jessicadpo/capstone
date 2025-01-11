@@ -59,6 +59,7 @@ def reward_to_dict_format(reward):
 
 
 def get_sort_by_filter(get_request):
+    """Get the value to use in .order_by() when sorting UserContribution objects"""
     if len(get_request) > 0:
         selected_sort_order = get_request['sort_order']
 
@@ -80,6 +81,7 @@ def get_sort_by_filter(get_request):
 
 
 def get_pinned_items_filters(get_request):
+    """Get all Django Q objects to pass into .filter() and .exclude() when filtering UserContribution objects"""
     filter_query = Q()  # Query to be passed to the .filter() function
     exclude_query = Q()  # Query to be passed to the .exclude() function
     tag_include_queries = []  # Queries to be passed to their own .filter() function
@@ -125,6 +127,10 @@ def get_pinned_items_filters(get_request):
 
 
 def is_default_sort_and_filter(get_request):
+    """
+    Check whether GET request only contains default sorting && no filters
+    for pages sorting & filtering UserContribution objects (e.g., Pinned Items page)
+    """
     sort_by_filter = get_sort_by_filter(get_request)
     filter_query, exclude_query, tag_include_queries = get_pinned_items_filters(get_request)
     if (sort_by_filter == '-pin_datetime' and
