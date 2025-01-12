@@ -214,7 +214,7 @@ def get_all_tags_for_item(item_id):
     return None
 
 
-def get_all_comments_for_item(item_id, user=None, exclude_request_user=False):
+def get_all_comments_for_item(item_id, user=None):
     """Function for getting all comments for a particular item_id"""
     item = Item.objects.filter(item_id=item_id)
     if item.exists():
@@ -225,7 +225,7 @@ def get_all_comments_for_item(item_id, user=None, exclude_request_user=False):
                                  .order_by('comment_datetime'))
 
         # Exclude the comment of the user making the request
-        if exclude_request_user and user is not None and user.is_authenticated:
+        if user is not None and user.is_authenticated:
             comment_contributions = comment_contributions.exclude(user=user)
 
         # Return an array of dicts, each dict contains:
@@ -234,11 +234,18 @@ def get_all_comments_for_item(item_id, user=None, exclude_request_user=False):
         for contrib in comment_contributions:
             equipped_1, equipped_2 = get_equipped_titles(contrib.user)
             comment = {'paragraphs': contrib.comment.split('\r\n\r\n'),
-                       'datetime': localtime(contrib.comment_datetime).strftime('%B %m, %Y %H:%M %p'),
+                       'datetime': localtime(contrib.comment_datetime).strftime('%B %d, %Y %H:%M %p'),
                        'username': contrib.user.username,
                        'equipped_title_1': equipped_1,
                        'equipped_title_2': equipped_2}
             comments.append(comment)
+
+        # Re-add the comment of the user making the request (if there is one) to the start of the list
+        # to ensure that it's always the first comment shown in the front-end
+        user_comment = get_user_comment_for_item(user, item_id)
+        if user_comment:
+            comments.insert(0, user_comment)
+
         return comments
     return None
 
@@ -272,7 +279,7 @@ def get_user_comment_for_item(user, item_id):
     if user_contrib.exists() and user_contrib[0].comment is not None:
         equipped_1, equipped_2 = get_equipped_titles(user)
         comment = {'paragraphs': user_contrib[0].comment.split('\r\n\r\n'),
-                   'datetime': localtime(user_contrib[0].comment_datetime).strftime('%B %m, %Y %H:%M %p'),
+                   'datetime': localtime(user_contrib[0].comment_datetime).strftime('%B %d, %Y %H:%M %p'),
                    'username': user.username,
                    'equipped_title_1': equipped_1,
                    'equipped_title_2': equipped_2}

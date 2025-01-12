@@ -14,9 +14,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <link rel="stylesheet" href="../../static/CSS/global.css">
-    <link rel="stylesheet" href="../../static/CSS/tag_modal.css">
-    <link rel="stylesheet" href="../../static/CSS/new_reward_modal.css">
-    <link rel="stylesheet" href="../../static/CSS/item_result.css">
+    <link rel="stylesheet" href="../../static/CSS/components/tag_modal.css">
+    <link rel="stylesheet" href="../../static/CSS/components/new_reward_modal.css">
+    <link rel="stylesheet" href="../../static/CSS/components/item_result.css">
+    <link rel="stylesheet" href="../../static/CSS/components/pagination.css">
     <link rel="stylesheet" href="../../static/CSS/pinned_items.css">
 </head>
 
@@ -33,13 +34,24 @@
         {% include "components/user_sidenav.html" %}
 
         <div id="main-content">
-            <div id="pinned-items-section">
-                <h1>Pinned Items by <b>{{request.user.username}}</b></h1>
-                {% for item in pinned_items %}
-                    {% include 'components/item_result.html' %}
-                {% empty %}
-                    <p>No pinned items found.</p>
-                {% endfor %}
+            <div id="pinned-items-section" class="paginated-content">
+                {% with "pinned items" as content_type %}
+                    <div id="pinned-items-header">
+                        <h1>Pinned Items by <b>{{request.user.username}}</b></h1>
+                        {% include 'components/pagination_top.html' %}
+                    </div>
+
+                    <div id="pinned-items-list"> <!-- Need this to fix footer at bottom of section -->
+                        {% for item in current_page %}
+                            {% include 'components/item_result.html' %}
+                        {% empty %}
+                            <p>No pinned items found.</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Pagination controls for pinned_items -->
+                    {% include 'components/pagination_footer.html' %}
+                {% endwith %}
             </div>
 
             <form id="filter-menu" method="GET">
@@ -152,7 +164,8 @@
     <!-- JavaScript -->
     <script type="text/javascript" src="../../static/JavaScript/global.js"></script>
     <script type="text/javascript" src="../../static/JavaScript/pinned_items.js"></script>
-    <script type="text/javascript" src="../../static/JavaScript/new_reward_modal.js"></script>
-    <script type="text/javascript" src="../../static/JavaScript/tag_modal.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/components/new_reward_modal.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/components/tag_modal.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/components/pagination.js"></script>
 </body>
 </html>

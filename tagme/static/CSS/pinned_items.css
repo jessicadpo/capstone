@@ -39,9 +39,22 @@ main {
     flex-direction: column; /* Main axis = Horizontal */
     gap: 10px;
 
+    & #pinned-items-header {
+        display: flex;
+        flex-direction: row;
+    }
+
     & h1 {
+        flex-grow: 1;
         margin: 10px 0px;
         white-space: nowrap;
+    }
+
+    & #pinned-items-list {
+        flex-grow: 1; /* Fixes footer to bottom of #pinned-items-section */
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
     }
 }
 

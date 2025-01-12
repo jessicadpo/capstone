@@ -1,10 +1,15 @@
 """Module for TagMe views"""
+from html.parser import HTMLParser
 from urllib.parse import urlparse
+
+from bs4 import BeautifulSoup
+from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
+from django.template.loader import render_to_string
 from django.urls import is_valid_path, reverse
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from .forms import *
 from .queries import *
 
@@ -163,8 +168,17 @@ def pinned_items(request, username):
         process_equip_form(request)
         return HttpResponse(status=204)  # NOT a render() so that page doesn't reload AGAIN
 
+    # If request is AJAX (i.e., pagination request)
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        all_filtered_pinned_items = request.session.get('results_on_page', {})  # Retrieve pinned item list from the session
+        current_page = Paginator(list(all_filtered_pinned_items.values()), 15).get_page(request.GET.get('page', 1))
+        full_page_html = render_to_string('pinned_items.html',
+                                          {'forms': page_forms, 'current_page': current_page},
+                                          request)
+        return JsonResponse({'html': extract_paginated_html(full_page_html), 'url_name': request.resolver_match.url_name})
 
-    # If all filters are empty/default values --> do NOT show "Clear Sort & Filter(s)" button #TODO
+    # ----------IF NOT a pagination (AJAX) request----------
+    # If all filters are empty/default values --> do NOT show "Clear Sort & Filter(s)" button
     show_clear_filters = True
     if is_default_sort_and_filter(request.GET):
         show_clear_filters = False
@@ -177,16 +191,19 @@ def pinned_items(request, username):
 
     page_forms['sort_filter_form'] = SortFilterForm(request.GET, user_contribution_types_with_item_counts)
 
-    # TODO: Paginate
-    # TODO: Set auto-complete of additional tags with only the tags of pinned items (?)
+    # If GET request doesn't contain 'page' --> returns page 1 by default
+    current_page = Paginator(filtered_pinned_items, 15).get_page(request.GET.get('page', 1))
 
-    # Store results in session (if there are any)
+    # Store ALL filtered pins (NOT just those on current page) in session (if there are any).
+    # Storing ALL pins so that pagination can be done without needing to re-filter items every time.
+    # Still storing in "results_on_page" session attribute since that's what item_page view needs.
+    # Otherwise, links to item pages from the Pinned Items page would not work.
     if filtered_pinned_items is not None:
         request.session['results_on_page'] = {item['item_id']: item for item in filtered_pinned_items}
 
     return render(request, 'pinned_items.html', {
         'forms': page_forms,
-        'pinned_items': filtered_pinned_items,
+        'current_page': current_page,
         'frequent_user_tags': frequent_user_tags_with_item_counts,
         'show_clear_filters': show_clear_filters,
         'score_data': score_data,  # Need this so can trigger "Congrats!" popup
@@ -259,8 +276,8 @@ def search_results(request, requested_page_number):
 
 def item_page(request, item_id):
     """View for Item pages"""
-    results_on_search_page = request.session.get('results_on_page', {})  # Retrieve search results from the session
-    item_data = results_on_search_page.get(str(item_id))  # Get the specific item's LOC API data using the item ID
+    results_from_referrer = request.session.get('results_on_page', {})  # Retrieve item list from the session
+    item_data = results_from_referrer.get(str(item_id))  # Get the specific item's LOC API data using the item ID
     score_data = {'user_points': -1, 'new_rewards': None}
 
     # If POST request for adding/editing tags on an item
@@ -287,7 +304,12 @@ def item_page(request, item_id):
                   "report_form": ReportForm(),
                   "equip_form": EquipForm()}
     item_data['tags'] = get_all_tags_for_item(item_id)
-    item_data['comments'] = get_all_comments_for_item(item_id, user=request.user, exclude_request_user=True)
+
+    # Ensure user's own comment is always the first comment on page 1
+    all_item_comments = get_all_comments_for_item(item_id, request.user)
+
+    # If GET request doesn't contain 'page' --> returns page 1 by default
+    current_page = Paginator(all_item_comments, 15).get_page(request.GET.get('page', 1))
 
     if request.user.is_authenticated:
         user_public_tags, user_private_tags = get_user_tags_for_item(request.user, item_id)
@@ -300,11 +322,27 @@ def item_page(request, item_id):
     if not item_data:
         raise Http404("Item not found")
 
+    # If request is AJAX (i.e., pagination request)
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        full_page_html = render_to_string('item_page.html',
+                                          {'item': item_data, 'forms': page_forms, 'current_page': current_page},
+                                          request)
+        return JsonResponse({'html': extract_paginated_html(full_page_html), 'url_name': request.resolver_match.url_name})
+
     return render(request, 'item_page.html', {
         'item': item_data,
         'forms': page_forms,
+        'current_page': current_page,
         'score_data': score_data,  # Need this so can trigger "Congrats!" popup
     })
+
+
+
+
+
+
+
+
 
 
 def process_tags_form(request, item_data, score_data):

@@ -1,10 +1,11 @@
-const commentContainers = document.querySelectorAll('.comment');
-const editCommentButton = document.getElementById('edit-comment-button');
-const commentForm = document.getElementById('comment-form');
-const commentFormTextarea = document.getElementById('user-comment-input');
-const commentFormRequestDelete = document.getElementById('id_request_delete_comment');
-const deleteCommentButton = document.getElementById('delete-comment-button');
-const cancelCommentButton = document.getElementById('cancel-comment-button');
+// vars instead of consts because elements will change whenever comment current_page is changed
+var commentContainers = document.querySelectorAll('.comment');
+var editCommentButton = document.getElementById('edit-comment-button');
+var commentForm = document.getElementById('comment-form');
+var commentFormTextarea = document.getElementById('user-comment-input');
+var commentFormRequestDelete = document.getElementById('id_request_delete_comment');
+var deleteCommentButton = document.getElementById('delete-comment-button');
+var cancelCommentButton = document.getElementById('cancel-comment-button');
 
 let isReadingMoreComment = false;
 
@@ -75,9 +76,16 @@ function updateCommentText(userCommentTextDiv) {
     });
 }
 
+// In its own function so that pagination.js can call it whenever it fetches a new comment page
+function setCommentsBehaviour() {
+    commentContainers = document.querySelectorAll('.comment');
+    editCommentButton = document.getElementById('edit-comment-button');
+    commentForm = document.getElementById('comment-form');
+    commentFormTextarea = document.getElementById('user-comment-input');
+    commentFormRequestDelete = document.getElementById('id_request_delete_comment');
+    deleteCommentButton = document.getElementById('delete-comment-button');
+    cancelCommentButton = document.getElementById('cancel-comment-button');
 
-// Triggers after DOM content is finished loading
-document.addEventListener("DOMContentLoaded", function () {
     // If the user already posted a comment (i.e., if editCommentButton exists)
     if (editCommentButton != null) {
         const userCommentTextDiv = editCommentButton.parentNode.parentNode.querySelector('.comment-text');
@@ -112,7 +120,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         // No need to set "Post" button behaviour for commentForm --> Default is what we need
-    } else {
+    } else if (commentForm != null) {
         commentForm.style.display = 'flex'; // Make commentForm visible
     }
 
@@ -132,8 +140,10 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
     }
-});
+}
 
+// Triggers after DOM content is finished loading
+document.addEventListener("DOMContentLoaded", setCommentsBehaviour);
 
 // Triggers when viewport is resized --> in item_page.js
 let resizeCommentTimeout;

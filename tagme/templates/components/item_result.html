@@ -2,20 +2,19 @@
     <div class="item-data-section">
         <!-- TODO: Create default cover -->
         <div class="cover-container"> <!-- Div container necessary for consistent sizing -->
-            <img class="result-cover" src="{{ item.cover }}" alt="{% if item.cover != None %} {{ item.title }} cover {% else %} Cover not found {% endif %}">
+            <!-- Invalid src= URLs causes pages to be requested twice, so only include src= attribute if item.cover is not None -->
+            <img class="result-cover" {% if item.cover %} src="{{ item.cover }}" {% endif %} alt="{% if item.cover != None %} {{ item.title }} cover {% else %} Cover not found {% endif %}">
         </div>
 
         <div class="result-text-info">
             <div class="media-type"><i class="fa fa-book" aria-hidden="true"></i>Book</div>
 
             <!-- Need <a> item-title class for "Pin Item" button JavaScript behaviour (tag_modal.js) -->
-            <a href="{% url 'item_page' item.item_id %}" class="result-title item-title"
-               title="{{ item.title }} ({{ item.publication_date }}) by {{ item.authors }}"
-               aria-label="{{ item.title }} ({{ item.publication_date }}) by {{ item.authors }}">
+            <a href="{% url 'item_page' item.item_id %}" class="result-title item-title" title="{{ item.title }}" aria-label="{{ item.title }}">
                 {{ item.title }}
             </a>
-            <p class="result-authors" title="{{ item.authors }}">by <b>{{ item.authors }}</b></p>
-            <p class="result-pub-date">{{ item.publication_date }}</p>
+            <p class="result-authors" title="{{ item.authors }}" aria-label="by {{ item.authors }}">by <b>{{ item.authors }}</b></p>
+            <p class="result-pub-date" title="{{ item.publication_date}}" aria-label="{{ item.publication_date }}">{{ item.publication_date }}</p>
         </div>
 
         {% if request.user.is_authenticated %}

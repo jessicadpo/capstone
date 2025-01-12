@@ -3,6 +3,7 @@ import html
 import re
 import string
 
+from bs4 import BeautifulSoup
 from django.db.models import Q
 
 
@@ -139,3 +140,10 @@ def is_default_sort_and_filter(get_request):
             len(tag_include_queries) == 0):
         return True
     return False
+
+
+def extract_paginated_html(full_page_html):
+    html_parser = BeautifulSoup(full_page_html, 'html.parser')
+    paginated_content_html = html_parser.find_all('div', class_="paginated-content")
+    return str(paginated_content_html[0])
+
