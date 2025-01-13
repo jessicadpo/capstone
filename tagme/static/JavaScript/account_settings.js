@@ -47,7 +47,7 @@ function hideForm(formToHide) {
     // Clear all non-submit input fields in formToHide
     inputFields = formToHide.querySelectorAll('input');
     inputFields.forEach(input => {
-        if (input.type !== 'submit' && input.name !== 'csrfmiddlewaretoken') {
+        if (input.type !== 'submit' && input.type !== 'hidden') {
             input.value = "";
         }
     });

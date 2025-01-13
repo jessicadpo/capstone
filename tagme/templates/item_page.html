@@ -89,21 +89,23 @@
 
         <div id="comments-section">
             <h1>Comments</h1>
-            <div id="comments-pane" class="paginated-content">
+            <div id="comments-pane">
                 <!-- If logged-in user has not made a comment for item yet, show comment_form -->
                 {% if user.is_authenticated and item.user_comment == null %}
                     {% include 'components/comment_form.html' %}
                 {% endif %}
 
-                <!-- NOTE: The user's comment (if there is one) is always put at top of page 1 -->
-                {% for comment in current_page %}
-                    {% include 'components/user_comment.html' %}
-                {% endfor %}
+                <div class="paginated-content">
+                    <!-- NOTE: The user's comment (if there is one) is always put at top of page 1 -->
+                    {% for comment in current_page %}
+                        {% include 'components/user_comment.html' %}
+                    {% endfor %}
 
-                <!-- Pagination controls for comments -->
-                {% with "comments" as content_type %}
-                    {% include 'components/pagination_footer.html' %}
-                {% endwith %}
+                    <!-- Pagination controls for comments -->
+                    {% with "comments" as content_type %}
+                        {% include 'components/pagination_footer.html' %}
+                    {% endwith %}
+                </div>
             </div>
         </div>
     </main>

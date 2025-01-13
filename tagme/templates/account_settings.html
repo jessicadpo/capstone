@@ -42,13 +42,17 @@
                         {% csrf_token %}
 
                         {% for field in forms.username_change_form %}
-                            <label for="{{ field.auto_id }}">{{ field.label }}</label>
-                            <div class="column-2">
-                                {{ field }}
-                                {% if field.errors %}
-                                    {{ field.errors }}
-                                {% endif %}
-                            </div>
+                            {% if not field.is_hidden %}
+                                <label for="{{ field.auto_id }}">{{ field.label }}</label>
+                                <div class="column-2">
+                                    {{ field }}
+                                    {% if field.errors %}
+                                        {{ field.errors }}
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                {{ field }} <!-- e.g., form_id field -->
+                            {% endif %}
                         {% endfor %}
 
                         <input type="submit" value="Apply Changes"/>
@@ -69,13 +73,17 @@
                         {% csrf_token %}
 
                         {% for field in forms.email_change_form %}
-                            <label for="{{ field.auto_id }}">{{ field.label }}</label>
-                            <div class="column-2">
-                                {{ field }}
-                                {% if field.errors %}
-                                    {{ field.errors }}
-                                {% endif %}
-                            </div>
+                            {% if not field.is_hidden %}
+                                <label for="{{ field.auto_id }}">{{ field.label }}</label>
+                                <div class="column-2">
+                                    {{ field }}
+                                    {% if field.errors %}
+                                        {{ field.errors }}
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                {{ field }} <!-- e.g., form_id field -->
+                            {% endif %}
                         {% endfor %}
 
                         <input type="submit" value="Apply Changes"/>
@@ -96,32 +104,37 @@
                         {% csrf_token %}
 
                         {% for field in forms.password_change_form %}
-                            <div class="column-1">
-                                <label for="{{ field.auto_id }}">{{ field.label }}</label>
-                                {% if field.help_text %}
-                                    <div class="tooltip">
-                                        <i class="fa fa-question-circle" aria-label="Tooltip for passwords" tabindex="0"></i>
-                                        <div class="tooltip-bubble yellow-bubble bubble-on-right">
-                                            <div class="bubble-tail-outline"></div>
-                                            <div class="bubble-tail"></div>
-                                            <ul class="bubble-content">
-                                                {{ field.help_text }}
-                                            </ul>
+                            {% if not field.is_hidden %}
+                                <div class="column-1">
+                                    <label for="{{ field.auto_id }}">{{ field.label }}</label>
+
+                                    {% if field.help_text %}
+                                        <div class="tooltip">
+                                            <i class="fa fa-question-circle" aria-label="Tooltip for passwords" tabindex="0"></i>
+                                            <div class="tooltip-bubble yellow-bubble bubble-on-right">
+                                                <div class="bubble-tail-outline"></div>
+                                                <div class="bubble-tail"></div>
+                                                <ul class="bubble-content">
+                                                    {{ field.help_text }}
+                                                </ul>
+                                            </div>
                                         </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="column-2">
+                                    {{ field }}
+                                </div>
+
+                                {% if field.errors %}
+                                    <div class="column-2">
+                                        {{ field.errors }}
                                     </div>
                                 {% endif %}
-                            </div>
 
-                            <div class="column-2">
-                                {{ field }}
-                            </div>
-
-                            {% if field.errors %}
-                                <div class="column-2">
-                                    {{ field.errors }}
-                                </div>
+                            {% else %}
+                                {{ field }} <!-- e.g., form_id field -->
                             {% endif %}
-
                         {% endfor %}
                         <input type="submit" class="column-3" value="Save Password"/>
                     </form>
@@ -131,7 +144,7 @@
                 <div id="settings-footer">
                     <form id="delete-account-form" method="POST">
                         {% csrf_token %}
-                        <input type="checkbox" class="invisible" name="delete_account" checked/>
+                        {{ forms.delete_account_form }}
                         <input type="submit" value="Delete Account"/>
                         <!-- Confirm popup opens on submit (see account_settings.js ) -->
                     </form>

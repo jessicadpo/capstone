@@ -83,7 +83,7 @@ def get_filtered_user_pinned_items(user, get_request):
 
         # Returning filtered_user_contribs as well for get_[thing]_with_item_counts() functions
         return user_pins, filtered_user_contribs
-    return None, None
+    return [], None
 
 
 def get_5_most_frequent_user_tags(user):
@@ -214,6 +214,26 @@ def get_all_tags_for_item(item_id):
     return None
 
 
+def get_user_tags_for_item(user, item_id):
+    """
+    Function for retrieving a user's tags for a particular item.
+    - Returns 2 lists of {'tag': tag_value} dicts.
+    - Using dicts instead of simple strings so that other tag_related data can be bundled with the
+      tag (e.g., usage count) if need be.
+    """
+    if not user.is_authenticated:
+        raise PermissionDenied("User must be logged in")
+
+    # Returns a list of dicts (each tag in its own dict)
+    user_contrib = UserContribution.objects.filter(user_id=user.id, item_id=item_id)
+    if user_contrib.exists():
+        user_contrib = user_contrib[0]
+        user_public_tags = list(user_contrib.public_tags.all().values('tag'))
+        user_private_tags = list(user_contrib.private_tags.all().values('tag'))
+        return user_public_tags, user_private_tags
+    return None, None
+
+
 def get_all_comments_for_item(item_id, user=None):
     """Function for getting all comments for a particular item_id"""
     item = Item.objects.filter(item_id=item_id)
@@ -248,26 +268,6 @@ def get_all_comments_for_item(item_id, user=None):
 
         return comments
     return None
-
-
-def get_user_tags_for_item(user, item_id):
-    """
-    Function for retrieving a user's tags for a particular item.
-    - Returns 2 lists of {'tag': tag_value} dicts.
-    - Using dicts instead of simple strings so that other tag_related data can be bundled with the
-      tag (e.g., usage count) if need be.
-    """
-    if not user.is_authenticated:
-        raise PermissionDenied("User must be logged in")
-
-    # Returns a list of dicts (each tag in its own dict)
-    user_contrib = UserContribution.objects.filter(user_id=user.id, item_id=item_id)
-    if user_contrib.exists():
-        user_contrib = user_contrib[0]
-        user_public_tags = list(user_contrib.public_tags.all().values('tag'))
-        user_private_tags = list(user_contrib.private_tags.all().values('tag'))
-        return user_public_tags, user_private_tags
-    return None, None
 
 
 def get_user_comment_for_item(user, item_id):
@@ -398,9 +398,8 @@ def get_related_tags(search_string):
 # SETTERS
 def set_item(item_data):
     """
-    Function for storing item data (from LOC API) into TagMe model
-    for later retrieval (i.e., Pinned Items page) & minimizing API calls
-    (due to rate limits)
+    Function for storing item data (from LOC API) into TagMe model for later retrieval (i.e., Pinned Items
+    page) & minimizing API calls (due to rate limits)
     """
     # Check if item has already been saved to TagMe database
     item = Item.objects.filter(item_id=item_data['item_id'])
@@ -551,7 +550,7 @@ def create_tag_report(user, item_id, report_data):
         ('Other', is_other),
     ] if selected), "No reason given.")
     if other_text:  # If other_text is not empty
-        reason += other_text
+        reason += ". " + other_text
 
     item = Item.objects.get(item_id=item_id)
     tag = Tag.objects.get(tag=reported_tag)
@@ -645,9 +644,9 @@ def update_pin_datetime(sender, instance, **kwargs):
 
 # pylint: enable=no-member
 
+
 ########################################################################################################################
 # DATAMUSE API QUERIES
-
 
 def query_datamuse_synonyms(word):
     """Function for synonyms of a given word (may or may NOT exist as tags in our database)"""

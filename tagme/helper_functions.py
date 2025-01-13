@@ -4,8 +4,13 @@ import re
 import string
 
 from bs4 import BeautifulSoup
+from django.core.paginator import Paginator
 from django.db.models import Q
+from django.template.loader import render_to_string
 
+
+########################################################################################################################
+# HELPER FUNCTIONS FOR queries.py
 
 def decode_unicode(text_string):
     """Convert any unicode to actual characters"""
@@ -127,6 +132,24 @@ def get_pinned_items_filters(get_request):
     return filter_query, exclude_query, tag_include_queries
 
 
+########################################################################################################################
+# HELPER FUNCTIONS FOR views.py
+
+def get_item_from_session(request, item_id=None):
+    """
+    Function for retrieving the data for a particular item from the user's session
+    (list of items previously stored in session by Search Results or Pinned Items view).
+    - If item_id is not specified, item will be retrieved from request's POST data (if specified in POST data).
+    - If item_id NOT given NOR in request.POST --> returns None.
+    """
+    items_in_session = request.session.get('results_from_referrer', {})
+    if item_id is not None:
+        return items_in_session.get(str(item_id))
+    elif "tagged_item" in request.POST:
+        return items_in_session.get(str(request.POST['tagged_item']))
+    return None
+
+
 def is_default_sort_and_filter(get_request):
     """
     Check whether GET request only contains default sorting && no filters
@@ -142,8 +165,27 @@ def is_default_sort_and_filter(get_request):
     return False
 
 
+def paginate(request, to_paginate, template_name, page_forms, item_data=None):
+    """
+    Function for paginating content into pages of 15 items/things
+    - If AJAX request --> will return the requested page.
+    - If not --> will return page 1.
+    """
+    current_page = Paginator(to_paginate, 1).get_page(request.GET.get('page', 1))
+
+    # If AJAX request (i.e., page already loaded)
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        full_page_html = render_to_string(template_name,
+                                          {'item_data': item_data, 'forms': page_forms, 'current_page': current_page},
+                                          request)
+        return extract_paginated_html(full_page_html)
+
+    # IF NOT AJAX request (i.e., page loading for the first time)
+    return current_page
+
+
 def extract_paginated_html(full_page_html):
+    """Function for getting only the HTML that needs to be changed when changing Pagination page (not web/URL page)"""
     html_parser = BeautifulSoup(full_page_html, 'html.parser')
     paginated_content_html = html_parser.find_all('div', class_="paginated-content")
     return str(paginated_content_html[0])
-

@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.template.loader import render_to_string
 from django.urls import is_valid_path, reverse
@@ -28,44 +28,17 @@ def about(request):
 
 def signup_login(request):
     """View for Sign up/Login page"""
-    page_forms = {}
-    if request.method == 'GET':
-        page_forms = {"signup_form": SignUpForm(), "login_form": LoginForm()}
+    page_forms = {"signup_form": SignUpForm(),
+                  "login_form": LoginForm()}
 
-    # NOTE: USERNAMES MUST BE UNIQUE
-    elif request.method == 'POST' and ('signup-submit' in request.POST):
-        signup_form = SignUpForm(request.POST)
-        if signup_form.is_valid():
-            signup_form.save()
-            username = signup_form.cleaned_data.get('username')
-            password = signup_form.cleaned_data.get('password1')
-            user = authenticate(request, username=username, password=password)
-            login(request, user)
-
-            # Ensure next_url is safe or default to home page
+    if request.method == "POST":
+        page_forms, success = process_post_form(request, page_forms=page_forms)
+        if success:
             next_url = request.POST.get('referrer')
             parsed_url = urlparse(next_url)
-            if parsed_url.netloc and is_valid_path(parsed_url.path):
-                return redirect(next_url)
+            if parsed_url.netloc and is_valid_path(parsed_url.path):  # Ensure next_url is safe or default to home page
+                return redirect(next_url)  # Redirect user to the page they were previously on
             return redirect("/")
-        page_forms = {"signup_form": signup_form, "login_form": LoginForm()}  # If login_form is invalid
-
-    elif request.method == 'POST' and ('login-submit' in request.POST):
-        login_form = LoginForm(request.POST)
-        if login_form.is_valid():
-            username = request.POST.get("username")
-            password = request.POST.get("password")
-            user = authenticate(request, username=username, password=password)
-            login(request, user)
-
-            # Ensure next_url is safe or default to home page
-            next_url = request.POST.get('referrer')
-            parsed_url = urlparse(next_url)
-            if parsed_url.netloc and is_valid_path(parsed_url.path):
-                return redirect(next_url)
-            return redirect("/")
-        page_forms = {"signup_form": SignUpForm(), "login_form": login_form}  # If login_form is invalid
-
     return render(request, 'signup_login.html', {'forms': page_forms})
 
 
@@ -75,20 +48,20 @@ def logout_view(request):
     return redirect("homepage")
 
 
-@login_required
+@login_required(login_url="/signup-login")  # TODO: TEST if works
 def user_profile(request, username):
     """View for a user's "My Profile" page"""
-    page_forms = {"search_form": SearchForm(), "equip_form": EquipForm()}
+    page_forms = {"search_form": SearchForm(),
+                  "equip_form": EquipForm()}
     score_data = {'user_points': -1, 'points_since_last_reward': -1}
 
-    # Redirect user to their own profile page if they try to access someone else's
-    if request.user.username != username:
+    if request.user.username != username:  # Redirect user to their own profile page if they try to access someone else's
         return redirect(reverse('user_profile', args=[request.user.username]))
 
-    # If POST request for equipping a title
-    if request.method == "POST" and ('title_to_equip' in request.POST):
-        process_equip_form(request)
-        return HttpResponse(status=204)  # NOT a render() so that page doesn't reload
+    if request.method == "POST":
+        form_result = process_post_form(request)  # Only POST form on User Profile == EquipForm
+        if form_result is True:  # If processed EquipForm && new title equipped successfully
+            return HttpResponse(status=204)  # NOT a render() so that page doesn't reload AGAIN
 
     next_reward = get_next_reward(request.user)
     equipped_title_1, equipped_title_2 = get_equipped_titles(request.user)
@@ -108,43 +81,36 @@ def user_profile(request, username):
     })
 
 
-@login_required
+@login_required(login_url="/signup-login")
 def account_settings(request, username):
     """View for a user's "Account Settings" page"""
     # Default page_forms (e.g., if GET request)
     page_forms = {"search_form": SearchForm(),
                   "username_change_form": UsernameChangeForm(request.user),
                   "email_change_form": EmailChangeForm(request.user),
-                  "password_change_form": CustomPasswordChangeForm(request.user)}
+                  "password_change_form": CustomPasswordChangeForm(request.user),
+                  "delete_account_form": DeleteAccountForm()}
 
-    # Redirect user to their own Account Settings page if they try to access someone else's
-    if request.user.username != username:
+    if request.user.username != username:  # Redirect user to their own profile page if they try to access someone else's
         return redirect(reverse('account_settings', args=[request.user.username]))
 
-    # If POST request for changing user's username
-    if request.method == 'POST' and ('new_username' in request.POST):
-        page_forms['username_change_form'], change_success = process_username_change_form(request)
-        # Reload page with updated URL if username was successfully changed
-        # else (if failed): Continue to normal render (contains form with the detected form errors)
-        if change_success:
+    if request.method == "POST":
+        form_result = process_post_form(request, page_forms=page_forms)
+        if form_result == "DeleteAccountForm":
+            request.user.delete()
+            return redirect("/")  # Redirect to homepage (user will be logged out)
+
+        elif "new_username" in request.POST and form_result[1]:  # If processed a UsernameChangeForm
             return redirect('account_settings', username=request.user.username)
+            # Reload page with updated URL if username was successfully changed (i.e., form_result[1] == True)
+            # else (if failed): Continue to normal render (contains form with the detected form errors)
 
-    elif request.method == 'POST' and ('new_email' in request.POST):
-        page_forms['email_change_form'] = process_email_change_form(request)
+        page_forms = form_result[0]
 
-    elif request.method == 'POST' and ('new_password1' in request.POST):
-        page_forms['password_change_form'] = process_password_change_form(request)
-
-    elif request.method == 'POST' and ('delete_account' in request.POST):
-        request.user.delete()
-        return redirect("/")  # Redirect to homepage (user will be logged out)
-
-    return render(request, 'account_settings.html', {
-        'forms': page_forms
-    })
+    return render(request, 'account_settings.html', {'forms': page_forms})
 
 
-@login_required
+@login_required(login_url="/signup-login")
 def pinned_items(request, username):
     """View for a user's "Pinned Items" page"""
     page_forms = {"search_form": SearchForm(),
@@ -152,54 +118,43 @@ def pinned_items(request, username):
                   "equip_form": EquipForm()}  # SortFilterForm added AFTER POST requests are processed
     score_data = {'user_points': -1, 'new_rewards': None}
 
-    # Redirect user to their own Pinned Items page if they try to access someone else's
-    if request.user.username != username:
+    if request.user.username != username:  # Redirect user to their own profile page if they try to access someone else's
         return redirect(reverse('pinned_items', args=[request.user.username]))
 
-    # If POST request for adding/editing tags on an item
-    if request.method == 'POST' and ('tagged_item' in request.POST):
-        results_on_search_page = request.session.get('results_on_page', {})  # Set by the first GET request
-        item_data = results_on_search_page.get(str(request.POST['tagged_item']))
-        score_data = process_tags_form(request, item_data, score_data)
+    if request.method == "POST":
+        item_data = get_item_from_session(request)
+        form_result = process_post_form(request, item_data)
+        if isinstance(form_result, dict):
+            score_data = form_result
+        elif form_result is True:  # If processed EquipForm && new title equipped successfully
+            return HttpResponse(status=204)  # NOT a render() so that page doesn't reload AGAIN
 
-    # If POST request for equipping a title
-    elif request.method == "POST" and ('title_to_equip' in request.POST):
-        #  Note: Tags already updated in front-end from a previous POST request
-        process_equip_form(request)
-        return HttpResponse(status=204)  # NOT a render() so that page doesn't reload AGAIN
-
-    # If request is AJAX (i.e., pagination request)
+    # ----------If AJAX request (i.e., page already loaded)----------
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        all_filtered_pinned_items = request.session.get('results_on_page', {})  # Retrieve pinned item list from the session
-        current_page = Paginator(list(all_filtered_pinned_items.values()), 15).get_page(request.GET.get('page', 1))
-        full_page_html = render_to_string('pinned_items.html',
-                                          {'forms': page_forms, 'current_page': current_page},
-                                          request)
-        return JsonResponse({'html': extract_paginated_html(full_page_html), 'url_name': request.resolver_match.url_name})
+        filtered_pinned_items = list(request.session.get('results_from_referrer').values())
+        current_page = paginate(request, filtered_pinned_items, "pinned_items.html", page_forms)
+        return JsonResponse({'html': current_page, 'url_name': request.resolver_match.url_name})
 
-    # ----------IF NOT a pagination (AJAX) request----------
+    # ----------IF NOT AJAX request (i.e., page loading for the first time)----------
     # If all filters are empty/default values --> do NOT show "Clear Sort & Filter(s)" button
-    show_clear_filters = True
-    if is_default_sort_and_filter(request.GET):
-        show_clear_filters = False
+    show_clear_filters = False if is_default_sort_and_filter(request.GET) else True
 
-    # Create SortFilterForm AFTER any/all POST requests are done so that it uses correct tag counts
-    # (i.e., calculated AFTER processing tags form / adding tags to database)
     filtered_pinned_items, filtered_contribs = get_filtered_user_pinned_items(request.user, request.GET)
     user_contribution_types_with_item_counts = get_user_contribution_types_with_item_counts(request.user, filtered_contribs)
     frequent_user_tags_with_item_counts = get_5_most_frequent_user_tags_with_item_counts(request.user, filtered_contribs)
 
+    # Create SortFilterForm AFTER any/all POST requests are done so that it uses correct tag counts
+    # (i.e., calculated AFTER processing tags form / adding tags to database)
     page_forms['sort_filter_form'] = SortFilterForm(request.GET, user_contribution_types_with_item_counts)
-
-    # If GET request doesn't contain 'page' --> returns page 1 by default
-    current_page = Paginator(filtered_pinned_items, 15).get_page(request.GET.get('page', 1))
 
     # Store ALL filtered pins (NOT just those on current page) in session (if there are any).
     # Storing ALL pins so that pagination can be done without needing to re-filter items every time.
-    # Still storing in "results_on_page" session attribute since that's what item_page view needs.
+    # Still storing in "results_from_referrer" session attribute since that's what item_page view needs.
     # Otherwise, links to item pages from the Pinned Items page would not work.
     if filtered_pinned_items is not None:
-        request.session['results_on_page'] = {item['item_id']: item for item in filtered_pinned_items}
+        request.session['results_from_referrer'] = {item['item_id']: item for item in filtered_pinned_items}
+
+    current_page = paginate(request, filtered_pinned_items, "pinned_items.html", page_forms)
 
     return render(request, 'pinned_items.html', {
         'forms': page_forms,
@@ -212,20 +167,18 @@ def pinned_items(request, username):
 
 def search_results(request, requested_page_number):
     """View for Search Results pages"""
-    page_forms = {"search_form": SearchForm(), "tags_form": TagsForm(), "equip_form": EquipForm()}
+    page_forms = {"search_form": SearchForm(),
+                  "tags_form": TagsForm(),
+                  "equip_form": EquipForm()}
     score_data = {'user_points': -1, 'new_rewards': None}
 
-    # If POST request for adding/editing tags on an item
-    if request.method == 'POST' and ('tagged_item' in request.POST):
-        results_on_search_page = request.session.get('results_on_page', {})  # Set by the first GET request
-        item_data = results_on_search_page.get(str(request.POST['tagged_item']))
-        score_data = process_tags_form(request, item_data, score_data)
-
-    # If POST request for equipping a title
-    elif request.method == "POST" and ('title_to_equip' in request.POST):
-        #  Note: Tags already updated in front-end from a previous POST request
-        process_equip_form(request)
-        return HttpResponse(status=204)  # NOT a render() so that page doesn't reload AGAIN
+    if request.method == "POST":
+        item_data = get_item_from_session(request)
+        form_result = process_post_form(request, item_data)
+        if isinstance(form_result, dict):
+            score_data = form_result
+        elif form_result is True:  # If processed EquipForm && new title equipped successfully
+            return HttpResponse(status=204)  # NOT a render() so that page doesn't reload AGAIN
 
     # TODO: Code for parsing AND/OR/NOT/*/? --> Investigate pyparsing & Shunting Yard algorithm
 
@@ -262,7 +215,7 @@ def search_results(request, requested_page_number):
     related_tags = get_related_tags(request.GET.get('search_string'))
 
     # Store results in session
-    request.session['results_on_page'] = {item['item_id']: item for item in results_on_page}
+    request.session['results_from_referrer'] = {item['item_id']: item for item in results_on_page}
 
     return render(request, 'search_results.html', {
         'current_page': results_on_page,
@@ -276,40 +229,23 @@ def search_results(request, requested_page_number):
 
 def item_page(request, item_id):
     """View for Item pages"""
-    results_from_referrer = request.session.get('results_on_page', {})  # Retrieve item list from the session
-    item_data = results_from_referrer.get(str(item_id))  # Get the specific item's LOC API data using the item ID
-    score_data = {'user_points': -1, 'new_rewards': None}
-
-    # If POST request for adding/editing tags on an item
-    if request.method == 'POST' and ('tagged_item' in request.POST):
-        score_data = process_tags_form(request, item_data, score_data)
-
-    # If POST request for equipping a title
-    elif request.method == "POST" and ('title_to_equip' in request.POST):
-        # Note: Page needs to reload if equipping a title from an item page in case user has comment
-        # for whom the equipped_titles need to be updated
-        process_equip_form(request)
-
-    # If POST request for reporting a tag
-    elif request.method == 'POST' and ('reported_tag' in request.POST):
-        process_report_form(request, item_id)
-
-    # If POST request for adding a comment
-    elif request.method == 'POST' and ('comment' in request.POST):
-        process_comment_form(request, item_data)
-
     page_forms = {"search_form": SearchForm(),
                   "tags_form": TagsForm(),
                   "comment_form": CommentForm(),
                   "report_form": ReportForm(),
                   "equip_form": EquipForm()}
+    score_data = {'user_points': -1, 'new_rewards': None}
+    item_data = get_item_from_session(request, item_id)  # Get the specific item's LOC API data using the item ID
+
+    if request.method == "POST":
+        form_result = process_post_form(request, item_data)
+        if isinstance(form_result, dict):
+            score_data = form_result
+        # W.R.T. PROCESSING EQUIP FORM --> Page needs to reload if equipping a title from
+        # an item page in case user has comment for whom the equipped_titles need to be updated
+
     item_data['tags'] = get_all_tags_for_item(item_id)
-
-    # Ensure user's own comment is always the first comment on page 1
     all_item_comments = get_all_comments_for_item(item_id, request.user)
-
-    # If GET request doesn't contain 'page' --> returns page 1 by default
-    current_page = Paginator(all_item_comments, 15).get_page(request.GET.get('page', 1))
 
     if request.user.is_authenticated:
         user_public_tags, user_private_tags = get_user_tags_for_item(request.user, item_id)
@@ -322,13 +258,13 @@ def item_page(request, item_id):
     if not item_data:
         raise Http404("Item not found")
 
-    # If request is AJAX (i.e., pagination request)
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        full_page_html = render_to_string('item_page.html',
-                                          {'item': item_data, 'forms': page_forms, 'current_page': current_page},
-                                          request)
-        return JsonResponse({'html': extract_paginated_html(full_page_html), 'url_name': request.resolver_match.url_name})
+    current_page = paginate(request, all_item_comments, "item_page.html", page_forms, item_data)
 
+    # ----------If AJAX request (i.e., page already loaded)----------
+    if isinstance(current_page, str):
+        return JsonResponse({'html': current_page, 'url_name': request.resolver_match.url_name})
+
+    # ----------IF NOT AJAX request (i.e., page loading for the first time)----------
     return render(request, 'item_page.html', {
         'item': item_data,
         'forms': page_forms,
@@ -337,31 +273,107 @@ def item_page(request, item_id):
     })
 
 
+########################################################################################################################
+# FORM PROCESSING
+
+def process_post_form(request, item_data=None, page_forms=None):
+    """Function for efficient calling of the appropriate form-processing function"""
+    if request.method != "POST":
+        raise ValueError("process_post_form() can only be called if the request.method is POST.")
+
+    match(request.POST["form_id"]):
+        case "SignUpForm":
+            page_forms['signup_form'], success = process_signup_form(request)
+            return page_forms, success  # Returns a (dict, bool) tuple
+        case "LoginForm":
+            page_forms['login_form'], success = process_login_form(request)
+            return page_forms, success  # Returns a (dict, bool) tuple
+
+        case "TagsForm":
+            return process_tags_form(request, item_data)  # Returns a dict (score_data) (or None if invalid form)
+        case "EquipForm":
+            return process_equip_form(request)  # Returns True or False
+        case "ReportForm":
+            return process_report_form(request, item_data['item_id'])  # Returns nothing (None)
+        case "CommentForm":
+            return process_comment_form(request, item_data)  # Returns nothing (None)
+
+        case "UsernameChangeForm":
+            page_forms['username_change_form'], success = process_username_change_form(request)
+            return page_forms, success  # Returns a (dict, bool) tuple
+        case "EmailChangeForm":
+            page_forms['email_change_form'], success = process_email_change_form(request)
+            return page_forms, success   # Returns a (dict, bool) tuple
+        case "CustomPasswordChangeForm":
+            page_forms['password_change_form'], success = process_password_change_form(request)
+            return page_forms, success   # Returns a (dict, bool) tuple
+        case "DeleteAccountForm":
+            # Form doesn't require processing
+            return "DeleteAccountForm"  # Returns a string (to differentiate from other form return types)
+
+        case _:
+            return None
 
 
+def process_signup_form(request):
+    """
+    Function for process "Sign Up" form
+    If successfully created user account --> returns a new SignUpForm && True
+    If failed --> returns the SignUpForm with the errors found && False
+    """
+    # NOTE: USERNAMES MUST BE UNIQUE
+    signup_form = SignUpForm(request.POST)
+    if signup_form.is_valid():
+        signup_form.save()
+        username = signup_form.cleaned_data.get('username')
+        password = signup_form.cleaned_data.get('password1')
+        user = authenticate(request, username=username, password=password)
+        login(request, user)
+        return SignUpForm(), True
+    return signup_form, False
 
 
+def process_login_form(request):
+    """
+    Function for process "Login" form
+    If successfully logged in --> returns a new LoginForm && True
+    If failed --> returns the LoginForm with the errors found && False
+    """
+    login_form = LoginForm(request.POST)
+    if login_form.is_valid():
+        username = login_form.cleaned_data.get('username')
+        password = login_form.cleaned_data.get('password')
+        user = authenticate(request, username=username, password=password)
+        login(request, user)
+        return LoginForm(), True
+    return login_form, False
 
 
-
-
-def process_tags_form(request, item_data, score_data):
+def process_tags_form(request, item_data):
     """Function for processing "Add Tags" form"""
     tags_form = TagsForm(request.POST)
     if tags_form.is_valid():  # cleans form inputs
         prev_score = get_user_total_points(request.user)
         set_item(item_data)
         set_user_tags_for_item(request.user, tags_form.cleaned_data)
-        score_data['user_points'] = get_user_total_points(request.user)
-        score_data['new_rewards'] = get_new_rewards(prev_score, score_data['user_points'])
-    return score_data
+        user_total_points = get_user_total_points(request.user)
+        score_data = {'user_points': user_total_points,
+                      'new_rewards': get_new_rewards(prev_score, user_total_points)}
+        return score_data
 
 
 def process_equip_form(request):
-    """Function for processing \"Equip Title\" form"""
+    """
+    Function for processing "Equip Title" form.
+    Returns True if new title equipped successfully. False if not.
+    """
+    # NOTE: If form triggered by new_reward_modal (i.e., user added new tags)
+    # --> tags already updated in front-end from a previous POST request
     equip_form = EquipForm(request.POST)
     if equip_form.is_valid():
         set_equipped_title(request.user, equip_form)
+        return True
+    return False
 
 
 def process_report_form(request, item_id):
@@ -385,29 +397,38 @@ def process_comment_form(request, item_data):
 def process_username_change_form(request):
     """
     Function for processing "Change Username" form
-    If successfully changed the username --> returns a new username_change_form && True
-    If failed to change username --> returns the username_change_form with the errors found && False
+    If successfully changed the username --> returns a new UsernameChangeForm && True
+    If failed to change username --> returns the UsernameChangeForm with the errors found && False
     """
     username_change_form = UsernameChangeForm(data=request.POST, user=request.user)
     if username_change_form.is_valid():
         username_change_form.save()
         return UsernameChangeForm(request.user), True
-    return username_change_form, False  # If form is invalid
+    return username_change_form, False
 
 
 def process_email_change_form(request):
-    """Function for processing "Change Email" form"""
+    """
+    Function for processing "Change Email" form
+    If successfully changed the email --> returns a new EmailChangeForm && True
+    If failed to change email --> returns the EmailChangeForm with the errors found && False
+    """
     email_change_form = EmailChangeForm(data=request.POST, user=request.user)
     if email_change_form.is_valid():
         email_change_form.save()
-        return EmailChangeForm(request.user)
-    return email_change_form  # If form is invalid
+        return EmailChangeForm(request.user), True
+    return email_change_form, False
 
 
 def process_password_change_form(request):
-    """Function for processing "Change Password" form"""
+    """
+    Function for processing "Change Password" form
+    If successfully changed the password --> returns a new CustomPasswordChangeForm && True
+    If failed to change password --> returns the CustomPasswordChangeForm with the errors found && False
+    """
     password_change_form = CustomPasswordChangeForm(data=request.POST, user=request.user)
     if password_change_form.is_valid():
         password_change_form.save()
-        return CustomPasswordChangeForm(request.user)
-    return password_change_form  # If form is invalid
+        update_session_auth_hash(request, request.user)  # Prevent auto-logout
+        return CustomPasswordChangeForm(request.user), True
+    return password_change_form, False
