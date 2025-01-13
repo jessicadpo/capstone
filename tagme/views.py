@@ -1,13 +1,9 @@
 """Module for TagMe views"""
-from html.parser import HTMLParser
 from urllib.parse import urlparse
 
-from bs4 import BeautifulSoup
-from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from django.template.loader import render_to_string
 from django.urls import is_valid_path, reverse
 from django.http import Http404, HttpResponse, JsonResponse
 from .forms import *
@@ -100,7 +96,7 @@ def account_settings(request, username):
             request.user.delete()
             return redirect("/")  # Redirect to homepage (user will be logged out)
 
-        elif "new_username" in request.POST and form_result[1]:  # If processed a UsernameChangeForm
+        if "new_username" in request.POST and form_result[1]:  # If processed a UsernameChangeForm
             return redirect('account_settings', username=request.user.username)
             # Reload page with updated URL if username was successfully changed (i.e., form_result[1] == True)
             # else (if failed): Continue to normal render (contains form with the detected form errors)
@@ -276,7 +272,7 @@ def item_page(request, item_id):
 ########################################################################################################################
 # FORM PROCESSING
 
-def process_post_form(request, item_data=None, page_forms=None):
+def process_post_form(request, item_data=None, page_forms=None):  # pylint disable=too-many-return-statements
     """Function for efficient calling of the appropriate form-processing function"""
     if request.method != "POST":
         raise ValueError("process_post_form() can only be called if the request.method is POST.")
@@ -360,6 +356,7 @@ def process_tags_form(request, item_data):
         score_data = {'user_points': user_total_points,
                       'new_rewards': get_new_rewards(prev_score, user_total_points)}
         return score_data
+    return None
 
 
 def process_equip_form(request):

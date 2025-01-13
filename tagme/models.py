@@ -16,12 +16,17 @@ class Item(models.Model):
 
     @property
     def subjects(self):
+        """Automatically convert _subjects (str) into a list of strings when accessing subjects"""
         if isinstance(self._subjects, str):
             return self._subjects.split("\\n")
         return self._subjects
 
     @subjects.setter
     def subjects(self, subject_list):
+        """
+        Automatically convert a list of strings into a single str with '\n' delimiter
+        & store this str in _subjects model field
+        """
         if isinstance(subject_list, list):
             self._subjects = '\\n'.join(subject_list)
         else:

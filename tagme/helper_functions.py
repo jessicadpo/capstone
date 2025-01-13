@@ -145,7 +145,7 @@ def get_item_from_session(request, item_id=None):
     items_in_session = request.session.get('results_from_referrer', {})
     if item_id is not None:
         return items_in_session.get(str(item_id))
-    elif "tagged_item" in request.POST:
+    if "tagged_item" in request.POST:
         return items_in_session.get(str(request.POST['tagged_item']))
     return None
 

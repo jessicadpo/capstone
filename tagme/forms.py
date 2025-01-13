@@ -48,8 +48,8 @@ class SortFilterForm(forms.Form):
         self.fields['comments'].label = f"Comments ({str(contribution_filter_counts[2])})"
 
         # Remove colon appended to the end of labels by Django, for all fields
-        for field_name, field in self.fields.items():
-            field.label_suffix = ''
+        for field in self.fields.items():
+            field[1].label_suffix = ''
 
         # Set form initial values
         if len(get_request) > 0:
@@ -216,7 +216,7 @@ class UsernameChangeForm(forms.Form):
         return new_username
 
     def save(self, commit=True):
-        # TODO: Only set if field not empty
+        """Change the user's username when form is saved"""
         self.user.username = self.cleaned_data['new_username']
         if commit:
             self.user.save()
@@ -249,7 +249,7 @@ class EmailChangeForm(forms.Form):
         return new_email
 
     def save(self, commit=True):
-        # TODO: Only set if field not empty
+        """Change the user's email when form is saved"""
         self.user.email = self.cleaned_data['new_email']
         if commit:
             self.user.save()
@@ -267,7 +267,7 @@ class CustomPasswordChangeForm(PasswordChangeForm):
     """
     form_id = forms.CharField(label=False, widget=forms.HiddenInput(
         attrs={'value': 'CustomPasswordChangeForm', 'id': 'password_change_form_id_input'}))
-    PasswordChangeForm.base_fields['new_password2'].label = 'Confirm new password'
+    PasswordChangeForm.base_fields['new_password2'].label = 'Confirm new password'  # pylint: disable=no-member
 
 
 class DeleteAccountForm(forms.Form):

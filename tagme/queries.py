@@ -8,7 +8,7 @@ from collections import Counter
 from urllib.parse import quote
 from django.utils.timezone import localtime
 from django.db import connection
-from django.db.models import Count, Prefetch
+from django.db.models import Count
 from django.forms.models import model_to_dict
 from django.contrib.auth import PermissionDenied
 from django.db.models.signals import pre_save, post_save, pre_delete, post_delete, post_migrate
@@ -572,8 +572,14 @@ def delete_user(user):
     user.delete()
 
 
+#######################################################
+# SIGNALS (AUTO-SETTERS)
+
+# Disable unused-argument pylint check for Django signals (unused arguments are necessary, even if unused)
+# pylint: disable=unused-argument
+
 @receiver(post_migrate)
-def set_global_blacklist(sender, **kwargs):  # pylint: disable=unused-argument
+def set_global_blacklist(sender, **kwargs):
     """Function for creating the list of globally-blacklisted tags in the database automatically after db is created"""
     if sender.name == 'tagme':
         for word in GLOBAL_BLACKLIST:
@@ -581,7 +587,7 @@ def set_global_blacklist(sender, **kwargs):  # pylint: disable=unused-argument
 
 
 @receiver(post_migrate)
-def set_reward_list(sender, **kwargs):  # pylint: disable=unused-argument
+def set_reward_list(sender, **kwargs):
     """Function for creating the list of reward titles in the database automatically after db is created"""
     if sender.name == 'tagme':
         points_required = 10
@@ -600,21 +606,21 @@ if "tagme_reward" in connection.introspection.table_names():
 
 
 @receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):  # pylint: disable=unused-argument
+def create_user_profile(sender, instance, created, **kwargs):
     """Use Django signals to automatically create a user profile points when a user is created (admin and not)"""
     if created:
         UserProfile.objects.create(user=instance)
 
 
 @receiver(post_save, sender=UserContribution)
-def update_user_profile_points_on_save(sender, instance, **kwargs):  # pylint: disable=unused-argument
+def update_user_profile_points_on_save(sender, instance, **kwargs):
     """Use Django signals to automatically update user profile points when a user contribution is added/updated"""
     user_profile = UserProfile.objects.get(user=instance.user)
     user_profile.update_points()
 
 
 @receiver(post_delete, sender=UserContribution)
-def update_user_profile_points_on_delete(sender, instance, **kwargs):  # pylint: disable=unused-argument
+def update_user_profile_points_on_delete(sender, instance, **kwargs):
     """
     Use Django signals to automatically update user profile points when a user contribution is deleted
     NOTE: UserContributions shouldn't ever be deleted (unless the user exercises their right to be forgotten)
@@ -624,7 +630,7 @@ def update_user_profile_points_on_delete(sender, instance, **kwargs):  # pylint:
 
 
 @receiver(pre_delete, sender=UserProfile)
-def delete_user_contributions_on_profile_delete(sender, instance, **kwargs):  # pylint: disable=unused-argument
+def delete_user_contributions_on_profile_delete(sender, instance, **kwargs):
     """
     Use Django signals to automatically delete all relevant user contributions BEFORE a user profile is deleted.
     Otherwise, impossible to delete a User (website crashes instead).
@@ -634,6 +640,7 @@ def delete_user_contributions_on_profile_delete(sender, instance, **kwargs):  # 
 
 @receiver(pre_save, sender=UserContribution)
 def update_pin_datetime(sender, instance, **kwargs):
+    """Use Django signals to automatically update the datetime of a pin BEFORE a user contribution is saved."""
     if instance.pk:  # If UserContribution object already exists (this is an update, not a creation)
         old_contrib = sender.objects.get(pk=instance.pk)
         if not old_contrib.is_pinned and instance.is_pinned:  # If re-pinning an item
@@ -642,6 +649,7 @@ def update_pin_datetime(sender, instance, **kwargs):
         if instance.is_pinned:  # If the new UserContribution is pinning an item (not just a comment)
             instance.pin_datetime = timezone.now()
 
+# pylint: enable=unused-argument
 # pylint: enable=no-member
 
 
