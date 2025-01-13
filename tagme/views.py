@@ -273,7 +273,6 @@ def item_page(request, item_id):
 ########################################################################################################################
 # FORM PROCESSING
 
-# pylint disable=too-many-return-statements
 def process_post_form(request, item_data=None, page_forms=None):
     """Function for efficient calling of the appropriate form-processing function"""
     if request.method != "POST":
@@ -311,7 +310,6 @@ def process_post_form(request, item_data=None, page_forms=None):
 
         case _:
             return None
-# pylint enable=too-many-return-statements
 
 
 def process_signup_form(request):
