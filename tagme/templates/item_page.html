@@ -102,9 +102,13 @@
                     {% endfor %}
 
                     <!-- Pagination controls for comments -->
-                    {% with "comments" as content_type %}
-                        {% include 'components/pagination_footer.html' %}
-                    {% endwith %}
+                    {% if current_page.paginator.count > 0 %}
+                        {% with "comments" as content_type %}
+                            {% include 'components/pagination_footer.html' %}
+                        {% endwith %}
+                    {% else %}
+                        <p>No comments posted yet. Be the first!</p>
+                    {% endif %}
                 </div>
             </div>
         </div>

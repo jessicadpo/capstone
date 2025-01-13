@@ -171,6 +171,9 @@ def paginate(request, to_paginate, template_name, page_forms, item_data=None):
     - If AJAX request --> will return the requested page.
     - If not --> will return page 1.
     """
+    if to_paginate is None:
+        to_paginate = []
+
     current_page = Paginator(to_paginate, 1).get_page(request.GET.get('page', 1))
 
     # If AJAX request (i.e., page already loaded)
