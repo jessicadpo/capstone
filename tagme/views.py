@@ -314,7 +314,7 @@ def process_post_form(request, item_data=None, page_forms=None):
 
 def process_signup_form(request):
     """
-    Function for process "Sign Up" form
+    Function for processing "Sign Up" form
     If successfully created user account --> returns a new SignUpForm && True
     If failed --> returns the SignUpForm with the errors found && False
     """
@@ -332,7 +332,7 @@ def process_signup_form(request):
 
 def process_login_form(request):
     """
-    Function for process "Login" form
+    Function for processing "Login" form
     If successfully logged in --> returns a new LoginForm && True
     If failed --> returns the LoginForm with the errors found && False
     """
