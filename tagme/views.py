@@ -133,7 +133,8 @@ def pinned_items(request, username):
 
     # ----------IF NOT AJAX request (i.e., page loading for the first time)----------
     # If all filters are empty/default values --> do NOT show "Clear Sort & Filter(s)" button
-    show_clear_filters = False if is_default_sort_and_filter(request.GET) else True
+    # show_clear_filters == opposite of is_default_sort_and_filter()
+    show_clear_filters = not is_default_sort_and_filter(request.GET)
 
     filtered_pinned_items, filtered_contribs = get_filtered_user_pinned_items(request.user, request.GET)
     user_contribution_types_with_item_counts = get_user_contribution_types_with_item_counts(request.user, filtered_contribs)
@@ -272,7 +273,8 @@ def item_page(request, item_id):
 ########################################################################################################################
 # FORM PROCESSING
 
-def process_post_form(request, item_data=None, page_forms=None):  # pylint disable=too-many-return-statements
+# pylint disable=too-many-return-statements
+def process_post_form(request, item_data=None, page_forms=None):
     """Function for efficient calling of the appropriate form-processing function"""
     if request.method != "POST":
         raise ValueError("process_post_form() can only be called if the request.method is POST.")
@@ -309,6 +311,7 @@ def process_post_form(request, item_data=None, page_forms=None):  # pylint disab
 
         case _:
             return None
+# pylint enable=too-many-return-statements
 
 
 def process_signup_form(request):
