@@ -14,10 +14,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <link rel="stylesheet" href="../../static/CSS/global.css">
-    <link rel="stylesheet" href="../../static/CSS/report_modal.css">
-    <link rel="stylesheet" href="../../static/CSS/tag_modal.css">
-    <link rel="stylesheet" href="../../static/CSS/new_reward_modal.css">
-    <link rel="stylesheet" href="../../static/CSS/user_comment.css">
+    <link rel="stylesheet" href="../../static/CSS/components/report_modal.css">
+    <link rel="stylesheet" href="../../static/CSS/components/tag_modal.css">
+    <link rel="stylesheet" href="../../static/CSS/components/new_reward_modal.css">
+    <link rel="stylesheet" href="../../static/CSS/components/user_comment.css">
+    <link rel="stylesheet" href="../../static/CSS/components/pagination.css">
     <link rel="stylesheet" href="../../static/CSS/item_page.css">
 </head>
 
@@ -89,22 +90,26 @@
         <div id="comments-section">
             <h1>Comments</h1>
             <div id="comments-pane">
-                <!-- Comment form + The user's comment (if there is one) (always put user's own comment at top) -->
-                {% if item.user_comment != null %}
-                    {% with item.user_comment as comment %}
-                        {% include 'components/user_comment.html' %}
-                    {% endwith %}
-                {% else %}
+                <!-- If logged-in user has not made a comment for item yet, show comment_form -->
+                {% if user.is_authenticated and item.user_comment == null %}
                     {% include 'components/comment_form.html' %}
                 {% endif %}
 
-                <!-- All other comments -->
-                {% for comment in item.comments %}
-                    {% include 'components/user_comment.html' %}
-                {% endfor %}
+                <div class="paginated-content">
+                    <!-- NOTE: The user's comment (if there is one) is always put at top of page 1 -->
+                    {% for comment in current_page %}
+                        {% include 'components/user_comment.html' %}
+                    {% endfor %}
 
-                <!--<p>1 to 15 of 999,999,999 comments</p>-->
-                <!-- TODO: Paste similar pagination as in search results page -->
+                    <!-- Pagination controls for comments -->
+                    {% if current_page.paginator.count > 0 %}
+                        {% with "comments" as content_type %}
+                            {% include 'components/pagination_footer.html' %}
+                        {% endwith %}
+                    {% else %}
+                        <p>No comments posted yet. Be the first!</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </main>
@@ -145,10 +150,11 @@
 
     <!-- JavaScript -->
     <script type="text/javascript" src="../../static/JavaScript/global.js"></script>
-    <script type="text/javascript" src="../../static/JavaScript/report_modal.js"></script>
-    <script type="text/javascript" src="../../static/JavaScript/tag_modal.js"></script>
-    <script type="text/javascript" src="../../static/JavaScript/new_reward_modal.js"></script>
-    <script type="text/javascript" src="../../static/JavaScript/user_comment.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/components/report_modal.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/components/tag_modal.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/components/new_reward_modal.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/components/user_comment.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/components/pagination.js"></script>
     <script type="text/javascript" src="../../static/JavaScript/item_page.js"></script>
 </body>
 </html>

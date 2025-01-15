@@ -7,9 +7,33 @@ from django.utils import timezone
 class Item(models.Model):
     """Class for Items database table"""
     item_id = models.TextField(primary_key=True, blank=False, null=False)  # The LOC API's item id
+    title = models.TextField(blank=False, null=False, default="No title available")
+    authors = models.TextField(blank=False, null=False, default="Unknown")
+    publication_date = models.TextField(blank=False, null=False, default="No publication date available")
+    description = models.TextField(blank=False, null=False, default="No description available")
+    _subjects = models.TextField(db_column='subjects', blank=True, null=True)  # String representing a list with \n delimitor
+    cover = models.TextField(blank=True, null=True)
+
+    @property
+    def subjects(self):
+        """Automatically convert _subjects (str) into a list of strings when accessing subjects"""
+        if isinstance(self._subjects, str):
+            return self._subjects.split("\\n")
+        return self._subjects
+
+    @subjects.setter
+    def subjects(self, subject_list):
+        """
+        Automatically convert a list of strings into a single str with '\n' delimiter
+        & store this str in _subjects model field
+        """
+        if isinstance(subject_list, list):
+            self._subjects = '\\n'.join(subject_list)
+        else:
+            self._subjects = subject_list
 
     def __str__(self):
-        return str(self.item_id) # For proper display on admin site
+        return str(self.item_id)  # For proper display on admin site
 
 
 class Tag(models.Model):
@@ -34,26 +58,6 @@ class Reward(models.Model):
         return str(self.title)  # For proper display on admin site
 
 
-class UserProfile(models.Model):
-    """
-    Class for UserProfile database table (extends default Django User model via OneToOneField)
-    Reference: https://www.geeksforgeeks.org/how-to-extend-user-model-in-django/
-    """
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    points = models.PositiveBigIntegerField(default=0, blank=False, null=False)
-    equipped_title_1 = models.ForeignKey(Reward, blank=True, null=True, related_name="title_1", on_delete=models.CASCADE)
-    equipped_title_2 = models.ForeignKey(Reward, blank=True, null=True, related_name="title_2", on_delete=models.CASCADE)
-
-    def update_points(self):
-        """ Sum all points_earned from UserContribution (for that user) """
-        total_points = self.user.usercontribution_set.aggregate(total=models.Sum('points_earned'))['total'] or 0  # pylint: disable=no-member
-        self.points = total_points
-        self.save()
-
-    def __str__(self):
-        return str(self.user)  # For proper display on admin site
-
-
 class UserContribution(models.Model):
     """
     Class for UserContributions database table
@@ -70,10 +74,14 @@ class UserContribution(models.Model):
     item = models.ForeignKey(Item, default=None, on_delete=models.CASCADE)
 
     # Default is false because contribution can exist for a comment without the user ever pinning the item
+    # Do NOT use auto_now=True because pin_datetime should not update if a tag/comment is updated, but pin status doesn't change
     is_pinned = models.BooleanField(default=False, blank=False, null=False)
+    pin_datetime = models.DateTimeField(blank=True, null=True)  # Can be blank && null because comment can exist without pin
+
     public_tags = models.ManyToManyField(Tag, blank=True, related_name="public_tags")
     private_tags = models.ManyToManyField(Tag, blank=True, related_name="private_tags")
     points_earned = models.IntegerField(default=0, blank=False, null=False)  # To prevent point farming by deleting/re-adding
+
     comment = models.TextField(blank=True, null=True)
     comment_datetime = models.DateTimeField(blank=True, null=True)
     # Do NOT use auto_now=True because comment_datetime should not update if only tags are updated
@@ -86,6 +94,28 @@ class UserContribution(models.Model):
     def __str__(self):
         return "User: " + str(self.user) + ", Item: " + str(self.item)  # For proper display on admin site
 
+
+class UserProfile(models.Model):
+    """
+    Class for UserProfile database table (extends default Django User model via OneToOneField)
+    Reference: https://www.geeksforgeeks.org/how-to-extend-user-model-in-django/
+
+    Note: MUST BE PLACED AFTER UserContribution MODEL (!!!!!!) so that objects are deleted in
+    the correct order if a User is deleted from the database.
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    points = models.PositiveBigIntegerField(default=0, blank=False, null=False)
+    equipped_title_1 = models.ForeignKey(Reward, blank=True, null=True, related_name="title_1", on_delete=models.CASCADE)
+    equipped_title_2 = models.ForeignKey(Reward, blank=True, null=True, related_name="title_2", on_delete=models.CASCADE)
+
+    def update_points(self):
+        """ Sum all points_earned from UserContribution (for that user) """
+        total_points = self.user.usercontribution_set.aggregate(total=models.Sum('points_earned'))['total'] or 0  # pylint: disable=no-member
+        self.points = total_points
+        self.save()
+
+    def __str__(self):
+        return str(self.user)  # For proper display on admin site
 
 class Report(models.Model):
     """Class for TagReports database table"""

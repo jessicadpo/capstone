@@ -10,7 +10,7 @@ main {
     background-color: #3B6000;
     color: white;
 
-    & i {
+    & * {
         color: white !important; /* Use !important to guarantee override of global.css */
     }
 
@@ -22,37 +22,16 @@ main {
 
 /* -------------------------------------------------------------------------------------------------------------------*/
 /* PROFILE SECTION (MAIN CONTENT) */
-#profile-section {
+#main-content {
     flex-grow: 1;
-    overflow-y: auto;
+    padding: 25px;
     display: flex;
     flex-direction: column; /* Main axis = Vertical */
 }
 
-#profile-header {
-    background-color: #3B6000;
-    padding: 20px;
-    display: flex;
-    flex-direction: row; /* Main axis = Horizontal */
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-
-    & i {
-        font-size: 3rem;
-    }
-
-    & span {
-        font-size: 3rem;
-        font-weight: 500;
-        color: white;
-    }
-}
-
-#profile-content {
+#profile-section {
     flex-grow: 1;
-    padding: 30px;
-    overflow-y: auto;
+    padding: 5px; /* To give enough space for box-shadow */
     display: flex;
     flex-direction: column; /* Main axis = Vertical */
     gap: 15px;
@@ -73,11 +52,7 @@ main {
     }
 }
 
-.content-box {
-    background-color: white;
-    padding: 20px 30px;
-    border-radius: 20px;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15);
+.content-box {  /* Extends global.css */
     display: flex;
     flex-direction: column; /* Main axis = Vertical */
     align-items: start;
@@ -222,7 +197,7 @@ main {
         background-color: rgba(0, 105, 150, 0.25); /* Same blue colour, but more transparent */
     }
 
-    & > .reward-title::after { /* TODO: TEST */
+    & > .reward-title::after {
         height: inherit;
         width: inherit;
         position: absolute;
@@ -246,28 +221,6 @@ main {
         color: #8A8A8A;
         font-weight: 400;
         font-size: 1.1em;
-    }
-}
-
-
-.edit-button {
-    width: auto; /* Override CSS of .dropdown-button (global.css) */
-    height: auto;
-    padding: 0px;
-    background: none;
-    border: none;
-    cursor: pointer;
-
-    & i {
-        color: #8A8A8A;
-        font-size: 2rem;
-    }
-}
-
-.edit-button:hover, .edit-button:focus {
-    background: none; /* Override CSS of .dropdown-button (global.css) */
-    & i {
-        color: black;
     }
 }
 

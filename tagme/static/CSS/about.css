@@ -24,11 +24,6 @@ main a {
 }
 
 .content-box {
-    background-color: white;
-    padding: 20px 30px;
-    border-radius: 20px;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15);
-
     & h1, h2 {
         margin: 0;
         font-weight: 400;

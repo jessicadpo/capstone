@@ -30,12 +30,9 @@ h1 {
     justify-content: center;
 }
 
-.form-inputs-section input {
+.form-inputs-section input {  /* Override input[type="text/password/email"] styling in global.css */
     width: 20vw;
-    border: solid black 1px;
     border-radius: 8px;
-    font-size: 1em;
-    padding: 10px;
     margin: 15px;
 }
 

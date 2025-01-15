@@ -1,0 +1,247 @@
+main {
+    display: flex;
+    flex-direction: row; /* Main axis = Horizontal */
+    border-top: solid 1px #8A8A8A;
+}
+
+/* -------------------------------------------------------------------------------------------------------------------*/
+/* SIDE BAR */
+#account-settings-sidebar-link {
+    background-color: #3B6000;
+    color: white;
+
+    & * {
+        color: white !important; /* Use !important to guarantee override of global.css */
+    }
+
+    &:hover { /* No change on hover */
+        background-color: #3B6000 !important;
+        color: white !important;
+    }
+}
+
+/* -------------------------------------------------------------------------------------------------------------------*/
+/* ACCOUNT SETTINGS SECTION (MAIN CONTENT) */
+#main-content {
+    flex-grow: 1;
+    padding: 25px;
+}
+
+#account-settings-section {
+    box-sizing: border-box;
+    width: fit-content;
+    padding: 20px 30px;
+    margin: 5px; /* To give enough space for box-shadows */
+    min-height: 100%;
+    display: flex;
+    flex-direction: column; /* Main axis = Vertical */
+
+    & h1 {
+        margin: 0px;
+        font-weight: 400;
+    }
+}
+
+form.invisible {
+    display: contents !important; /* OVERRIDE global.css STYLING */
+
+    & > * { /* Direct children only */
+        display: flex; /* NOT "none" because need to keep width even if an element should be hidden/invisible */
+    }
+}
+
+form.invisible * { /* All descendants (indirect children included) */
+    height: 0px !important;
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    visibility: hidden !important;
+}
+
+.grid-content {
+    display: grid;
+    grid: min-content / 1fr 20vw min-content;
+    /* 20vw so that column02 width stays the same across page reloads (e.g., when a form error occurs) */
+    align-content: center;
+    column-gap: 10px;
+    /* Don't use row-gap so that hidden rows are properly hidden. Use 7.5px margins instead */
+
+    & h2 {
+        font-weight: 400;
+        font-size: 1.2rem;
+    }
+
+    & label {
+        font-weight: 400;
+        font-size: 1.1rem;
+        color: #595959;
+    }
+
+    & .edit-button {
+        justify-content: center;
+    }
+
+    & .edit-button i {
+        font-size: 1.5rem;
+    }
+
+    & form {
+        /* Treat the elements inside forms as if they're children (not grandchildren) of grid-content */
+        display: contents;
+    }
+
+    & input[type="submit"]  {
+        padding: 10px;
+        font-size: 1rem;
+        grid-column: 3;
+        cursor: pointer;
+        border: solid 1px #537A00;
+        border-radius: 10px;
+        background-color: #537A00;
+        color: white;
+    }
+
+    & input[type="submit"]:hover {
+        border-color: #3B6000;
+        background-color: #3B6000;
+    }
+
+    & hr {
+        grid-column: 1 / span 3;
+        width: 100%;
+        border: none; /* Override default <hr> styling */
+        border-bottom: solid 1px #8A8A8A;
+    }
+}
+
+.grid-content > *:not(form),
+.grid-content form:not(.invisible) > * {
+    box-sizing: border-box;
+    margin: 7.5px 0px;
+
+    &.first-grid-row {
+        margin-top: 15px;
+    }
+
+    &.last-grid-row {
+        margin-bottom: 15px;
+    }
+}
+
+.grid-content > *:not(form),
+.grid-content form > *:not(.column-2) {
+    display: flex;
+    flex-direction: row;
+    align-items: center; /* Make sure all text are vertically-centered/aligned regardless of font-size */
+    gap: 5px;
+}
+
+.column-2 {
+    & ul {
+        list-style-type: "* ";
+        padding: 5px;
+        margin: 0px 0px 0px 5px; /* Override default <ul> styling */
+    }
+
+    & li {
+        color: red;
+    }
+}
+
+.single-field-form .column-2 {
+    grid-column: 2;
+    grid-row: auto / span 2;
+
+    &:has(.errorlist) > input {
+        border-color: red;
+    }
+}
+
+.multi-field-form .column-2 {
+    grid-column: 2 / span 2;
+
+    &:has(input[aria-invalid="true"]) {
+        margin-bottom: 0px;
+    }
+
+    &:has(.errorlist) {
+        margin: 0px 0px 7.5px 0px;
+    }
+
+    &:has(+div.column-2 > .errorlist) input {
+        border-color: red;
+    }
+}
+
+/* Select all .column-1 divs that are followed by a .column-2 div that contains an input with aria-invalid="true" attribute */
+.multi-field-form .column-1:has(+div.column-2 > input[aria-invalid="true"]) {
+    margin-bottom: 0px !important;
+}
+
+#settings-footer {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-items: end;
+
+    & input[type="submit"] {
+        cursor: pointer;
+        padding: 10px 20px;
+        border: solid 1px #B52801;
+        border-radius: 10px;
+        background-color: #B52801;
+        color: white;
+        font-size: 1rem;
+    }
+
+    & input:hover[type="submit"]:hover {
+        border-color: #952101;
+        background-color: #952101;
+    }
+}
+
+.tooltip { /* Overrides global.css */
+    & i {
+        color: #595959;
+    }
+
+    & .tooltip-bubble.bubble-on-right {
+        /*
+        - Width of .bubble-content (25vw) (includes padding & border due to box-sizing)
+        - Left margin of bubble-tail (15px)
+        - Position of bubble-tail-outline (2px)
+        - 6px of spacing (arbitrarily-decided)
+        - Total = -25vw - 15px - 6px = -25vw - 23px
+        */
+        right: calc(-25vw - 23px);
+    }
+
+    & .bubble-content {
+        width: 25vw;
+        list-style-type: disc;
+        padding: 10px 5px 10px 30px;
+    }
+
+    & .bubble-content ul { /* The default <ul> for help text added by Django (has no class name) */
+        display: contents; /* Treat <li> inside it as if they're direct children (not grandchildren) of .bubble-content */
+        list-style-type: disc;
+    }
+
+    & li {
+        margin-bottom: 10px;
+        padding-left: 5px; /* Space between bullet point and text */
+    }
+
+    & li:last-child {
+        margin: 10px 0px 0px 0px;
+    }
+
+    & li:only-child {
+        margin: 0;
+    }
+}
+

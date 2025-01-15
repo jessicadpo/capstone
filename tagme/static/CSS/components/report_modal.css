@@ -39,61 +39,16 @@
     padding: 0px 20px;
 }
 
-input[type='checkbox'] {
-    -webkit-appearance: none; /* Remove default browser styling */
-    -moz-appearance: none; /* Remove default browser styling */
-    appearance: none; /* Remove default browser styling */
-    min-height: 35px;
-    min-width: 35px;
-    position: relative;
-    border: solid 3px #3B6000;
-    border-radius: 5px;
-    font-size: 1.3em;
-    display: flex;  /* Need this to get center x/checkmark inside the checkbox */
-    justify-content: center;
-    cursor: pointer;
-
-    color: #959595;
-    background-color: #FDFDFD;
-    transition: all 0.2s ease;
+input[type='checkbox'] { /* Override global.css */
+    border-color: #3B6000; /* Dark Green */
 
     &::before {
-        content: "✖";
-        position: absolute;
-        opacity: 1;
-        transform: scale(1);
-        transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-
-    &::after {
-        content: "✔";
-        position: absolute;
-        opacity: 0;
-        transform: scale(0.5);
-        transition: opacity 0.2s ease, transform 0.2s ease;
+        opacity: 1; /* Show "x" instead of blank when unchecked */
     }
 }
 
-input[type='checkbox']:checked {
-    background-color: #537A00;
-    color: white;
-
-    &::before {
-        opacity: 0;
-        transform: scale(0.5);
-    }
-
-    &::after {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-#other-input {
+#other-input {  /* Override input[type="text"] of global.css */
     font-size: 1.3em;
-    border: solid 1px black;
-    border-radius: 5px;
-    padding: 8px 10px;
     margin-left: 70px; /* (20px padding + 35px width + 10px gap) - 5px (looks off without it) */
     width: calc(100% - 70px - 20px - 22px); /* -70px margin-left - 20px padding - 25px padding */
 }
