@@ -24,6 +24,7 @@ main {
 /* -------------------------------------------------------------------------------------------------------------------*/
 /* RESULTS SECTION */
 #results-section {
+    box-sizing: border-box; /* Height & Width include padding */
     height: 100%;
     width: 85%;
     padding: 1vh 1vw;
@@ -47,6 +48,7 @@ main {
     margin: 0;
 }
 
+/* TODO: Remove once switch to pagination.css */
 #results-header p {
     margin: 0px 20px;
     font-size: 1.1em;
@@ -81,176 +83,13 @@ main {
     border-radius: 0px 5px 5px 0px;
 }
 
-/* ----------- (RESULTS) FOOTER--------------*/
-#results-footer {
-    position: relative; /* So can position bottom-to-of-results */
-    display: flex;
-    flex-direction: row; /* Main axis = Horizontal */
-    justify-content: center;
-    align-items: center;
-}
-
-#results-footer p {
-    position: absolute;
-    left: 0;
-    font-size: 1.2em;
-}
-
-#bottom-page-navigation {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 7px;
-}
-
-#bottom-page-navigation input {
-    -webkit-appearance: none;
-    -moz-appearance: textfield;
-    width: 40px;
-    padding: 10px;
-    background-color: white;
-    border: solid 1px black;
-    border-radius: 5px;
-    font-size: 1.2em;
-    font-weight: 400;
-    text-align: center;
-}
-
-#bottom-page-navigation a:not(:has(>i)) {
-    font-size: 1.2em;
-    font-weight: 500;
-    padding: 8px 14px;
-    padding: 8px 14px;
-    border-radius: 5px;
-    text-decoration: none;
-}
-
-#current-page-link {
-    color: white;
-    background-color: #537A00;
-}
-
-#bottom-page-navigation a:not(:has(>i)):not(#current-page-link):hover {
-    background-color: #D9D9D9;
-}
-
-#current-page-link:hover {
-    background-color: #3B6000;
-}
-
-#bottom-page-navigation a:has(>i) {
-    border-radius: 20px;
-    transform: translate(0px, -1px);
-}
-
-#bottom-page-navigation i {
-    font-size: 2.5em;
-    font-weight: 600;
-    padding: 0px 12px;
-}
-
-.bottom-prev-page i.fa-angle-left {
-    transform: translate(-2px, -1px);
-}
-
-.bottom-next-page i.fa-angle-right {
-    transform: translate(2px, -1px);
-}
-
-#bottom-page-navigation a:has(>i):hover {
-    background-color: #D9D9D9;
-}
-
 /* -----------MAIN LIST--------------*/
 #results-list {
+    flex-grow: 1; /* Occupy all remaining available height */
     width: 100%;
     display: flex;
     flex-direction: column; /* Main axis = Vertical */
     gap: 10px;
 }
 
-.result-item {
-    height: 22vh;
-    min-height: 200px;
-    background-color: white;
-    padding: 20px 30px;
-    border-radius: 20px;
-    display: flex;
-    flex-direction: row; /* Main axis = Horizontal */
-    gap: 20px;
-}
-
-.cover-container {
-    height: 100%;
-    min-width: 10%;
-    max-width: 10%;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: solid 1px black;
-    border-radius: 8px;
-}
-
-.result-cover {
-    height: 100%;
-    width: 100%;
-    color: #8A8A8A; /* Text color if no cover found */
-    display: flex;
-    align-items: center;
-    justify-content: center; /* Center-align text if no cover found */
-}
-
-.pin-item-button { /* Partially overrides styling in global.css */
-    width: 16%;
-    height: 20%;
-    margin: 20px;
-    padding: 25px 30px 25px 25px;
-    flex-shrink: 0;
-    & span {
-        flex-grow: 1;
-    }
-}
-
-.result-text-info {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column; /* Main axis = Vertical */
-    overflow: hidden;
-    font-size: 1.5em;
-    gap: 10px;
-    padding: 10px 0px;
-}
-
-.result-text-info * {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.media-type {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
-}
-
-.result-title {
-    font-size: 2.5rem;
-    font-weight: 600;
-    text-decoration: none;
-    margin: 5px 0px;
-}
-
-.result-title:hover, .result-title:focus {
-    color: #537A00;
-    text-decoration: underline;
-}
-
-.result-authors {
-    margin: 0;
-}
-
-.result-pub-date {
-    margin: 0;
-}
+/* Rest of styling in item_result.css */

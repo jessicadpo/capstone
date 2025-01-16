@@ -1,17 +1,18 @@
-const pinItemButtons = document.querySelectorAll('.pin-item-button');
+// vars instead of consts because elements will change whenever search_results/pinned_items current_page is changed
+var pinItemButtons = document.querySelectorAll('.pin-item-button');
 const addTagsOverlay = document.getElementById('add-tags-overlay');
 const addTagsModal = document.getElementById('add-tags-modal');
-const userTagsForm = document.getElementById('user-tags-form');
+var userTagsForm = document.getElementById('user-tags-form');
 const closeXButton = document.getElementById('close-tag-modal-button');
 const cancelButton = document.getElementById('cancel-tags-modal-button');
 const saveTagsButton = document.getElementById('save-tags-button');
-const unpinItemButton = document.getElementById('unpin-item-button');
+var unpinItemButton = document.getElementById('unpin-item-button');
 
 const publicTagsContainer = document.getElementById('public-tags-list-container');
 const privateTagsContainer = document.getElementById('private-tags-list-container');
 
-const publicTagsInput = document.getElementById('public-tags-input');
-const privateTagsInput = document.getElementById('private-tags-input');
+var publicTagsInput = document.getElementById('public-tags-input');
+var privateTagsInput = document.getElementById('private-tags-input');
 const animatedTagScore = document.getElementById('animated-tag-score');
 const totalPointsEarnedElement = document.getElementById('total-points-earned');
 let initialTotalPointsEarned = 0; // Set at the same time "Pin" button behaviour is set
@@ -119,20 +120,14 @@ function playScoreAnimation() {
     animatedTagScore.classList.add('play-animation');
 }
 
-/*--------------------------------------------------------------------------------------------------------------------*/
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape' || event.keyCode === 27) {
-        closeTagsModal();
-    }
-});
+// In its own function so that pagination.js can call it whenever it fetches a new search_resuls or pinned_items page
+function setPinItemButtonBehaviour() {
+    pinItemButtons = document.querySelectorAll('.pin-item-button');
+    userTagsForm = document.getElementById('user-tags-form');
+    publicTagsInput = document.getElementById('public-tags-input');
+    privateTagsInput = document.getElementById('private-tags-input');
+    unpinItemButton = document.getElementById('unpin-item-button');
 
-// Triggers after DOM content is finished loading
-document.addEventListener("DOMContentLoaded", function() {
-    // Set close modal button behaviour
-    closeXButton.addEventListener('click', closeTagsModal);
-    cancelButton.addEventListener('click', closeTagsModal);
-
-    // Set "Pin Item" button behaviour
     pinItemButtons.forEach(pinItemButton => {
         pinItemButton.addEventListener('click', function() {
             const pinningItem = this.closest('.result-item'); // i.e., closest common ancestor of "Pin Item" button and element containing item title
@@ -183,6 +178,23 @@ document.addEventListener("DOMContentLoaded", function() {
             openTagsModal();
         });
     });
+}
+
+/*--------------------------------------------------------------------------------------------------------------------*/
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape' || event.keyCode === 27) {
+        closeTagsModal();
+    }
+});
+
+// Triggers after DOM content is finished loading
+document.addEventListener("DOMContentLoaded", function() {
+    // Set close modal button behaviour
+    closeXButton.addEventListener('click', closeTagsModal);
+    cancelButton.addEventListener('click', closeTagsModal);
+
+    // Set "Pin Item" button behaviour
+    setPinItemButtonBehaviour();
 
     // Set tag text input behaviour (Public tags)
     publicTagsInput.addEventListener('keydown', function(event) {

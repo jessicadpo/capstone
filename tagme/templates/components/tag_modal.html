@@ -79,7 +79,7 @@
     </div>
 
     <!-- NOT VISIBLE -->
-    <form id="user-tags-form" class="invisible" method="POST">
+    <form id="user-tags-form" class="invisible" method="POST" name="TagsForm">
         {% csrf_token %}
         {{ forms.tags_form }}
     </form>

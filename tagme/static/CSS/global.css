@@ -30,8 +30,16 @@ em {
     font-style: italic;
 }
 
-.invisible {
-    display: none;
+.invisible { /* Overwritten in account_settings.css */
+    display: none !important;
+}
+
+.content-box {
+    position: relative; /* So can absolute position the elements inside it, if necessary */
+    background-color: white;
+    padding: 20px 30px;
+    border-radius: 20px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 /**********************************************************************************************************************/
@@ -59,6 +67,199 @@ em {
     50%  {transform: translate(5px, 0);}
     100% {transform: translate(0, 0);}
 }
+
+/**********************************************************************************************************************/
+/* DROPDOWN MENUS (GENERAL - CAN BE OVERWRITTEN FOR SPECIFIC MENUS) */
+/* MUST BE PLACED BEFORE CSS FOR EDIT BUTTONS (FOR user_profile PAGE) */
+.dropdown-button {
+    height: 100%;
+    width: 100%;
+    padding: 0px 15px;
+    background-color: #537A00;
+    border: solid #3B6000 1px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    & > * {
+        color: white;
+    }
+
+    & > span {
+        flex-grow: 1;
+    }
+}
+
+.dropdown-button:hover, .dropdown-button:focus {
+    background-color: #3B6000;
+}
+
+/* Applies to the dropdown-button only when "show" class is added to dropdown-options */
+.dropdown-button:has(~.show) {
+    border-radius: 10px 10px 0px 0px;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Hidden by Default */
+.dropdown-options {
+    display: none;
+    position: absolute;
+    z-index: 1;
+    box-sizing: border-box; /* Sizing includes padding & border */
+    width: 100%;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    border: solid 1px #3B6000;
+    border-radius: 0px 0px 10px 10px;
+    overflow: hidden;
+}
+
+.dropdown-options > * {
+    display: block;
+    margin: 0px;
+    padding: 12px 16px;
+    background-color: white;
+    border-bottom: solid 1px #3B6000;
+    color: black;
+    text-decoration: none;
+    font-size: 1.1em;
+}
+
+.dropdown-options > *:last-of-type {
+    border-radius: 0px 0px 10px 10px;
+    border-bottom: none;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-options > *:hover {
+    background-color: #E0EEAC;
+}
+
+/* Show the dropdown menu ("show" class added to .dropdown-options using JavaScript */
+.show {
+    display:block;
+}
+
+/**********************************************************************************************************************/
+/* INPUTS (CUSTOM) */
+input[type="text"], input[type="password"], input[type="email"] {  /* Overwritten in some pages */
+    box-sizing: border-box;
+    width: 100%;
+    padding: 8px 10px;
+    border: solid 1px black;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+input[type="checkbox"] {
+    -webkit-appearance: none; /* Remove default browser styling */
+    -moz-appearance: none; /* Remove default browser styling */
+    appearance: none; /* Remove default browser styling */
+    height: 35px;
+    width: 35px;
+    flex-shrink: 0; /* Cannot shrink if checkbox is inside a flex container */
+    font-size: 1.3rem;
+    position: relative;
+    border: solid 3px #595959; /* Dark Grey */
+    border-radius: 5px;
+    display: inline-flex;  /* Need this to get center x/checkmark inside the checkbox */
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+
+    color: #959595; /* Medium Grey --> Only applicable to certain binary-state checkboxes (e.g., report_modal.css) */
+    background-color: #FDFDFD;
+    transition: all 0.2s ease;
+
+    &::before {
+        content: "✖";
+        position: absolute;
+        opacity: 0;
+        transform: scale(1);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    &::after {
+        content: "✔";
+        position: absolute;
+        opacity: 0;
+        transform: scale(0.5);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+}
+
+input[type='checkbox']:checked {
+    border-color: #3B6000; /* Dark Green */
+    background-color: #537A00; /* Green */
+    color: white;
+
+    &::before {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    &::after {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+input[type='checkbox']:indeterminate { /* Only applies to tri-state checkboxes */
+    border-color: #952101; /* Dark Red */
+    background-color: #B52801; /* Red */
+    color: white;
+
+    &::before {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    &::after {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+}
+
+.tri-state-checkbox-container {
+    cursor: pointer;
+    padding: 0px 5px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 7px;
+
+    & * {
+        cursor: pointer;
+    }
+
+    & select {
+        display: none;
+    }
+
+    & label {
+        -webkit-user-select: none; /* Safari */
+        -ms-user-select: none; /* Internet Explorer */
+        user-select: none;
+        word-break: break-word;
+        font-size: 1.5rem;
+    }
+
+    /* Styling for "Remove filter" buttons in pinned_items.css */
+}
+
+.tri-state-checkbox-container:has(input:disabled) {
+    cursor: initial;
+
+    & *:not(button) {
+        cursor: initial;
+    }
+}
+
 
 /**********************************************************************************************************************/
 /* MISC. BUTTONS */
@@ -96,11 +297,26 @@ em {
     }
 }
 
-.pin-item-button { /* Partially overwritten in search_results.css */
+.pin-item-button-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+
+    & .date-pinned {
+        width: 100%;
+        font-size: 0.9rem;
+        text-align: right;
+        font-weight: 400;
+        color: #595959;
+    }
+}
+
+.pin-item-button { /* Partially overwritten in item_result.css */
     width: 100%;
     min-width: 210px;
-    padding: 12px 0;
-    margin: 2vh 0;
+    padding: 12px 0px;
+    margin: 2vh 0px;
     border: solid 1px #B52801;
     border-radius: 15px;
     display: flex;
@@ -179,6 +395,36 @@ em {
 
 .close-x-button:hover {
     color: #537A00;
+}
+
+.edit-button {
+    width: auto; /* Override CSS of .dropdown-button */
+    height: auto;
+    padding: 0px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+
+    & i {
+        color: #8A8A8A;
+        font-size: 2rem;
+    }
+
+    & span {
+        color: #8A8A8A;
+        font-size: 1rem;
+    }
+}
+
+.edit-button:hover, .edit-button:focus {
+    background: none; /* Override CSS of .dropdown-button */
+    & i, span {
+        color: black;
+    }
 }
 
 /**********************************************************************************************************************/
@@ -406,45 +652,46 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
 
 /********************************************/
 /* TOOLTIP (INITIAL) STYLE */
-.tooltip-bubble.red-bubble {
+.bubble-on-right .bubble-tail-outline, .bubble-on-right .bubble-tail {
+    border-right: 26px solid;
+    border-top: 13px solid transparent !important;  /* Ensure transparent borders */
+    border-bottom: 13px solid transparent !important; /* Ensure transparent borders */
+}
+
+.bubble-on-left .bubble-tail-outline, .bubble-on-left .bubble-tail {
+    border-left: 26px solid;
+    border-top: 13px solid transparent !important;  /* Ensure transparent borders */
+    border-bottom: 13px solid transparent !important; /* Ensure transparent borders */
+}
+
+.red-bubble {
     background-color: #FEEBE8;
     border-color: #B52801;
 
-    &.bubble-on-right .bubble-tail-outline {
-        border-right: 26px solid #B52801;
-    }
-    &.bubble-on-right .bubble-tail {
-        border-right: 26px solid #FEEBE8;
+    & .bubble-tail-outline {
+        border-color: #B52801;
     }
 
-    &.bubble-on-left .bubble-tail-outline {
-        border-left: 26px solid #B52801;
-    }
-    &.bubble-on-left .bubble-tail {
-        border-left: 26px solid #FEEBE8;
+    & .bubble-tail {
+        border-color: #FEEBE8;
     }
 }
 
-.tooltip-bubble.yellow-bubble {
+.yellow-bubble {
     background-color: #FFF1CD;
     border-color: #C67A2A;
 
-    &.bubble-on-right .bubble-tail-outline {
-        border-right: 26px solid #C67A2A;
-    }
-    &.bubble-on-right .bubble-tail {
-        border-right: 26px solid #FFF1CD;
+    & .bubble-tail-outline {
+         border-color: #C67A2A;
     }
 
-    &.bubble-on-left .bubble-tail-outline {
-        border-left: 26px solid #C67A2A;
-    }
-    &.bubble-on-left .bubble-tail {
-        border-left: 26px solid #FFF1CD;
+    & .bubble-tail {
+        border-color: #FFF1CD;
     }
 }
 
 .bubble-content {
+    box-sizing: border-box;
     padding: 10px;
     position: relative; /* So z-index has an effect */
     margin: 0;
@@ -462,8 +709,6 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
     & > p:last-child {
         margin-bottom: 0;
     }
-
-
 }
 
 .bubble-tail-outline { /* Triangle BORDER part of speech bubble shape */
@@ -471,8 +716,6 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
     position: absolute;
     width: 0;
     height: 0;
-    border-top: 13px solid transparent;
-    border-bottom: 13px solid transparent;
     margin: auto 0px auto -15px;
     z-index: -1;
 }
@@ -482,8 +725,6 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
     position: absolute;
     width: 0;
     height: 0;
-    border-top: 13px solid transparent;
-    border-bottom: 13px solid transparent;
     margin: auto 0px auto -15px;
     z-index: 1;
 }
@@ -498,7 +739,14 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
 }
 
 .tooltip-bubble.bubble-on-right {
-    right: calc(-15vw - 45px);
+    /*
+    - Width of .bubble-content (15vw) (includes padding & border due to box-sizing)
+    - Left margin of bubble-tail (15px)
+    - Position of bubble-tail-outline (2px)
+    - 6px of spacing (arbitrarily-decided)
+    - Total = -15vw - 15px- 2px - 6px = -15vw - 23px
+    */
+    right: calc(-15vw - 23px);
     & .bubble-tail-outline {
         left: -2px;
     }
@@ -508,7 +756,14 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
 }
 
 .tooltip-bubble.bubble-on-left {
-    left: calc(-15vw - 45px);
+    /*
+    - Width of .bubble-content (15vw) (includes padding & border due to box-sizing))
+    - Right margin of bubble-tail (15px)
+    - Position of bubble-tail-outline (2px)
+    - 6px of spacing (arbitrarily-decided)
+    - Total = -15vw - 15px- 2px - 6px = -15vw - 23px
+    */
+    left: calc(-15vw - 23px);
     & .bubble-tail-outline {
         right: -17px;
     }
@@ -528,82 +783,6 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
     display: flex;
     flex-direction: row;
     align-items: center;
-}
-
-/**********************************************************************************************************************/
-/* DROPDOWN MENUS (GENERAL - CAN BE OVERWRITTEN FOR SPECIFIC MENUS) */
-.dropdown-button {
-    height: 100%;
-    width: 100%;
-    padding: 0px 15px;
-    background-color: #537A00;
-    border: solid #3B6000 1px;
-    border-radius: 10px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-
-    & > * {
-        color: white;
-    }
-
-    & > span {
-        flex-grow: 1;
-    }
-}
-
-.dropdown-button:hover, .dropdown-button:focus {
-    background-color: #3B6000;
-}
-
-/* Applies to the dropdown-button only when "show" class is added to dropdown-options */
-.dropdown-button:has(~.show) {
-    border-radius: 10px 10px 0px 0px;
-}
-
-.dropdown {
-    position: relative;
-    display: inline-block;
-}
-
-/* Hidden by Default */
-.dropdown-options {
-    display: none;
-    position: absolute;
-    z-index: 1;
-    box-sizing: border-box; /* Sizing includes padding & border */
-    width: 100%;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    border: solid 1px #3B6000;
-    border-radius: 0px 0px 10px 10px;
-    overflow: hidden;
-}
-
-.dropdown-options > * {
-    display: block;
-    margin: 0px;
-    padding: 12px 16px;
-    background-color: white;
-    border-bottom: solid 1px #3B6000;
-    color: black;
-    text-decoration: none;
-    font-size: 1.1em;
-}
-
-.dropdown-options > *:last-of-type {
-    border-radius: 0px 0px 10px 10px;
-    border-bottom: none;
-}
-
-/* Change color of dropdown links on hover */
-.dropdown-options > *:hover {
-    background-color: #E0EEAC;
-}
-
-/* Show the dropdown menu ("show" class added to .dropdown-options using JavaScript */
-.show {
-    display:block;
 }
 
 /**********************************************************************************************************************/
@@ -663,12 +842,10 @@ div:has(>#search-input) { /* Because Django puts every field in its own div... *
     display: flex;
 }
 
-#search-input {  /* Text input field */
+#search-input {  /* Override input[type="text"] styling (see above) */
     width: 100%;
-    border: solid black 1px;
     border-radius: 10px;
     font-size: 1.1em;
-    padding: 10px;
 }
 
 #search-button {
@@ -754,10 +931,10 @@ div:has(>#search-input) { /* Because Django puts every field in its own div... *
 }
 
 /**********************************************************************************************************************/
-/* SIDE BAR (USER PROFILE / SAVED ITEMS / ACCOUNT SETTIGNS) */
+/* SIDE BAR (USER PROFILE / SAVED ITEMS / ACCOUNT SETTINGS) */
 #user-account-sidebar {
     height: 100%;
-    width: 15%;
+    width: 13%;
     border-right: solid 1px #537A00;
     overflow: hidden; /* TODO: Figure out how to adapt this when browser width is small */
     display: flex;
@@ -766,7 +943,7 @@ div:has(>#search-input) { /* Because Django puts every field in its own div... *
 
 #user-account-sidebar a {
     padding: 15px 20px;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     font-weight: 300;
     text-decoration: none;
     border-bottom: solid 1px #537A00;
@@ -777,6 +954,12 @@ div:has(>#search-input) { /* Because Django puts every field in its own div... *
 
     & i {
         color: #537A00;
+    }
+
+    & span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     &:hover {
@@ -805,7 +988,3 @@ div:has(>#search-input) { /* Because Django puts every field in its own div... *
 #footer a:hover {
     text-decoration: underline;
 }
-
-
-
-

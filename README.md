@@ -4,8 +4,8 @@
 3. Navigate to the capstone folder in your file explorer.
 4. Open the capstone folder in PyCharm.
 5. In PyCharm's terminal:
-   1. Windows: `pip install django` `pip install requests` (for querying APIs)
-   2. macOS: `pip3 install django` `pip3 install requests` (for querying APIs)
+   1. Windows: `pip install -r requirements.txt` 
+   2. macOS: `pip3 install -r requirements.txt'
 
 # CREATE A NEW BRANCH
 1. Create a new branch per task, NOT per person.
@@ -51,13 +51,15 @@
    1. If this is the first time reviewing this branch: `git fetch origin branch-to-review`
    2. If you have already fetched this branch before: `git pull origin task-branch-name`
 2. `git checkout branch-to-review`
-3. To run the server/website:
+3. `pip install -r requirements.txt` In case a new package requirement was added.
+4. `python manage.py migrate` In case models.py was modified .
+5. To run the server/website:
    1. Windows: `python manage.py runserver`
    2. macOS: `python3 manage.py runserver`
-4. Access application at http://127.0.0.1:8000
-5. Test that all buttons, links, and form inputs work correctly (pretend you're a user)
-6. **If FAIL:**
+6. Access application at http://127.0.0.1:8000
+7. Test that all buttons, links, and form inputs work correctly (pretend you're a user)
+8. **If FAIL:**
    1. On GitHub: Describe the issues found & (if you know what went wrong) propose solutions.
    2. Select "Request changes" before submitting you review
    3. Ping the code author on Discord & let them know to check your review
-7. **If PASS:** Accept pull request & let the code author know that they can merge the branch.
+9. **If PASS:** Accept pull request & let the code author know that they can merge the branch.

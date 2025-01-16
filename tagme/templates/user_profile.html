@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ request.user.username }} - TagMe Profile</title>
+    <title>TagMe | {{ request.user.username }}</title>
 
     <!-- Roboto font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,20 +21,10 @@
     {% include "components/top_bar.html" %}
 
     <main>
-        <nav id="user-account-sidebar">
-            <a id="my-profile-sidebar-link" href="/profile/{{ request.user.username }}"><i class="fa fa-user-o" aria-hidden="true"></i>My Profile</a>
-            <a id="pinned-items-sidebar-link" href="/pinned-items/{{ request.user.username }}"><i class="fa fa-thumb-tack" aria-hidden="true"></i>Pinned Items</a>
-            <a id="account-settings-sidebar-link" href="/settings/{{ request.user.username }}"><i class="fa fa-cog" aria-hidden="true"></i>Account Settings</a>
-            <a id="logout-sidebar-link" href="/logout"><i class="fa fa-sign-out" aria-hidden="true"></i>Log Out</a>
-        </nav>
+        {% include "components/user_sidenav.html" %}
 
-        <div id="profile-section">
-            <div id="profile-header">
-                <i class="fa fa-user-circle" aria-hidden="true"></i>
-                <span>{{ request.user.username }}</span>
-            </div>
-
-            <div id="profile-content">
+        <div id="main-content">
+            <div id="profile-section">
                 <div id="progress-equip-row">
                     <div class="content-box" id="progress-section">
                         <h1>Progress</h1>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Results</title>
+    <title>TagMe | Search Results</title>
 
     <!-- Roboto font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,15 +14,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <link rel="stylesheet" href="../../static/CSS/global.css">
-    <link rel="stylesheet" href="../../static/CSS/tag_modal.css">
-    <link rel="stylesheet" href="../../static/CSS/new_reward_modal.css">
+    <link rel="stylesheet" href="../../static/CSS/components/tag_modal.css">
+    <link rel="stylesheet" href="../../static/CSS/components/new_reward_modal.css">
+    <link rel="stylesheet" href="../../static/CSS/components/item_result.css">
+    <link rel="stylesheet" href="../../static/CSS/components/pagination.css">
     <link rel="stylesheet" href="../../static/CSS/search_results.css">
 </head>
 
 <body>
+    {% load html_functions %} <!-- TODO: Remove once replace pagination with includes -->
     {% include "components/top_bar.html" %}
     {% include "components/new_reward_modal.html" %}
-    {% load html_math %}
 
     <main>
         <div id="sidebar">
@@ -44,6 +46,8 @@
         <div id="results-section">
             <div id="results-header">
                 <h1>{{ request.GET.search_type}} results for: <b>"{{ request.GET.search_string }}"</b></h1>
+
+                <!-- TODO: Replace with include components/pagination_top.html once have Search figured out -->
                 <p> {{ pagination.from }} to {{ pagination.to }} of {{ pagination.of }} results</p>
 
                 {% if pagination.current == 1 %}
@@ -69,37 +73,14 @@
 
             <div id="results-list">
                 {% for item in current_page %}
-                    <div class="result-item">
-                        <!-- TODO: Create default cover -->
-                        <div class="cover-container"> <!-- Div container necessary for consistent sizing -->
-                            <img class="result-cover" src="{{ item.cover }}" alt="{% if item.cover != None %} {{ item.title }} cover {% else %} Cover not found {% endif %}">
-                        </div>
-
-                        <div class="result-text-info">
-                            <div class="media-type"><i class="fa fa-book" aria-hidden="true"></i>Book</div>
-
-                            <!-- Need <a> item-title class for "Pin Item" button JavaScript behaviour (tag_modal.js) -->
-                            <a href="{% url 'item_page' item.item_id %}" class="result-title item-title"
-                               title="{{ item.title }} ({{ item.publication_date }}) by {{ item.authors }}"
-                               aria-label="{{ item.title }} ({{ item.publication_date }}) by {{ item.authors }}">
-                                {{ item.title }}
-                            </a>
-                            <p class="result-authors" title="{{ item.authors }}">by <b>{{ item.authors }}</b></p>
-                            <p class="result-pub-date">{{ item.publication_date }}</p>
-                        </div>
-
-                        {% if request.user.is_authenticated %}
-                            {% include "components/pin_item_button.html" %}
-                        {% endif %}
-
-
-                    </div>
+                    {% include "components/item_result.html" %}
                 {% empty %}
                     <p>No results found.</p>
                 {% endfor %}
             </div>
 
-            <div id="results-footer">
+            <!-- TODO: Replace with include components/pagination_footer.html once have Search figured out -->
+            <div id="pagination-footer">
                 <p> {{ pagination.from }} to {{ pagination.to }} of {{ pagination.of }} results</p>
 
                 <div id="bottom-page-navigation">
@@ -171,8 +152,9 @@
 
     <!-- JavaScript -->
     <script type="text/javascript" src="../../static/JavaScript/global.js"></script>
-    <script type="text/javascript" src="../../static/JavaScript/new_reward_modal.js"></script>
-    <script type="text/javascript" src="../../static/JavaScript/tag_modal.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/components/new_reward_modal.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/components/tag_modal.js"></script>
+    <!--<script type="text/javascript" src="../../static/JavaScript/components/pagination.js"></script> TODO-->
     <script type="text/javascript" src="../../static/JavaScript/search_results.js"></script>
 </body>
 </html>
