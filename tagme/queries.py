@@ -229,7 +229,22 @@ def get_related_tags(search_string):
     # TODO: Need a way to determine which tags more relevant (so can list the most relevant ones first)
 
     return related_tags
+def filter_blacklisted_tags(search_string, global_blacklist):
+    """Function for identifying search strings that are blacklisted"""
+    # TODO: Blacklist tag filtering
 
+    # blacklisted_words = global_blacklist
+    blacklisted_tags = []
+    i = 0
+    for blacklisted_word in global_blacklist:
+        blacklisted_tag = Tag.objects.filter(tag=blacklisted_word)
+        if blacklisted_tag[i] == True:
+
+            blacklisted_tags.remove({"tag": blacklisted_tag[i].tag})
+        else:
+            i += 1
+
+    return blacklisted_tags
 
 #######################################################
 # SETTERS
