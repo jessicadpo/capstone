@@ -140,7 +140,7 @@ class Report(models.Model):
 
     def save(self, *args, **kwargs):
         #If decision has not been made, Set decision to now
-        if self.decision and not self.decision_datetime:
+        if self.decision:
             self.decision_datetime = timezone.now()
         super().save(*args, **kwargs)
 
