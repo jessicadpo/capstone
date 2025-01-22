@@ -656,6 +656,17 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
 
 .tooltip-bubble {
     display: contents;
+    visibility: hidden;
+}
+
+/* TOOLTIP BEHAVIOUR */
+.tooltip i:focus {  /* Whichever icon is used as the tooltip icon */
+    outline: auto 1px rgb(181, 40, 1); /* Apply (Firefox's) default :focus-visible styling to :focus */
+}
+
+.tooltip i:hover+.tooltip-bubble,
+.tooltip i:focus+.tooltip-bubble {
+    visibility: visible;
 }
 
 /********************************************/
@@ -817,17 +828,6 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
     & .bubble-tail {
         right: calc(100% + 6px + 2px); /*  To the left of the tooltip icon + 6px gap + 2px (width of bubble-tail-outline) */
     }
-}
-
-/********************************************/
-/* TOOLTIP BEHAVIOUR */
-.tooltip i:focus, .tooltip i:focus-visible {  /* Whichever icon is used as the tooltip icon */
-    border: solid 5px -webkit-focus-ring-color;
-} /* TODO: Add JavaScript to make icon focus on click */
-
-.tooltip i:hover+.tooltip-bubble,
-.tooltip i:focus+.tooltip-bubble {
-    display: flex;
 }
 
 /**********************************************************************************************************************/

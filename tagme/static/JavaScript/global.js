@@ -1,4 +1,4 @@
-const dropdownButton = document.getElementById("search-dropdown-button");
+const tooltips = document.querySelectorAll(".tooltip");
 const dropdownButtonSpan = document.getElementById("search-dropdown-button-text");
 const dropdownItems = document.querySelectorAll(".search-dropdown-item");
 const dropdownFormSelect = document.getElementById('search-type-select');
@@ -75,24 +75,51 @@ function cycleTriStateValues(checkbox, select, label) {
 // Prevent tooltips from overflowing the viewport width-wise
 function preventTooltipViewportOverflow() {
     const viewportWidth = window.innerWidth;
-    const tooltipBubbles = document.querySelectorAll(".tooltip-bubble");
-    if (tooltipBubbles != null && tooltipBubbles.length > 0) {
-        tooltipBubbles.forEach(tooltipBubble => {
-            const bubbleContent = tooltipBubble.querySelector('.bubble-content');
-            const bubbleTailOutline = tooltipBubble.querySelector('.bubble-tail-outline');
 
+    if (tooltips != null && tooltips.length > 0) {
+        tooltips.forEach(tooltip => {
+            const tooltipBubble = tooltip.querySelector('.tooltip-bubble');
+            const bubbleContent = tooltip.querySelector('.bubble-content');
+            const bubbleTailOutline = tooltip.querySelector('.bubble-tail-outline');
+
+            const tooltipMaxPossibleWidth = bubbleContent.getBoundingClientRect().width + Math.max(bubbleTailOutline.getBoundingClientRect().width, bubbleTailOutline.getBoundingClientRect().height);
+            const tooltipIconRightCoordinate = tooltip.querySelector('i').getBoundingClientRect().right;
+            const tooltipIconLeftCoordinate = tooltip.querySelector('i').getBoundingClientRect().left;
             /* NOTE: Calling .getBoundingClientRect() every time due to weird JavaScript issues
             * (i.e., getBoundingClientRect().right value is not the same if stored in a const vs. if called) */
 
             // Switch to bubble-on-top if bubbleContent overflows from viewport
-            if ((tooltipBubble.classList.contains("bubble-on-right") && bubbleContent.getBoundingClientRect().right >= viewportWidth)
-            || (tooltipBubble.classList.contains("bubble-on-left") && bubbleContent.getBoundingClientRect().left < 0)) {
+            if (tooltipBubble.classList.contains("bubble-on-right")
+            && bubbleContent.getBoundingClientRect().right >= viewportWidth) {
                 tooltipBubble.classList.remove("bubble-on-right");
+                tooltipBubble.classList.add("bubble-on-top");
+                tooltipBubble.classList.add("originally-bubble-on-right");
+            }
+            else if (tooltipBubble.classList.contains("bubble-on-left")
+            && bubbleContent.getBoundingClientRect().left < 0) {
                 tooltipBubble.classList.remove("bubble-on-left");
                 tooltipBubble.classList.add("bubble-on-top");
+                tooltipBubble.classList.add("originally-bubble-on-left");
             }
-
-            // TODO: Switch back to bubble-on-right/left if resize back to ok width
+            // Switch back to bubble-on-right/bubble-on-left if resize back to ok width
+            else if (tooltipBubble.classList.contains("originally-bubble-on-right")
+            && tooltipIconRightCoordinate + 6 + tooltipMaxPossibleWidth < viewportWidth) {
+                tooltipBubble.classList.remove("bubble-on-top");
+                tooltipBubble.classList.remove("bubble-on-bottom");
+                tooltipBubble.classList.remove("originally-bubble-on-right");
+                tooltipBubble.classList.add("bubble-on-right");
+                bubbleContent.style.removeProperty('left');
+                return;
+            }
+            else if (tooltipBubble.classList.contains("originally-bubble-on-left")
+            && tooltipIconLeftCoordinate - 6 - tooltipMaxPossibleWidth >= 0) {
+                tooltipBubble.classList.remove("bubble-on-top");
+                tooltipBubble.classList.remove("bubble-on-bottom");
+                tooltipBubble.classList.remove("originally-bubble-on-left");
+                tooltipBubble.classList.add("bubble-on-left");
+                bubbleContent.style.removeProperty('left');
+                return;
+            }
 
             // newLeftCoordinate == x coordinate of bubble-content's left edge on screen IF CORRECT FOR OVERFLOW
             // newRightCoordinate == x coordinate of bubble-content's right edge on screen IF CORRECT FOR OVERFLOW
@@ -119,7 +146,8 @@ function preventTooltipViewportOverflow() {
                 bubbleContent.style.left = String(currentLeftStyle - rightOverflow - 1) + "px";
             }
 
-            // TODO: Adjust position as close to original position as possible if no longer overflowing
+            // Adjust position as close to original position as possible if no longer overflowing
+            // FIXME: (??) Not working if spamming resize too fast
             const originalCenterCoordinate = bubbleTailOutline.getBoundingClientRect().x + (bubbleTailOutline.getBoundingClientRect().width / 2);
             const maxLeftCoordinate = originalCenterCoordinate - (bubbleContent.getBoundingClientRect().width / 2);
             const minRightCoordinate = originalCenterCoordinate + (bubbleContent.getBoundingClientRect().width / 2);
@@ -193,8 +221,10 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 });
-preventTooltipViewportOverflow();
+
+
 // Triggers after window has finished loading (i.e., all CSS and JavaScript has already been applied)
+preventTooltipViewportOverflow(); // Need to call function twice like this for best results
 window.addEventListener("load", preventTooltipViewportOverflow);
 
 // Triggers when window is resized
