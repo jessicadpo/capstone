@@ -69,6 +69,80 @@ function cycleTriStateValues(checkbox, select, label) {
     setTriStateCheckboxState(checkboxStates[nextStateIndex], checkbox, select, label);
 }
 
+/*--------------------------------------------------------------------------------------------------------------------*/
+/* ABSOLUTE POSITIONING (PREVENT OVERFLOW FROM VIEWPORT WIDTH) */
+
+// Prevent tooltips from overflowing the viewport width-wise
+function preventTooltipViewportOverflow() {
+    const viewportWidth = window.innerWidth;
+    const tooltipBubbles = document.querySelectorAll(".tooltip-bubble");
+    if (tooltipBubbles != null && tooltipBubbles.length > 0) {
+        tooltipBubbles.forEach(tooltipBubble => {
+            const bubbleContent = tooltipBubble.querySelector('.bubble-content');
+            const bubbleTailOutline = tooltipBubble.querySelector('.bubble-tail-outline');
+
+            /* NOTE: Calling .getBoundingClientRect() every time due to weird JavaScript issues
+            * (i.e., getBoundingClientRect().right value is not the same if stored in a const vs. if called) */
+
+            // Switch to bubble-on-top if bubbleContent overflows from viewport
+            if ((tooltipBubble.classList.contains("bubble-on-right") && bubbleContent.getBoundingClientRect().right >= viewportWidth)
+            || (tooltipBubble.classList.contains("bubble-on-left") && bubbleContent.getBoundingClientRect().left < 0)) {
+                tooltipBubble.classList.remove("bubble-on-right");
+                tooltipBubble.classList.remove("bubble-on-left");
+                tooltipBubble.classList.add("bubble-on-top");
+            }
+
+            // TODO: Switch back to bubble-on-right/left if resize back to ok width
+
+            // newLeftCoordinate == x coordinate of bubble-content's left edge on screen IF CORRECT FOR OVERFLOW
+            // newRightCoordinate == x coordinate of bubble-content's right edge on screen IF CORRECT FOR OVERFLOW
+            const leftOverflow = 0 - bubbleContent.getBoundingClientRect().left;
+            const rightOverflow = bubbleContent.getBoundingClientRect().right - viewportWidth;
+            var newLeftCoordinate = bubbleContent.getBoundingClientRect().left + leftOverflow;
+            var newRightCoordinate = bubbleContent.getBoundingClientRect().right - (rightOverflow - 1); // 1px margin of error
+
+            const currentLeftStyle = isNaN(parseInt(bubbleContent.style.left)) ? 0 : parseInt(bubbleContent.style.left);
+
+            /* NOTE:
+            * Decreasing bubbleContent.style.left --> shifts towards the left.
+            * Increasing bubbleContent.style-left --> shifts towards the right. */
+
+            // Adjust position to prevent overflow on left side of viewport
+            // The "- 10" ensures a minimum space of 10px between edge of bubbleContent and edge of bubbleTailOutline
+            if (leftOverflow >= 0 && newLeftCoordinate < bubbleTailOutline.getBoundingClientRect().left - 10) {
+                bubbleContent.style.left = String(currentLeftStyle + leftOverflow) + "px";
+            }
+
+            // Adjust position to prevent overflow on right side of viewport
+            // The "+ 10" ensures a minimum space of 10px between edge of bubbleContent and edge of bubbleTailOutline
+            if (rightOverflow >= 0 && newRightCoordinate > bubbleTailOutline.getBoundingClientRect().right + 10) {
+                bubbleContent.style.left = String(currentLeftStyle - rightOverflow - 1) + "px";
+            }
+
+            // TODO: Adjust position as close to original position as possible if no longer overflowing
+            const originalCenterCoordinate = bubbleTailOutline.getBoundingClientRect().x + (bubbleTailOutline.getBoundingClientRect().width / 2);
+            const maxLeftCoordinate = originalCenterCoordinate - (bubbleContent.getBoundingClientRect().width / 2);
+            const minRightCoordinate = originalCenterCoordinate + (bubbleContent.getBoundingClientRect().width / 2);
+
+            var currentCenterCoordinate = bubbleContent.getBoundingClientRect().x + (bubbleContent.getBoundingClientRect().width / 2);
+
+            if (leftOverflow < 0 && currentCenterCoordinate > originalCenterCoordinate) {
+                if (newLeftCoordinate > maxLeftCoordinate) {
+                    bubbleContent.style.left = String(currentLeftStyle + leftOverflow) + "px";
+                }
+            }
+            else if (rightOverflow < 0 && currentCenterCoordinate < originalCenterCoordinate) {
+                if (newRightCoordinate < minRightCoordinate) {
+                    bubbleContent.style.left = String(currentLeftStyle - rightOverflow - 1) + "px";
+                }
+            }
+        });
+    }
+}
+
+/*--------------------------------------------------------------------------------------------------------------------*/
+/* DROPDOWN MENU BEHAVIOUR */
+
 // Close the dropdown menu if the user clicks outside of it
 window.onclick = function(event) {
     if (!event.target.matches('.dropdown-button') && !event.target.matches('.dropdown-button *')) {
@@ -83,6 +157,7 @@ window.onclick = function(event) {
     }
 }
 
+/*--------------------------------------------------------------------------------------------------------------------*/
 // Triggers after DOM content is finished loading
 document.addEventListener("DOMContentLoaded", function() {
     // Update the text inside the dropdown menu button to the selected item
@@ -96,9 +171,6 @@ document.addEventListener("DOMContentLoaded", function() {
             dropdownFormSelect.value = selectedValue;
         });
     });
-
-    
-
 
     // Set tri-state checkboxes (for all pages, if they have any)
     triStateCheckboxContainer.forEach(container => {
@@ -121,3 +193,9 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 });
+preventTooltipViewportOverflow();
+// Triggers after window has finished loading (i.e., all CSS and JavaScript has already been applied)
+window.addEventListener("load", preventTooltipViewportOverflow);
+
+// Triggers when window is resized
+window.addEventListener("resize", preventTooltipViewportOverflow);
