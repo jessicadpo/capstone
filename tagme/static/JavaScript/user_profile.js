@@ -121,8 +121,11 @@ function makeEarnedTitlesDraggable() {
 
 // Triggers after DOM content is finished loading
 document.addEventListener("DOMContentLoaded", function() {
-    setCurrentProgressBarWidth();
-    preventTickmarkOverlap();
+    if (currentProgressBar != null) {
+        setCurrentProgressBarWidth();
+        preventTickmarkOverlap();
+    }
+
     makeEarnedTitlesDraggable();
 
     // Update the text inside the (relevant) equip slot to the selected dropdown option
