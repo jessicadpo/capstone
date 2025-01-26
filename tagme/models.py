@@ -138,10 +138,11 @@ class Report(models.Model):
     decision_datetime = models.DateTimeField(blank=True, null=True)
     # Do NOT use auto_now=True because decision_datetime should not be set when report is first created
 
-    def save_decision(self, *args, **kwargs):
-        """Update timestamp when decision is added/edited"""
-        self.decision_datetime = timezone.now()
-        return super().save(*args, **kwargs)
+    def save(self, *args, **kwargs):
+        #If decision has not been made, Set decision to now
+        if self.decision:
+            self.decision_datetime = timezone.now()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return str(self.report_id)
