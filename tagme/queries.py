@@ -402,10 +402,10 @@ def filter_blacklisted_tags(search_string, global_blacklist):
     blacklisted = "blank"
     i = 0
 
-    for word in global_blacklist:
+    for blacklisted in search_string:
         if search_string[i] == global_blacklist:
             blacklisted = search_string.pop(i)
-            i = i
+
         else:
             i=+1
 
