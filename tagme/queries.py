@@ -409,7 +409,9 @@ def filter_blacklisted_tags(search_string, global_blacklist):
         else:
             i=+1
 
-    return search_string
+    blacklisted = "adult"
+
+    return search_string, blacklisted
 
 #######################################################
 # SETTERS
