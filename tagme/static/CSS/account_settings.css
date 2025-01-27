@@ -5,22 +5,6 @@ main {
 }
 
 /* -------------------------------------------------------------------------------------------------------------------*/
-/* SIDE BAR */
-#account-settings-sidebar-link {
-    background-color: #3B6000;
-    color: white;
-
-    & * {
-        color: white !important; /* Use !important to guarantee override of global.css */
-    }
-
-    &:hover { /* No change on hover */
-        background-color: #3B6000 !important;
-        color: white !important;
-    }
-}
-
-/* -------------------------------------------------------------------------------------------------------------------*/
 /* ACCOUNT SETTINGS SECTION (MAIN CONTENT) */
 #main-content {
     flex-grow: 1;

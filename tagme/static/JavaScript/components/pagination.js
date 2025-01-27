@@ -3,7 +3,7 @@ const nextPageButtons = document.querySelectorAll('.next-page-button');
 
 // If both pagination_top and pagination_top used in the same page, page will have duplicate fields
 // for storing this info, thus why we're using classes/querySelectorAll instead of ids/getElementById
-const page_url = document.querySelectorAll('.page-url')[0].value;
+const page_url = document.querySelectorAll('.page-url')[0].value; // FIXME: Error on item pages? ([0] is undefined)
 var currentPageNumber = parseInt(document.querySelectorAll('.current-page-number')[0].value);
 var lastPageNumber = parseInt(document.querySelectorAll('.last-page-number')[0].value);
 

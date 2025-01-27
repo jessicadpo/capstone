@@ -27,6 +27,11 @@
                     <a href="/logout"><i class="fa fa-sign-out" aria-hidden="true"></i>Log Out</a>
                 </div>
             </div>
+            <!-- Only visible if screen width < 840px -->
+            <button onclick="openAccountDropdown()" id="account-dropdown-button-icon-only" class="dropdown-button">
+                <i class="fa fa-user-circle" aria-hidden="true"></i>
+            </button>
+
         <!--Show links to signup/login page if user is NOT logged in-->
         {% else %}
             <div id="signup-login-block">

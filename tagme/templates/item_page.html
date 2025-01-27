@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ item.title }}</title>
+    <meta name="page-name" content="{{ request.resolver_match.url_name }}">
+    <title>TagMe | {{ item.title }}</title>
 
     <!-- Roboto font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

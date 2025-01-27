@@ -1,33 +1,20 @@
-main { /* Default: Portrait orientation (i.e., mobile) when viewport width < viewport height */
+main {
     display: grid;
-    grid: auto / auto;
+    grid: auto auto auto / calc(50% - 1px) 2px calc(50% - 1px);
+    grid-auto-flow: column;
     justify-items: center; /* Horizontally center items inside each cell */
-    align-content: start; /* Vertically align the entire grid to the top of <main> (below padding-top) */
+    align-content: center; /* Vertically align the entire grid to the center of <main> */
     align-items: center; /* Vertically center items inside each cell */
-    padding: 10vh 2vw;
+    padding: 8% 2vw;
 }
 
 #divider {
+    grid-row: 1 / 4; /* Make the divider span 3 rows (i.e., start at row 1 and end at (beginning of) row "4") */
     border: solid #8A8A8A 1px;
-    width: 90%;
-    margin: 50px 0px;
+    height: 120%;
+    width: auto;
+    margin: 0px;
 }
-
-@media (orientation:landscape) { /* When viewport width > viewport height */
-    main {
-        grid: auto auto auto / calc(50% - 1px) 2px calc(50% - 1px);
-        grid-auto-flow: column;
-    }
-
-    #divider {
-        grid-row: 1 / 4; /* Make the divider span 3 rows (i.e., start at row 1 and end at (beginning of) row "4") */
-        border: solid #8A8A8A 1px;
-        height: 120%;
-        margin: 0px;
-        width: auto;
-    }
-}
-
 
 form {
     display: contents;
@@ -56,7 +43,7 @@ h1 {
     & input {  /* Override input[type="text/password/email"] styling in global.css */
         width: 50%;
         border-radius: 8px;
-        margin: 15px;
+        margin: 1.5vh;
     }
 }
 
@@ -114,5 +101,22 @@ ul.bubble-content { /* ul content of tooltip bubble */
 
     & li:only-child {
         margin: 0;
+    }
+}
+
+/**********************************************************************************************************************/
+/* RESPONSIVE STYLING */
+@media (orientation:portrait) { /* When viewport width < viewport height (e.g., mobile) */
+    main {
+        grid: auto / auto;
+        grid-auto-flow: row;
+    }
+
+    #divider {
+        grid-row: unset;
+        border: solid #8A8A8A 1px;
+        height: auto;
+        width: 90%;
+        margin: 50px 0px;
     }
 }

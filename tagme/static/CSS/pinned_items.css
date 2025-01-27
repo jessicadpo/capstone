@@ -5,22 +5,6 @@ main {
 }
 
 /* -------------------------------------------------------------------------------------------------------------------*/
-/* SIDE BAR */
-#pinned-items-sidebar-link {
-    background-color: #3B6000;
-    color: white;
-
-    & * {
-        color: white !important; /* Use !important to guarantee override of global.css */
-    }
-
-    &:hover { /* No change on hover */
-        background-color: #3B6000 !important;
-        color: white !important;
-    }
-}
-
-/* -------------------------------------------------------------------------------------------------------------------*/
 /* PINNED ITEMS SECTION (MAIN CONTENT) */
 #main-content {
     flex-grow: 1;

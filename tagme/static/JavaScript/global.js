@@ -1,3 +1,8 @@
+const topBar = document.getElementById('top-bar');
+const searchBar = document.getElementById('search-bar');
+const closeSearchBarButton = document.getElementById('close-search-bar-button');
+const openSearchBarButton = document.getElementById('open-search-bar-button');
+
 const tooltips = document.querySelectorAll(".tooltip");
 const dropdownButtonSpan = document.getElementById("search-dropdown-button-text");
 const dropdownItems = document.querySelectorAll(".search-dropdown-item");
@@ -5,77 +10,63 @@ const dropdownFormSelect = document.getElementById('search-type-select');
 const triStateCheckboxContainer = document.querySelectorAll('.tri-state-checkbox-container');
 const checkboxStates = ['no', 'yes', 'null'];
 
-// When the user clicks on the button, toggle between hiding and showing the dropdown content
-function openSearchDropdown() {
-  document.getElementById("search-dropdown-options").classList.toggle("show");
-}
-
-function openAccountDropdown() {
-  document.getElementById("account-dropdown-options").classList.toggle("show");
-}
-
 /*--------------------------------------------------------------------------------------------------------------------*/
-/* TRI-STATE CHECKBOXES (BASIC) BEHAVIOUR */
-function setTriStateCheckboxState(newState, checkbox, select, label) {
-    // Use checkbox.value to store the state of the checkbox
-    checkbox.value = newState;
-
-    switch(newState) {
-        case checkboxStates[0]: // No
-            checkbox.indeterminate = true;
-            select.value = 0;
-            label.style.fontWeight = 400;
-            break;
-        case checkboxStates[1]: // Yes
-            checkbox.checked = true;
-            checkbox.indeterminate = false;
-            select.value = 1;
-            label.style.fontWeight = 400; // bold
-            break;
-        default: // Null
-            checkbox.checked = false;
-            checkbox.indeterminate = false;
-            select.value = -1;
-            label.style.fontWeight = 300;  // Normal / Not bold
-            break;
-     }
-}
-
-function setInitialTriStateValue(checkbox, select, label) {
-    switch(select.value) {
-    case "0":  // Checkbox.value = No (indeterminate), Select.value = 0, Label = bold
-        setTriStateCheckboxState(checkboxStates[0], checkbox, select, label);
-        break;
-    case "1": // Checkbox.value = Yes (checked), Select.value = 1, Label = bold
-        setTriStateCheckboxState(checkboxStates[1], checkbox, select, label);
-        break;
-    default: // Checkbox.value = Null (unchecked), Select.value = -1, Label = Normal
-        setTriStateCheckboxState(checkboxStates[2], checkbox, select, label);
-        break;
+/* RESPONSIVE STYLING */
+function openSearchBar() {
+    if (window.innerWidth <= 500) {
+        searchBar.style.width = "100%"; // Make sure width is at 100%
+        topBar.style.overflow = "hidden";
+        requestAnimationFrame(() => { // Ensure height change is only rendered AFTER display grid has completed execution
+            requestAnimationFrame(() => {
+                topBar.style.height = String(100 + searchBar.clientHeight) + "px";
+                setTimeout(() => {
+                    topBar.style.overflow = "visible";
+                }, 200); // 200ms == 0.2s (same time as height transition set in global.css)
+            });
+        });
+    } else {
+        searchBar.style.width = "0px"; // Make sure width is at 0px
+        topBar.style.overflow = "visible";
+        topBar.style.height = "fit-content";
+        requestAnimationFrame(() => { // Ensure width change is only rendered AFTER display flex has completed execution
+            requestAnimationFrame(() => {
+                searchBar.style.width = "100%";
+            });
+        });
     }
 }
 
-function cycleTriStateValues(checkbox, select, label) {
-    /* Cycle through states BACKWARDS because we want "yes" option to be associated with number 1 (i.e., true) &&
-    * "no" to be associated with number 0 (i.e., false)
-    * --> "yes" option at index [1] && "no" option at index [0]
-    * --> "null" option has to be at index [2] as a result
-    * BUT, we also want "yes" option to be after "null" when clicking --> so cycle checkboxStates backwards */
+function closeSearchBar() {
+    topBar.style.height = "100px";
 
-    // Get index of the next state
-    // If nextStateIndex == -1 --> loop back to [2]
-    const currentStateIndex = checkboxStates.indexOf(checkbox.value);
-    const nextStateIndex = (currentStateIndex - 1) < 0 ? 2 : currentStateIndex - 1;
-    setTriStateCheckboxState(checkboxStates[nextStateIndex], checkbox, select, label);
+    if (window.innerWidth < 750 && window.innerWidth > 500) {
+        searchBar.style.width = "0px";
+    } else if (window.innerWidth <= 500) {
+        topBar.style.overflow = "hidden";
+    }
+
+    setTimeout(() => {
+      searchBar.classList.remove("open");
+      searchBar.style.display = null;
+      searchBar.style.width = null;
+      topBar.style.overflow = "visible";
+    }, 200); // 200ms == 0.2s (same time as width transition set in global.css)
 }
 
-/*--------------------------------------------------------------------------------------------------------------------*/
-/* ABSOLUTE POSITIONING (PREVENT OVERFLOW FROM VIEWPORT WIDTH) */
+function toggleSearchBar() {
+    if (searchBar.classList.contains("open")) {
+        searchBar.classList.remove("open");
+        closeSearchBar();
+    } else {
+        searchBar.classList.add("open");
+        openSearchBar();
+    }
+}
 
-// Prevent tooltips from overflowing the viewport width-wise
+
+// TOOLTIPS - PREVENT OVERFLOWING FROM VIEWPORT WIDTH-WISE
 function preventTooltipViewportOverflow() {
     const viewportWidth = window.innerWidth;
-
     if (tooltips != null && tooltips.length > 0) {
         tooltips.forEach(tooltip => {
             const tooltipBubble = tooltip.querySelector('.tooltip-bubble');
@@ -168,8 +159,79 @@ function preventTooltipViewportOverflow() {
     }
 }
 
+// Triggers after window has finished loading (i.e., all CSS and JavaScript has already been applied)
+preventTooltipViewportOverflow(); // Need to call function twice like this for best results
+window.addEventListener("load", preventTooltipViewportOverflow);
+
+// Triggers when window is resized
+window.addEventListener("resize", preventTooltipViewportOverflow);
+
+/*--------------------------------------------------------------------------------------------------------------------*/
+/* TRI-STATE CHECKBOXES (BASIC) BEHAVIOUR */
+function setTriStateCheckboxState(newState, checkbox, select, label) {
+    // Use checkbox.value to store the state of the checkbox
+    checkbox.value = newState;
+
+    switch(newState) {
+        case checkboxStates[0]: // No
+            checkbox.indeterminate = true;
+            select.value = 0;
+            label.style.fontWeight = 400;
+            break;
+        case checkboxStates[1]: // Yes
+            checkbox.checked = true;
+            checkbox.indeterminate = false;
+            select.value = 1;
+            label.style.fontWeight = 400; // bold
+            break;
+        default: // Null
+            checkbox.checked = false;
+            checkbox.indeterminate = false;
+            select.value = -1;
+            label.style.fontWeight = 300;  // Normal / Not bold
+            break;
+     }
+}
+
+function setInitialTriStateValue(checkbox, select, label) {
+    switch(select.value) {
+    case "0":  // Checkbox.value = No (indeterminate), Select.value = 0, Label = bold
+        setTriStateCheckboxState(checkboxStates[0], checkbox, select, label);
+        break;
+    case "1": // Checkbox.value = Yes (checked), Select.value = 1, Label = bold
+        setTriStateCheckboxState(checkboxStates[1], checkbox, select, label);
+        break;
+    default: // Checkbox.value = Null (unchecked), Select.value = -1, Label = Normal
+        setTriStateCheckboxState(checkboxStates[2], checkbox, select, label);
+        break;
+    }
+}
+
+function cycleTriStateValues(checkbox, select, label) {
+    /* Cycle through states BACKWARDS because we want "yes" option to be associated with number 1 (i.e., true) &&
+    * "no" to be associated with number 0 (i.e., false)
+    * --> "yes" option at index [1] && "no" option at index [0]
+    * --> "null" option has to be at index [2] as a result
+    * BUT, we also want "yes" option to be after "null" when clicking --> so cycle checkboxStates backwards */
+
+    // Get index of the next state
+    // If nextStateIndex == -1 --> loop back to [2]
+    const currentStateIndex = checkboxStates.indexOf(checkbox.value);
+    const nextStateIndex = (currentStateIndex - 1) < 0 ? 2 : currentStateIndex - 1;
+    setTriStateCheckboxState(checkboxStates[nextStateIndex], checkbox, select, label);
+}
+
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* DROPDOWN MENU BEHAVIOUR */
+
+// When the user clicks on the button, toggle between hiding and showing the dropdown content
+function openSearchDropdown() {
+  document.getElementById("search-dropdown-options").classList.toggle("show");
+}
+
+function openAccountDropdown() {
+  document.getElementById("account-dropdown-options").classList.toggle("show");
+}
 
 // Close the dropdown menu if the user clicks outside of it
 window.onclick = function(event) {
@@ -188,6 +250,12 @@ window.onclick = function(event) {
 /*--------------------------------------------------------------------------------------------------------------------*/
 // Triggers after DOM content is finished loading
 document.addEventListener("DOMContentLoaded", function() {
+    // Set openSearchBarButton behaviour (responsive styling)
+    openSearchBarButton.addEventListener("click", toggleSearchBar); // will also close search bar if clicked again
+
+    // Set closeSearchBarButton behaviour (responsive styling)
+    closeSearchBarButton.addEventListener("click", closeSearchBar);
+
     // Update the text inside the dropdown menu button to the selected item
     // Set the hidden Select element (from Django form) to the selected value
     // Doing it this way because Select HTML elements can't be formatted/styled properly
@@ -221,11 +289,3 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 });
-
-
-// Triggers after window has finished loading (i.e., all CSS and JavaScript has already been applied)
-preventTooltipViewportOverflow(); // Need to call function twice like this for best results
-window.addEventListener("load", preventTooltipViewportOverflow);
-
-// Triggers when window is resized
-window.addEventListener("resize", preventTooltipViewportOverflow);
