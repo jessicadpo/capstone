@@ -22,9 +22,14 @@
     {% include "components/top_bar.html" %}
 
     <main>
-        <img src="../static/icons/logo.svg" alt="TagMe logo" id="logo">
-        <p id="slogan">Tagging made fun</p>
-        {% include "components/search_bar.html" %}
+        <div id="logo-section">
+            <img src="../static/icons/logo.svg" alt="TagMe logo" id="logo">
+            <p class="slogan">Tag books you've read to earn fun rewards!</p>
+
+        </div>
+        <div id="homepage-search-bar-container">
+            {% include "components/search_bar.html" %}
+        </div>
     </main>
 
     {% include "components/footer.html" %}

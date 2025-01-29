@@ -16,10 +16,15 @@
         <!--Show account menu if user is logged in-->
         {% if request.user.is_authenticated %}
             <div class="dropdown" id="account-dropdown">
-                <button onclick="openAccountDropdown()" id="account-dropdown-button" class="dropdown-button">
+                <button id="account-dropdown-button" class="dropdown-button">
                     <i class="fa fa-user-circle" aria-hidden="true"></i>
                     <span>{{ request.user.username }}</span>
                 </button>
+                <!-- Only visible if screen width < 840px -->
+                <button id="account-dropdown-button-icon-only" class="dropdown-button">
+                    <i class="fa fa-user-circle" aria-hidden="true"></i>
+                </button>
+
                 <div id="account-dropdown-options" class="dropdown-options">
                     <a href="/profile/{{ request.user.username }}"><i class="fa fa-user-o" aria-hidden="true"></i>My Profile</a>
                     <a href="/pinned-items/{{ request.user.username }}"><i class="fa fa-thumb-tack" aria-hidden="true"></i>Pinned Items</a>
@@ -27,10 +32,6 @@
                     <a href="/logout"><i class="fa fa-sign-out" aria-hidden="true"></i>Log Out</a>
                 </div>
             </div>
-            <!-- Only visible if screen width < 840px -->
-            <button onclick="openAccountDropdown()" id="account-dropdown-button-icon-only" class="dropdown-button">
-                <i class="fa fa-user-circle" aria-hidden="true"></i>
-            </button>
 
         <!--Show links to signup/login page if user is NOT logged in-->
         {% else %}

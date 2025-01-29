@@ -121,7 +121,8 @@ em {
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     border: solid 1px #3B6000;
     border-radius: 0px 0px 10px 10px;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .dropdown-options > * {
@@ -856,6 +857,7 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
 #top-bar-logo {
     height: 90%;
     max-height: 72px;
+    padding-left: 10px;
 }
 
 /********************************************/
@@ -968,6 +970,7 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
     & i {
         margin: 0px 20px;
         width: fit-content;
+        grid-column: 3; /* Ensure is always in last (right-most) column */
     }
 }
 
@@ -1061,23 +1064,28 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
     }
 
     #account-dropdown {
-        position: absolute;
-        right: 0;
-        top: 80%;
+        margin: 0px;
 
         & #account-dropdown-button {
             display: none;
         }
 
         & #account-dropdown-options {
-            position: relative;
+            width: 215px;
+            position: absolute;
+            right: 0px;
+            top: 120%;
+
             border-radius: 10px;
         }
     }
 }
 
+/* See homepage.css for responsive styling of homepage's search bar */
+
 @media (width < 750px) and (width > 500px) {
-    #search-bar {
+    /* Only applies to search bar in top-bar (not homepage search bar) */
+    #top-bar #search-bar {
         width: 0px;
         height: 100px;
         padding: 20px;
@@ -1095,7 +1103,8 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
         }
     }
 
-    #open-search-bar-button, #close-search-bar-button {
+    /* Only applies to buttons in top-bar (not homepage search bar) */
+    #top-bar #open-search-bar-button, #top-bar #close-search-bar-button {
         display: flex;
     }
 }
@@ -1107,16 +1116,13 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
 }
 
 @media (width <= 500px) {
-    #top-bar:has( .open) #account-dropdown {
-        top: 40%;
-    }
-
     #top-bar {
         display: grid;
         grid: 80px auto / 0px auto minmax(43.5px, min-content); /* 80px == 100px - 20px (padding-top) - 20px (padding-bottom) */
     }
 
-    #search-bar {
+    /* Only applies to search bar in top-bar (not homepage search bar) */
+    #top-bar #search-bar {
         width: 100%;
         height: fit-content;
         padding: 10px 20px 20px 20px;
@@ -1151,9 +1157,8 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
         }
     }
 
-    #open-search-bar-button, #close-search-bar-button {
+    /* Only applies to buttons in top-bar (not homepage search bar) */
+    #top-bar #open-search-bar-button, #top-bar #close-search-bar-button {
         display: flex;
     }
 }
-
-

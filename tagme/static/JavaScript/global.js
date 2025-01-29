@@ -1,17 +1,33 @@
 const topBar = document.getElementById('top-bar');
-const searchBar = document.getElementById('search-bar');
+const searchBar = document.querySelector('#top-bar #search-bar');  // Only applies to the search bar in top bar (not homepage search bar)
 const closeSearchBarButton = document.getElementById('close-search-bar-button');
 const openSearchBarButton = document.getElementById('open-search-bar-button');
 
 const tooltips = document.querySelectorAll(".tooltip");
-const dropdownButtonSpan = document.getElementById("search-dropdown-button-text");
-const dropdownItems = document.querySelectorAll(".search-dropdown-item");
-const dropdownFormSelect = document.getElementById('search-type-select');
+const dropdowns = document.querySelectorAll('.dropdown');
+const footer = document.getElementById('footer');
+
+
+const searchDropdownButtonSpan = document.getElementById("search-dropdown-button-text");
+const searchDropdownItems = document.querySelectorAll(".search-dropdown-item");
+const searchFormSelect = document.getElementById('search-type-select');
+
+
 const triStateCheckboxContainer = document.querySelectorAll('.tri-state-checkbox-container');
 const checkboxStates = ['no', 'yes', 'null'];
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* RESPONSIVE STYLING */
+function preventDropdownPageOverflow(dropdownOptions) {
+    dropdownOptions.style.height = "auto"; // Reset to default so always occupy max available height
+
+    // Prevent dropdown menus from overflowing beyond page footer
+    if (dropdownOptions.getBoundingClientRect().bottom > footer.getBoundingClientRect().bottom) {
+        const height = footer.getBoundingClientRect().bottom - dropdownOptions.getBoundingClientRect().top;
+        dropdownOptions.style.height = String(height) + "px";
+    }
+}
+
 function openSearchBar() {
     if (window.innerWidth <= 500) {
         searchBar.style.width = "100%"; // Make sure width is at 100%
@@ -62,7 +78,6 @@ function toggleSearchBar() {
         openSearchBar();
     }
 }
-
 
 // TOOLTIPS - PREVENT OVERFLOWING FROM VIEWPORT WIDTH-WISE
 function preventTooltipViewportOverflow() {
@@ -166,6 +181,13 @@ window.addEventListener("load", preventTooltipViewportOverflow);
 // Triggers when window is resized
 window.addEventListener("resize", preventTooltipViewportOverflow);
 
+window.addEventListener("resize", function() {
+    var openedDropdowns = document.querySelectorAll('.dropdown-options.show');
+    openedDropdowns.forEach(openedDropdown => {
+        preventDropdownPageOverflow(openedDropdown);
+    });
+});
+
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* TRI-STATE CHECKBOXES (BASIC) BEHAVIOUR */
 function setTriStateCheckboxState(newState, checkbox, select, label) {
@@ -222,17 +244,9 @@ function cycleTriStateValues(checkbox, select, label) {
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
-/* DROPDOWN MENU BEHAVIOUR */
+/* DROPDOWN MENU CLOSING BEHAVIOUR */
 
-// When the user clicks on the button, toggle between hiding and showing the dropdown content
-function openSearchDropdown() {
-  document.getElementById("search-dropdown-options").classList.toggle("show");
-}
-
-function openAccountDropdown() {
-  document.getElementById("account-dropdown-options").classList.toggle("show");
-}
-
+// TODO: Replace with "focus out" event for every dropdown-button???
 // Close the dropdown menu if the user clicks outside of it
 window.onclick = function(event) {
     if (!event.target.matches('.dropdown-button') && !event.target.matches('.dropdown-button *')) {
@@ -250,21 +264,40 @@ window.onclick = function(event) {
 /*--------------------------------------------------------------------------------------------------------------------*/
 // Triggers after DOM content is finished loading
 document.addEventListener("DOMContentLoaded", function() {
-    // Set openSearchBarButton behaviour (responsive styling)
-    openSearchBarButton.addEventListener("click", toggleSearchBar); // will also close search bar if clicked again
+    if (openSearchBarButton != null) {
+        // Set openSearchBarButton behaviour (responsive styling)
+        openSearchBarButton.addEventListener("click", toggleSearchBar); // will also close search bar if clicked again
+    }
 
-    // Set closeSearchBarButton behaviour (responsive styling)
-    closeSearchBarButton.addEventListener("click", closeSearchBar);
+    if (closeSearchBarButton != null) {
+        // Set closeSearchBarButton behaviour (responsive styling)
+        closeSearchBarButton.addEventListener("click", closeSearchBar);
+    }
 
-    // Update the text inside the dropdown menu button to the selected item
-    // Set the hidden Select element (from Django form) to the selected value
-    // Doing it this way because Select HTML elements can't be formatted/styled properly
-    dropdownItems.forEach(item => {
+    // Set dropdown menu behaviour for all dropdown menus on page
+    // When the user clicks on the button, toggle between hiding and showing the dropdown content
+    dropdowns.forEach(dropdown => {
+        dropdownButtons = dropdown.querySelectorAll('.dropdown-button');
+
+        dropdownButtons.forEach(dropdownButton => {
+            dropdownButton.addEventListener("click", function() {
+                dropdownOptions = dropdown.querySelector('.dropdown-options');
+                dropdownOptions.classList.toggle('show');
+                preventDropdownPageOverflow(dropdownOptions);
+            });
+        });
+    });
+
+    // Set custom behaviour for search dropdown:
+    // - Update the text inside the dropdown menu button to the selected item
+    // - Set the hidden Select element (from Django form) to the selected value
+    // - Doing it this way because Select HTML elements can't be formatted/styled properly
+    searchDropdownItems.forEach(item => {
         item.addEventListener("click", function(event) {
             event.preventDefault(); // Prevent page from jumping
-            dropdownButtonSpan.textContent = this.textContent; // Change the button text to the clicked item's text
+            searchDropdownButtonSpan.textContent = this.textContent; // Change the button text to the clicked item's text
             const selectedValue = this.getAttribute('data-value');
-            dropdownFormSelect.value = selectedValue;
+            searchFormSelect.value = selectedValue;
         });
     });
 
