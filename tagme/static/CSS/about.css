@@ -44,7 +44,7 @@ main a {
 #website-info-section {
     display: flex;
     flex-direction: row;
-    gap: 50px;
+    gap: 2vw;
 
     & > * {
         width: 50%;
@@ -60,22 +60,28 @@ main a {
 }
 
 #team-info-section .content-box {
-    height: 150px;
     display: flex;
     flex-direction: row;
     gap: 20px;
 
+    & img {
+        max-height: 150px;
+        border-radius: 50%;
+        aspect-ratio: 1 / 1;
+    }
+
     & > div {
+        min-width: calc(100% - 150px - 30px); /* 150px == width of img. 30px == padding of content-box */
         flex-grow: 1;
         display: flex;
         flex-direction: column;
         justify-content: center;
     }
 
-    & img {
-        height: 100%;
-        border-radius: 50%;
-        aspect-ratio: 1 / 1;
+    & h2 {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
     }
 
     & p {
@@ -95,3 +101,64 @@ main a {
     font-size: 1.2rem;
     margin-bottom: 10px;
 }
+
+/**********************************************************************************************************************/
+/* RESPONSIVE STYLING */
+@media (orientation:portrait) {
+    #website-info-section {
+        flex-direction: column;
+        gap: 2vh;
+
+        & > * {
+            width: 100%;
+        }
+    }
+}
+
+@media (width < 1615px) {
+    #team-info-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+
+        & img {
+            max-height: 125px !important;
+        }
+
+        & .content-box {
+            width: calc(50% - 20px); /* 20px == gap between content-boxes */
+        }
+    }
+}
+
+@media (width < 1050px) {
+    #team-info-section {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: 15px;
+
+        & .content-box {
+            width: auto;
+        }
+    }
+}
+
+@media (width < 550px) {
+    #team-info-section .content-box {
+        flex-direction: column;
+        align-items: center;
+
+        & img {
+            max-height: 100px;
+            max-width: 100px;
+        }
+
+        & h2, p {
+            text-align: center;
+
+        }
+    }
+}
+
+
+
