@@ -127,6 +127,11 @@ function preventTooltipViewportOverflow() {
                 return;
             }
 
+            // DO NOT PROCEED IF TOOLTIP BUBBLE IS NOT "ON TOP" OR "ON BOTTOM"
+            if (!tooltipBubble.classList.contains('bubble-on-top') && !tooltipBubble.classList.contains('bubble-on-bottom')) {
+                return;
+            }
+
             // newLeftCoordinate == x coordinate of bubble-content's left edge on screen IF CORRECT FOR OVERFLOW
             // newRightCoordinate == x coordinate of bubble-content's right edge on screen IF CORRECT FOR OVERFLOW
             const leftOverflow = 0 - bubbleContent.getBoundingClientRect().left;

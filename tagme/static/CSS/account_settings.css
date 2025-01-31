@@ -7,15 +7,18 @@ main {
 /* -------------------------------------------------------------------------------------------------------------------*/
 /* ACCOUNT SETTINGS SECTION (MAIN CONTENT) */
 #main-content {
+    container-type: inline-size;
+    container-name: main-content;
     flex-grow: 1;
-    padding: 25px;
+    padding: 30px;
 }
 
 #account-settings-section {
-    box-sizing: border-box;
-    width: fit-content;
+    container-type: inline-size;
+    container-name: account-settings;
+    min-width: 750px; /* Set to 0 once main-content hits 750px in width (see end of this file) */
+    width: 50%;
     padding: 20px 30px;
-    margin: 5px; /* To give enough space for box-shadows */
     min-height: 100%;
     display: flex;
     flex-direction: column; /* Main axis = Vertical */
@@ -45,17 +48,28 @@ form.invisible * { /* All descendants (indirect children included) */
     visibility: hidden !important;
 }
 
+.grid-content > *:not(form),
+.grid-content form:not(.invisible) > *:not(.form-errors) {
+    margin: 7.5px 0px;
+}
+
 .grid-content {
+    margin: 7.5px 0px;
     display: grid;
-    grid: min-content / 1fr 20vw min-content;
-    /* 20vw so that column02 width stays the same across page reloads (e.g., when a form error occurs) */
+    grid: min-content / auto 1fr min-content;
     align-content: center;
+    align-items: center;
     column-gap: 10px;
     /* Don't use row-gap so that hidden rows are properly hidden. Use 7.5px margins instead */
 
     & h2 {
         font-weight: 400;
         font-size: 1.2rem;
+    }
+
+    & span {
+        text-overflow: ellipsis;
+        overflow: hidden;
     }
 
     & label {
@@ -77,13 +91,34 @@ form.invisible * { /* All descendants (indirect children included) */
         display: contents;
     }
 
+    & hr {
+        grid-column: 1 / span 3;
+        width: 100%;
+        border: none; /* Override default <hr> styling */
+        border-bottom: solid 1px #8A8A8A;
+    }
+
+    & input {
+        border-radius: 10px;
+    }
+
+    /*--------Inputs that are NOT submit buttons--------*/
+    & input:not([type="submit"]) {
+        grid-column: 2;
+    }
+
+    & input:not([type="submit"]):has(+.form-errors) {
+        border-color: red;
+    }
+
+    /*------------------Submit buttons------------------*/
     & input[type="submit"]  {
-        padding: 10px;
+        max-width: 140px;
+        padding: 8px 15px; /* Same top/bottom padding as default input style (see global.css) */
         font-size: 1rem;
         grid-column: 3;
         cursor: pointer;
         border: solid 1px #537A00;
-        border-radius: 10px;
         background-color: #537A00;
         color: white;
     }
@@ -92,38 +127,43 @@ form.invisible * { /* All descendants (indirect children included) */
         border-color: #3B6000;
         background-color: #3B6000;
     }
+}
 
-    & hr {
-        grid-column: 1 / span 3;
-        width: 100%;
-        border: none; /* Override default <hr> styling */
-        border-bottom: solid 1px #8A8A8A;
+#username-change-form {
+    & .form-errors ~ input[type="submit"] {
+        grid-row: 2;
     }
 }
 
-.grid-content > *:not(form),
-.grid-content form:not(.invisible) > * {
-    box-sizing: border-box;
-    margin: 7.5px 0px;
-
-    &.first-grid-row {
-        margin-top: 15px;
-    }
-
-    &.last-grid-row {
-        margin-bottom: 15px;
+#email-change-form {
+    & .form-errors ~ input[type="submit"] {
+        grid-row: 5;
     }
 }
 
-.grid-content > *:not(form),
-.grid-content form > *:not(.column-2) {
+#password-change-form {
+    & input:not([type="submit"]) {
+        grid-column: 2 / span 2;
+    }
+
+    & input[type="submit"] {
+        margin-top: 0px;
+    }
+}
+
+.grid-content *:has( > .tooltip) {
     display: flex;
     flex-direction: row;
     align-items: center; /* Make sure all text are vertically-centered/aligned regardless of font-size */
     gap: 5px;
 }
 
-.column-2 {
+.form-errors {  /* Form error lists */
+    grid-column: 2 / span 2;
+    margin: 0px;
+    position: relative;
+    top: -8px;
+
     & ul {
         list-style-type: "* ";
         padding: 5px;
@@ -133,36 +173,6 @@ form.invisible * { /* All descendants (indirect children included) */
     & li {
         color: red;
     }
-}
-
-.single-field-form .column-2 {
-    grid-column: 2;
-    grid-row: auto / span 2;
-
-    &:has(.errorlist) > input {
-        border-color: red;
-    }
-}
-
-.multi-field-form .column-2 {
-    grid-column: 2 / span 2;
-
-    &:has(input[aria-invalid="true"]) {
-        margin-bottom: 0px;
-    }
-
-    &:has(.errorlist) {
-        margin: 0px 0px 7.5px 0px;
-    }
-
-    &:has(+div.column-2 > .errorlist) input {
-        border-color: red;
-    }
-}
-
-/* Select all .column-1 divs that are followed by a .column-2 div that contains an input with aria-invalid="true" attribute */
-.multi-field-form .column-1:has(+div.column-2 > input[aria-invalid="true"]) {
-    margin-bottom: 0px !important;
 }
 
 #settings-footer {
@@ -205,7 +215,7 @@ form.invisible * { /* All descendants (indirect children included) */
     }
 
     & .bubble-content {
-        width: 25vw;
+        min-width: 25vw;
         list-style-type: disc;
         padding: 10px 5px 10px 30px;
     }
@@ -229,3 +239,58 @@ form.invisible * { /* All descendants (indirect children included) */
     }
 }
 
+/**********************************************************************************************************************/
+/* RESPONSIVE STYLING */
+@media (width < 750px) or (orientation:portrait) { /* When viewport width < viewport height (e.g., mobile) */
+    main {
+        flex-direction: column; /* Main axis = Vertical */
+    }
+}
+
+@container main-content (width < 750px) {
+    #account-settings-section {
+        width: 100%;
+        min-width: 0px;
+        margin: 0px;
+    }
+}
+
+@container account-settings (width < 500px) {
+    input[type="submit"] {
+        grid-column: 2 / span 2 !important;
+        margin-top: 0px !important;
+        margin-left: auto !important;
+    }
+
+    input:not([type="submit"]) {
+        grid-column: 2 / span 2 !important;
+    }
+
+    .edit-button {
+        padding: 0px 10px;
+    }
+
+    #username-change-form, #email-change-form {
+        & .form-errors ~ input[type="submit"] {
+            grid-row: auto;
+        }
+    }
+}
+
+@container account-settings (width < 400px) {
+    .grid-content {
+        grid: min-content / auto min-content;
+    }
+
+    label, div:has(label) {
+        margin-bottom: 0px !important;
+    }
+
+    h2, label, div:has(label), hr, input:not([type="submit"]), .form-errors {
+        grid-column: 1 / span 2 !important;
+    }
+
+    input[type="submit"] {
+        grid-column: 2 !important;
+    }
+}

@@ -66,7 +66,7 @@
 
 /**********************************************************************************************************************/
 /* RESPONSIVE STYLING */
-@media (orientation:landscape) { /* When viewport width > viewport height */
+@media (width >= 750px) and (orientation:landscape)  { /* When viewport width > viewport height */
     #user-sidenav-links a.active {  /* active class set via JavaScript */
         background-color: #3B6000;
         color: white;
@@ -82,7 +82,7 @@
     }
 }
 
-@media (orientation:portrait) { /* When viewport width < viewport height (e.g., mobile) */
+@media (width < 750px) or (orientation:portrait) {
     #user-account-sidenav {
         width: 100%;
         height: fit-content;

@@ -251,22 +251,6 @@ main {
 
 /**********************************************************************************************************************/
 /* RESPONSIVE STYLING */
-@media (orientation:portrait) { /* When viewport width < viewport height (e.g., mobile) */
-    main {
-        flex-direction: column; /* Main axis = Vertical */
-    }
-
-    #progress-info-line {
-        flex-direction: column;
-    }
-
-    #equipped-titles-content {
-        flex-direction: column;
-        /*padding: 20px 0%;
-        gap: 5%;*/
-    }
-}
-
 @media (width < 1700px) {
     #profile-content {
         grid: min-content min-content auto / auto;
@@ -277,7 +261,21 @@ main {
     }
 }
 
+@media (width < 750px) or (orientation:portrait) {
+    main {
+        flex-direction: column; /* Main axis = Vertical */
+    }
 
+    #progress-info-line {
+        flex-direction: column;
+    }
+
+    #equipped-titles-content {
+        flex-direction: column;
+    }
+}
+
+/*--------PROGRESS SECTION (RESPONSIVE)---------*/
 @container progress (width < 575px) {
     #progress-info-line {
         flex-direction: column;
@@ -292,6 +290,7 @@ main {
     }
 }
 
+/*--------EQUIPPED TITLES SECTION (RESPONSIVE)---------*/
 @container equipped-titles (width > 900px) {
     #equipped-titles-content {
         padding: 20px 15%;
