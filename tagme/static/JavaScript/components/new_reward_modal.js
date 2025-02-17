@@ -44,7 +44,7 @@ function openNewRewardModal() {
         newRewardModal.style.opacity = 1;
     }, 0);
 
-    playFireworks(); // TODO: prevent modal movement when fireworks play
+    playFireworks();
 }
 
 function closeNewRewardModal() {

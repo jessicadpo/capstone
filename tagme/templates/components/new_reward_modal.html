@@ -1,16 +1,18 @@
 <div id="new-reward-overlay" class="modal-overlay"></div> <!-- id so behaves differently from report-tag-overlay -->
 
-<div class="firework invisible"></div>
-<div class="firework invisible"></div>
-<div class="firework invisible"></div>
-
 <dialog id="new-reward-modal" class="modal"> <!-- carousel class added via JavaScript for responsive layout -->
+    <!-- Must be inside modal to be visible in all screen sizes -->
+    <div class="firework invisible"></div>
+    <div class="firework invisible"></div>
+    <div class="firework invisible"></div>
+
     <button class="slide-controls prev-slide-button"><i class="fa fa-angle-left" aria-hidden="true"></i></button>
     <div class="modal-content carousel-strip"> <!-- Need this because can't apply display: flex on <dialog> elements + need carousel-strip -->
         <div class="slide-card">
             <h1>Congrats!</h1>
             <p>You've reached {{ score_data.user_points }} points and earned:</p>
             <div>
+                {% include "components/reward_title.html" %}
                 {% for reward in score_data.new_rewards %}
                     {% include "components/reward_title.html" %}
                 {% endfor %}
@@ -50,4 +52,3 @@
         {{ forms.equip_form }}
     </form>
 </dialog>
-

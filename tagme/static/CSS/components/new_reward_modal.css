@@ -122,7 +122,8 @@
 }
 
 .firework.playing, .firework.playing::before, .firework.playing::after {
-    z-index: 1003;
+    z-index: 1003; /* Put fireworks above new-reward-overlay */
+    overflow: hidden; /* Prevents weird overflow & movement on smaller screens */
     opacity: 0;
     --initialSize: 0.5vmin;
     --finalSize: 45vmin;
@@ -203,12 +204,12 @@
     transform: translate(-50%, -50%) rotate(170deg) scale(1.15) rotateY(-30deg);
 }
 
-.firework.playing:nth-child(3) {
+.firework.playing:nth-of-type(2) {
     --x: 30vmin;
     --y: -50vmin;
 }
 
-.firework.playing:nth-child(3), .firework.playing:nth-child(3)::before, .firework.playing:nth-child(3)::after {
+.firework.playing:nth-of-type(2), .firework.playing:nth-of-type(2)::before, .firework.playing:nth-of-type(2)::after {
     --color1: pink;
     --color2: violet;
     --color3: fuchsia;
@@ -221,12 +222,12 @@
     animation-delay: -0.25s;
 }
 
-.firework.playing:nth-child(4) {
+.firework.playing:nth-of-type(3) {
     --x: -30vmin;
     --y: -50vmin;
 }
 
-.firework.playing:nth-child(4), .firework.playing:nth-child(4)::before, .firework.playing:nth-child(4)::after {
+.firework.playing:nth-of-type(3), .firework.playing:nth-of-type(3)::before, .firework.playing:nth-of-type(3)::after {
     --color1: cyan;
     --color2: lightcyan;
     --color3: lightblue;
