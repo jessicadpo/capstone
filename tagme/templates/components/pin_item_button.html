@@ -1,6 +1,9 @@
 <div class="pin-item-button-container">
-    <button class="pin-item-button pin-{{ item.is_pinned }}" value="{{ item.item_id }}">
-    <i class="fa fa-thumb-tack" aria-hidden="true"></i>
+    <button class="pin-item-button pin-{{ item.is_pinned }}"
+            value="{{ item.item_id }}"
+            aria-label="{% if item.is_pinned %} Unpin or Edit Pin {% else %} Pin Item {% endif %}"
+            title="{% if item.is_pinned %} Unpin or Edit Pin {% else %} Pin Item {% endif %}">
+        <i class="fa fa-thumb-tack" aria-hidden="true"></i>
         {% if item.is_pinned %}
             <span>Pinned Item</span>
         {% else %}
@@ -21,12 +24,6 @@
     <div class="points-earned-for-item invisible"> <!-- Hidden from user (Need this to pre-fill "Add tags" form in Search results page in JavaScript -->
         <span>{{ item.points_earned }}</span>
     </div>
-
-    <!-- Show Date Pinned in pinned-items page (required loading of html_functions) -->
-    {% load html_functions %}
-    {% if request|url_contains_pinned_items %}
-        <span class="date-pinned">Date Pinned: {{ item.date_pinned }}</span>
-    {% endif %}
 </div>
 
 

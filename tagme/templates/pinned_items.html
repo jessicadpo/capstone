@@ -32,6 +32,8 @@
         {% include 'components/tri_state_checkbox.html' %}
     </template>
 
+    <div class="sidebar-overlay"></div>
+
     <main>
         {% include "components/user_sidenav.html" %}
 
@@ -39,8 +41,13 @@
             <div id="pinned-items-section" class="paginated-content">
                 {% with "pinned items" as content_type %}
                     <div id="pinned-items-header">
-                        <h1>Pinned Items by <b>{{request.user.username}}</b></h1>
+                        <h1>Items pinned by <b>{{request.user.username}}</b></h1>
+
                         {% include 'components/pagination_top.html' %}
+                        <button id="open-filter-menu-button" aria-label="Sort & Filter" title="Sort & Filter">
+                            <i class="fa fa-filter" aria-hidden="true"></i>
+                            <span>Filter & Sort</span>
+                        </button>
                     </div>
 
                     <div id="pinned-items-list"> <!-- Need this to fix footer at bottom of section -->
@@ -56,106 +63,113 @@
                 {% endwith %}
             </div>
 
-            <form id="filter-menu" method="GET">
-                {% if show_clear_filters %}
-                    <!-- Removes GET parameters from URL ==> so resets to default sort & filtering -->
-                    <a href="/pinned-items/{{ request.user.username }}">
-                        <button type="button" id="clear-filters-button">Clear Sort & Filter(s)</button>
-                    </a>
-                {% endif %}
+            <aside id="filter-sidebar">
+                <form id="filter-menu" method="GET">
+                    <button id="close-filter-menu-button" aria-label="Close sort & filter menu">
+                        <span>✖</span>
+                        Close
+                    </button>
 
-                <input type="submit" value="Apply Sort & Filter(s)"/>
+                    {% if show_clear_filters %}
+                        <!-- Removes GET parameters from URL ==> so resets to default sort & filtering -->
+                        <a href="/pinned-items/{{ request.user.username }}">
+                            <button type="button" id="clear-filters-button" aria-label="Clear sort & filters">Clear Sort & Filter(s)</button>
+                        </a>
+                    {% endif %}
 
-                <div class="form-section" id="sort-by-section">
-                    <h2>Sort by</h2>
-                    {{ forms.sort_filter_form.sort_order }}
-                </div>
+                    <input type="submit" value="Apply Sort & Filter(s)"/>
 
-                <div class="form-section" id="your-contributions-section">
-                    <div class="heading-container">
-                        <h2>Your Contributions</h2>
-                        <div class="tooltip">
-                            <i class="fa fa-question-circle" aria-label="Filtering tooltip" tabindex="0"></i>
-                            <div class="tooltip-bubble yellow-bubble bubble-on-left">
-                                <div class="bubble-content">
-                                    <p>Click on any filter <b>once</b> to <b>include</b> it.</p>
-                                    <p>Click on it a <b>2nd time</b> to <b>exclude</b> it.</p>
-                                    <p>Click on it a <b>3rd time</b> to <b>clear</b> it.</p>
-                                </div>
-                                <div class="bubble-tail-outline"></div>
-                                <div class="bubble-tail"></div>
-                            </div>
-                        </div>
+                    <div class="form-section" id="sort-by-section">
+                        <h2>Sort by</h2>
+                        {{ forms.sort_filter_form.sort_order }}
                     </div>
 
-                    {% with forms.sort_filter_form.public_tags as select_element %}
-                        {% include 'components/tri_state_checkbox.html' %}
-                    {% endwith %}
-
-                    {% with forms.sort_filter_form.private_tags as select_element %}
-                        {% include 'components/tri_state_checkbox.html' %}
-                    {% endwith %}
-
-                    {% with forms.sort_filter_form.comments as select_element %}
-                        {% include 'components/tri_state_checkbox.html' %}
-                    {% endwith %}
-                </div>
-
-                <!--
-                5 most frequent tags across ALL pinned items (not just the ones filtered in)
-                so that the same tags remain in Frequent Tags section across filters
-                (otherwise, any excluded tags would move from "Frequent Tags" to "Tags to Exclude", always)
-                -->
-                <div class="form-section" id="frequent-tags-section">
-                    <div class="heading-container">
-                        <h2>Frequent Tags</h2>
-                        <div class="tooltip">
-                            <i class="fa fa-question-circle" aria-label="Filtering tooltip" tabindex="0"></i>
-                            <div class="tooltip-bubble yellow-bubble bubble-on-left">
-                                <div class="bubble-content">
-                                    <p>Click on any filter <b>once</b> to <b>include</b> it.</p>
-                                    <p>Click on it a <b>2nd time</b> to <b>exclude</b> it.</p>
-                                    <p>Click on it a <b>3rd time</b> to <b>clear</b> it.</p>
+                    <div class="form-section" id="your-contributions-section">
+                        <div class="heading-container">
+                            <h2>Your Contributions</h2>
+                            <div class="tooltip">
+                                <i class="fa fa-question-circle" aria-label="Filtering tooltip" tabindex="0"></i>
+                                <div class="tooltip-bubble yellow-bubble bubble-on-left">
+                                    <div class="bubble-content">
+                                        <p>Click on any filter <b>once</b> to <b>include</b> it.</p>
+                                        <p>Click on it a <b>2nd time</b> to <b>exclude</b> it.</p>
+                                        <p>Click on it a <b>3rd time</b> to <b>clear</b> it.</p>
+                                    </div>
+                                    <div class="bubble-tail-outline"></div>
+                                    <div class="bubble-tail"></div>
                                 </div>
-                                <div class="bubble-tail-outline"></div>
-                                <div class="bubble-tail"></div>
                             </div>
                         </div>
-                    </div>
 
-                    {% for tag in frequent_user_tags %}
-                        {% with tag|tag_item_count_dict_to_string as label_text %}
+                        {% with forms.sort_filter_form.public_tags as select_element %}
                             {% include 'components/tri_state_checkbox.html' %}
                         {% endwith %}
-                    {% empty %}
-                        <p>No tags found.</p>
-                    {% endfor %}
-                </div>
 
-                <div class="form-section" id="additional-tags-section">
-                    <h2>Additional Tags</h2>
+                        {% with forms.sort_filter_form.private_tags as select_element %}
+                            {% include 'components/tri_state_checkbox.html' %}
+                        {% endwith %}
 
-                    <h3>Tags to Include</h3>
-                    <div id="tags-to-include-container"></div> <!-- Filled with tri_state_checkboxes via JavaScript -->
-                    <input id="additional-include-input" type="text"/>
+                        {% with forms.sort_filter_form.comments as select_element %}
+                            {% include 'components/tri_state_checkbox.html' %}
+                        {% endwith %}
+                    </div>
 
-                    <h3>Tags to Exclude</h3>
-                    <div id="tags-to-exclude-container"></div> <!-- Filled with tri_state_checkboxes via JavaScript -->
-                    <input id="additional-exclude-input" type="text"/>
-                </div>
+                    <!--
+                    5 most frequent tags across ALL pinned items (not just the ones filtered in)
+                    so that the same tags remain in Frequent Tags section across filters
+                    (otherwise, any excluded tags would move from "Frequent Tags" to "Tags to Exclude", always)
+                    -->
+                    <div class="form-section" id="frequent-tags-section">
+                        <div class="heading-container">
+                            <h2>Frequent Tags</h2>
+                            <div class="tooltip">
+                                <i class="fa fa-question-circle" aria-label="Filtering tooltip" tabindex="0"></i>
+                                <div class="tooltip-bubble yellow-bubble bubble-on-left">
+                                    <div class="bubble-content">
+                                        <p>Click on any filter <b>once</b> to <b>include</b> it.</p>
+                                        <p>Click on it a <b>2nd time</b> to <b>exclude</b> it.</p>
+                                        <p>Click on it a <b>3rd time</b> to <b>clear</b> it.</p>
+                                    </div>
+                                    <div class="bubble-tail-outline"></div>
+                                    <div class="bubble-tail"></div>
+                                </div>
+                            </div>
+                        </div>
 
-                <!--
-                NOTE: None of the tri-state checkboxes for Frequent Tags & Additional Tags are included in GET request.
-                Instead, pinned_items.js adds all tags to include & exclude in hidden textarea elements (see below).
-                Doing it this way for easier processing of GET request
-                -->
-                <div class="invisible">
-                    {{ forms.sort_filter_form.include_tags }}
-                    {{ forms.sort_filter_form.exclude_tags }}
-                </div>
+                        {% for tag in frequent_user_tags %}
+                            {% with tag|tag_item_count_dict_to_string as label_text %}
+                                {% include 'components/tri_state_checkbox.html' %}
+                            {% endwith %}
+                        {% empty %}
+                            <p>No tags found.</p>
+                        {% endfor %}
+                    </div>
 
-                <input type="submit" value="Apply Sort & Filter(s)"/>
-            </form>
+                    <div class="form-section" id="additional-tags-section">
+                        <h2>Additional Tags</h2>
+
+                        <h3>Tags to Include</h3>
+                        <div id="tags-to-include-container"></div> <!-- Filled with tri_state_checkboxes via JavaScript -->
+                        <input id="additional-include-input" type="text"/>
+
+                        <h3>Tags to Exclude</h3>
+                        <div id="tags-to-exclude-container"></div> <!-- Filled with tri_state_checkboxes via JavaScript -->
+                        <input id="additional-exclude-input" type="text"/>
+                    </div>
+
+                    <!--
+                    NOTE: None of the tri-state checkboxes for Frequent Tags & Additional Tags are included in GET request.
+                    Instead, pinned_items.js adds all tags to include & exclude in hidden textarea elements (see below).
+                    Doing it this way for easier processing of GET request
+                    -->
+                    <div class="invisible">
+                        {{ forms.sort_filter_form.include_tags }}
+                        {{ forms.sort_filter_form.exclude_tags }}
+                    </div>
+
+                    <input type="submit" value="Apply Sort & Filter(s)"/>
+                </form>
+            </aside>
         </div>
     </main>
 

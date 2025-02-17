@@ -7,14 +7,9 @@ const readMoreButton = document.getElementById('column2-read-more-button');
 const tagsContainer = document.getElementById('tags-container');
 const column3Tags = document.querySelectorAll('.column3 .tag');
 
-const topBar = document.getElementById('top-bar');
-const mainContent = document.getElementById('main-content');
-const footer = document.getElementById('footer');
-
-const openSidebarButtons = document.querySelectorAll('.open-sidebar-button');
-const closeSidebarButton = document.getElementById('close-sidebar-button');
-const reportOverlay = document.getElementById('report-tag-overlay');
-const sidebar = document.getElementById('tag-sidebar');
+const openTagSidebarButtons = document.querySelectorAll('.open-sidebar-button');
+const closeTagSidebarButton = document.getElementById('close-sidebar-button');
+const tagSidebar = document.getElementById('tag-sidebar');
 
 const reportButtons = document.querySelectorAll('.report-button');
 const reportTagDialog = document.getElementById('report-tag-dialog');
@@ -99,23 +94,13 @@ function setBackLink() {
     }
 }
 
-function openSidebar() {
-    sidebar.classList.add('active');
-    reportOverlay.classList.add('active');
-    document.body.style.overflow = 'hidden'; // Disable scrolling on the main content
-    topBar.setAttribute('inert', ''); // Disable mouse & keyboard interaction
-    mainContent.setAttribute('inert', '');
-    footer.setAttribute('inert', '');
+function openTagSidebar() {
+    openSidebar(tagSidebar, true); // see global.js
 }
 
-function closeSidebar() {
-    sidebar.classList.remove('active');
-    reportOverlay.classList.remove('active');
+function closeTagSidebar() {
     reportTagDialog.close();
-    document.body.style.overflow = ''; // Re-enable scrolling on the main content
-    topBar.removeAttribute('inert');
-    mainContent.removeAttribute('inert');
-    footer.removeAttribute('inert');
+    closeSidebar(tagSidebar, true); // see global.js
 }
 
 // Triggers after DOM content is finished loading
@@ -139,11 +124,11 @@ document.addEventListener("DOMContentLoaded", function () {
     reportedTagComponent.setAttribute('aria-disabled', 'true');
 
     // Open/Close sidebar behaviour
-    openSidebarButtons.forEach(openSidebarButton => {
-        openSidebarButton.addEventListener('click', openSidebar);
+    openTagSidebarButtons.forEach(openTagSidebarButton => {
+        openTagSidebarButton.addEventListener('click', openTagSidebar);
     });
-    closeSidebarButton.addEventListener('click', closeSidebar);
-    reportOverlay.addEventListener('click', closeSidebar);
+    closeTagSidebarButton.addEventListener('click', closeTagSidebar);
+    sidebarOverlay.addEventListener('click', closeTagSidebar); //sidebarOverlay defined in global.js
 
     // Set report button behaviour
     let lastButton = null; // keep track of the last Report button that was clicked

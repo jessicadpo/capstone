@@ -1,3 +1,6 @@
+const openFilterMenuButton = document.getElementById('open-filter-menu-button');
+const closeFilterMenuButton = document.getElementById('close-filter-menu-button');
+const filterSidebar = document.getElementById('filter-sidebar');
 const sortFilterForm = document.getElementById('filter-menu');
 const applySortFilterButtons = document.querySelectorAll('#filter-menu input[type="submit"]');
 
@@ -183,8 +186,37 @@ function copyTagsToFilterToTextarea(tagsToFilter, textarea) {
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
+// FILTER MENU SIDEBAR (RESPONSIVE)
+function openFilterMenu() {
+    openSidebar(filterSidebar, true); // see global.js
+    document.getElementById('user-account-sidenav').setAttribute('inert', '');
+
+    // Move the tooltips in sync with scrolling
+    document.querySelector('#filter-menu').addEventListener('scroll', () => {
+        const headingContainers = document.querySelectorAll('.heading-container:has(.tooltip)');
+        headingContainers.forEach(headingContainer => {
+            const tooltip = headingContainer.querySelector('.tooltip');
+            tooltip.style.top = headingContainer.getBoundingClientRect().top + "px";
+        });
+    });
+}
+
+function closeFilterMenu() {
+    document.getElementById('user-account-sidenav').removeAttribute('inert');
+    closeSidebar(filterSidebar, true); // see global.js
+}
+
+/*--------------------------------------------------------------------------------------------------------------------*/
 // Triggers after DOM content is finished loading
 document.addEventListener("DOMContentLoaded", function () {
+    // Set open & close filter menu behavior
+    openFilterMenuButton.addEventListener("click", openFilterMenu);
+    sidebarOverlay.addEventListener("click", closeFilterMenu); // sidebarOverlay defined in global.js
+    closeFilterMenuButton.addEventListener("click", function(event) {
+        event.preventDefault(); // Prevent filter form submission (default behaviour)
+        closeFilterMenu();
+    });
+
     // Add tristate checkboxes for every filtered tag (listed in the textareas) && set the state
     // If a frequent tag --> just set the state
     setTagFilterStates(tagsToIncludeTextarea.value.split('\\n'), true);

@@ -1,105 +1,107 @@
-.result-item {
+.item-result-container {
+    container-type: inline-size;
+    container-name: item-result-container;
+}
+
+.item-result {
     box-sizing: border-box;
     height: fit-content;
     padding: 20px 30px;
     border-radius: 20px;
 
-    & .item-data-section {
-        height: 22vh;
-        min-height: 200px;
+    display: grid;
+    grid: 50px auto minmax(0, 1fr) / 180px auto min-content;
+    column-gap: 20px;
+    row-gap: 10px;
+}
+
+div:has(>.cover-container) {
+    grid-row: 1 / -1; /* Ensures occupies all of first column regardless of how many rows (2 or 3) */
+    height: fit-content;
+
+    & .cover-container {
+        width: 100%;
+        aspect-ratio: 1 / 1.5;
+        overflow: hidden;
         display: flex;
-        flex-direction: row; /* Main axis = Horizontal */
-        gap: 20px;
+        justify-content: center;
+        align-items: center;
+        border: solid 1px black;
+        border-radius: 8px;
+    }
+
+    & .result-cover {
+        height: 100%;
+        width: 100%;
+        color: #8A8A8A; /* Text color if no cover found */
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center; /* Center-align text if no cover found */
     }
 }
 
-.cover-container {
-    flex-shrink: 0;
-    flex-grow: 0;
-    height: 100%;
-    aspect-ratio: 1/1.5;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: solid 1px black;
-    border-radius: 8px;
-}
+.date-pinned {
+    &.attached-to-cover {
+        margin-top: 5px;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
 
-.result-cover {
-    height: 100%;
-    width: 100%;
-    color: #8A8A8A; /* Text color if no cover found */
-    display: flex;
-    align-items: center;
-    justify-content: center; /* Center-align text if no cover found */
-}
-
-.pin-item-button { /* Partially overrides styling in global.css */
-    width: 225px;
-    height: 20%;
-    margin: 20px 0px 10px 0px;
-    padding: 25px 30px 25px 25px;
-    flex-shrink: 0;
-    & span {
-        flex-grow: 1;
+    &.attached-to-pin-button {
+        grid-column: 3;
+        width: 250px;
     }
 }
 
 .result-text-info {
+    grid-row: 1 / span 2;
+
     flex-grow: 1;
     display: flex;
     flex-direction: column; /* Main axis = Vertical */
     overflow: hidden;
-    font-size: 1.5em;
+    font-size: 1.5rem;
     gap: 10px;
-    padding: 10px 0px;
+
+    & .media-type {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+    }
+
+    & .result-title {
+        font-size: 2.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        margin: 0px;
+    }
+
+    & .result-title:hover, .result-title:focus {
+        color: #537A00;
+        text-decoration: underline;
+    }
+
+    & .result-title, .result-authors {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    & .result-authors, .result-pub-date {
+        margin: 0px;
+    }
 }
 
-.result-text-info * {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+/* NOTE: See global.css for Pin button styling */
 
-.media-type {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
-}
-
-.result-title {
-    font-size: 2.5rem;
-    font-weight: 600;
-    text-decoration: none;
-    margin: 5px 0px;
-}
-
-.result-title:hover, .result-title:focus {
-    color: #537A00;
-    text-decoration: underline;
-}
-
-.result-authors {
-    margin: 0;
-}
-
-.result-pub-date {
-    margin: 0;
-}
-
-/*--------------------------------------------------------------------------------------------------------------------*/
-/* VISIBLE IN PINNED ITEMS PAGE ONLY */
-
-.user-tags-section {
-    box-sizing: border-box;
-    margin-top: 10px;
-    margin-left: calc(max(calc(22vh / 1.5), calc(200px / 1.5)) + 20px);
-    /*
-    - Margin-left is always == width of cover-container + gap of .item-data-section
-    - Use margin-left instead of position: relative + left --> so that width doesn't exceed parent container
-    */
+.user-tags-section {  /* VISIBLE IN PINNED ITEMS PAGE ONLY */
+    grid-column: 2 / span 2;
+    height: fit-content;
     padding: 10px 0px;
     border-top: solid 1px #8A8A8A;
     display: flex;
@@ -115,12 +117,127 @@
         font-size: 1.5rem;
         white-space: nowrap;
         min-width: 150px;
-
     }
 
     & .tag-list-container {  /* Override styling from tag_modal.css */
         height: fit-content;
         padding: 0px;
-
     }
 }
+
+/**********************************************************************************************************************/
+/* RESPONSIVE STYLING */
+
+@container item-result-container (width < 1000px) {
+    .pin-item-button-container {
+        display: contents;
+    }
+
+    .pin-item-button {
+        justify-self: end;
+        width: 50px;
+        min-width: 0px;
+        border: none;
+        border: none;
+        border: none;
+        padding: 0px 20px;
+
+        & span {
+            display: none;
+        }
+    }
+
+    .date-pinned {
+        &.attached-to-pin-button {
+                display: none;
+        }
+
+        &.attached-to-cover {
+            display: flex;
+        }
+    }
+}
+
+@container item-result-container (width < 650px) {
+    .item-result {
+        grid: 50px min-content minmax(0, 1fr) / 100px auto min-content;
+        position: relative; /* So can position button based on it */
+    }
+
+    .date-pinned {
+        font-size: 0.8rem;
+    }
+
+    .media-type {
+        font-size: 1.1rem;
+    }
+
+    .result-text-info {
+        grid-column: 2 / span 2;
+        gap: 5px;
+
+        & * {
+            font-size: 1.1rem !important;
+        }
+
+        & .result-title {
+            font-size: 1.5rem !important;
+            margin-top: 10px;
+        }
+    }
+
+    .result-title, .result-authors {
+        -webkit-line-clamp: 5 !important;
+    }
+
+    .pin-item-button {
+        width: 30px;
+        height: 40px;
+        border-radius: 10px;
+        position: absolute;
+        top: 20px;
+        right: 20px;
+
+        & i {
+            font-size: 1.4rem;
+        }
+    }
+
+    .user-tags-section {
+        flex-direction: column;
+        gap: 15px;
+
+        & p {
+            font-size: 1.3rem !important;
+        }
+
+        & .tag-content {
+            padding: 7px;
+        }
+
+        & .tag-content a {
+            font-size: 1rem !important;
+        }
+    }
+}
+
+@container item-result-container (width < 450px) {
+    .result-title, .result-authors {
+        -webkit-line-clamp: 10 !important;
+    }
+}
+
+/*
+.item-result {
+    display: grid;
+    grid: 200px auto / 133px auto; /* maintains 1 / 1.5 aspect ratio for cover images
+    column-gap: 20px;
+
+    & .item-data-section {
+        display: contents;
+    }
+}
+*/
+
+
+

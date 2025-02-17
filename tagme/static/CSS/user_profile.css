@@ -153,14 +153,21 @@ main {
     }
 }
 
+
 .equipped-title-widget {
     box-sizing: border-box;
     width: 100%;
     height: min-content;
     display: grid;
-    grid: auto / auto min-content;
-    align-items: center;
-    gap: 15px;
+    grid: auto / calc(100% - 32px - 15px); /* 32px = width of edit button. 15px = gap */
+}
+
+
+.edit-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%); /* Vertically center with dropzone */
+    left: calc(100% + 15px); /* To the right of dropzone + 15px gap */
 }
 
 .dropzone.hovered {
@@ -222,10 +229,9 @@ main {
 }
 
 /* Applies to the .empty-equip or > .reward-title only when "show" class is added to dropdown-options */
-.dropdown:has(>.show) .dropzone > .empty-equip, .dropdown:has(>.show) .dropzone > .reward-title {
+.dropdown:has(.show) .dropzone  .empty-equip, .dropdown:has(.show) .dropzone .reward-title {
     border-radius: 10px 10px 0px 0px;
 }
-
 
 /* ------------------------------------------------------------*/
 /* EARNED TITLES SECTION  */
@@ -265,14 +271,6 @@ main {
     main {
         flex-direction: column; /* Main axis = Vertical */
     }
-
-    #progress-info-line {
-        flex-direction: column;
-    }
-
-    #equipped-titles-content {
-        flex-direction: column;
-    }
 }
 
 /*--------PROGRESS SECTION (RESPONSIVE)---------*/
@@ -302,8 +300,6 @@ main {
         flex-direction: column;
         padding: 20px 15%;
         gap: 20px;
-        /*padding: 20px 0%;
-        gap: 5%;*/
     }
 }
 
