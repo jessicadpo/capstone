@@ -58,7 +58,7 @@ function setResponsiveTagModalBehaviour() {
     }
 
     // Responsive layout if modal-footer has overflow
-    preventModalFooterOverflow(addTagsModalFooter); // defined in global.js
+    preventResponsiveGridOverflow(addTagsModalFooter); // defined in global.js
 
     // MUST BE DONE LAST (i.e., all other responsive layouts have been applied)
     // If height of addTagsModal > 100vh (ONLY THEN. Otherwise, tooltips get cut-off)
@@ -114,7 +114,7 @@ function addTag(newTagValue, isPublic) {
         const tagObject = tagTemplate.content.children[0].cloneNode(true);
 
         // Insert user input into tagObject's <a> element
-        tagObject.querySelector('a').textContent = newTagValue;
+        tagObject.querySelector('.tag-value').textContent = newTagValue;
 
         // Add tag to public/private-tags-list-container
         if (isPublic) {
@@ -248,7 +248,7 @@ window.addEventListener("resize", function() {
 });
 
 document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape' || event.keyCode === 27) {
+    if ((event.key === 'Escape' || event.keyCode === 27) && addTagsModal.open) {
         closeTagsModal();
     }
 });

@@ -9,6 +9,34 @@ var cancelCommentButton = document.getElementById('cancel-comment-button');
 
 let isReadingMoreComment = false;
 
+function setResponsiveCommentHeaderBehaviour() {
+    // TODO: Test when no comments in page
+
+    const commentHeaders = document.querySelectorAll('.comment-header');
+    commentHeaders.forEach(commentHeader => {
+        // If comment-date is not on same line as username --> text-align: left (otherwise, right)
+        const commentUsername = commentHeader.querySelector('h2');
+        const commentDate = commentHeader.querySelector('.comment-date');
+        if (commentDate.getBoundingClientRect().top > commentUsername.getBoundingClientRect().bottom) {
+            commentDate.style.textAlign = "left";
+        } else {
+            commentDate.style.textAlign = ''; // reset to CSS default (should be "right")
+        }
+
+        if (commentHeader.scrollWidth > commentHeader.clientWidth) {
+            commentHeader.classList.add("compact");
+        } else {
+            commentHeader.classList.remove("compact");
+            const commentEquippedTitles = commentHeader.querySelector('.comment-equipped-titles');
+            if (commentHeader.clientWidth < commentEquippedTitles.getBoundingClientRect().width) {
+                commentHeader.classList.add("compact");
+            }
+        }
+    });
+}
+
+
+/* TODO
 function toggleCommentReadMore(commentTextDiv, readMoreCommentButton) {
     if (isReadingMoreComment) {
         // If user is reading more --> button should say "Read Less"
@@ -48,6 +76,7 @@ function checkAllCommentsOverflow() {
         })
     }
 }
+*/
 
 function autofillCommentTextarea(userCommentTextDiv) {
     // Auto-fill commentFormTextarea with user's comment + Set height of textarea to same height as userCommentTextDiv
@@ -116,7 +145,7 @@ function setCommentsBehaviour() {
             event.preventDefault();
             commentForm.style.display = 'none';
             userCommentTextDiv.style.display = 'block';
-            checkCommentOverflow(userCommentTextDiv, userCommentReadMoreButton);
+            // TODO checkCommentOverflow(userCommentTextDiv, userCommentReadMoreButton);
         });
 
         // No need to set "Post" button behaviour for commentForm --> Default is what we need
@@ -124,14 +153,15 @@ function setCommentsBehaviour() {
         commentForm.style.display = 'flex'; // Make commentForm visible
     }
 
-    // Set "Read More" button behaviour (for comments)
+    /*
+    // TODO Set "Read More" button behaviour (for comments)
     if (commentContainers != null) {
         commentContainers.forEach(commentContainer => {
             commentTextDiv = commentContainer.querySelector('.comment-text');
             readMoreCommentButton = commentContainer.querySelector('.comment-read-more');
 
             // For each comment --> Determine if "Read More" button should be displayed or not
-            checkCommentOverflow(commentTextDiv, readMoreCommentButton);
+            // TODO checkCommentOverflow(commentTextDiv, readMoreCommentButton);
 
             // For each comment --> Set behaviour of "Read More" button
             readMoreCommentButton.addEventListener('click', function () {
@@ -140,14 +170,23 @@ function setCommentsBehaviour() {
             });
         });
     }
+    */
 }
 
 // Triggers after DOM content is finished loading
 document.addEventListener("DOMContentLoaded", setCommentsBehaviour);
 
+// Triggers after window has finished loading (i.e., all CSS and JavaScript has already been applied)
+window.addEventListener("load", setResponsiveCommentHeaderBehaviour);
+
+// Triggers when window is resized
+window.addEventListener("resize", setResponsiveCommentHeaderBehaviour);
+
+/*
 // Triggers when viewport is resized --> in item_page.js
 let resizeCommentTimeout;
 window.addEventListener("resize", () => {
     clearTimeout(resizeCommentTimeout);
     resizeCommentTimeout = setTimeout(checkAllCommentsOverflow, 100); // Only run the function every 100ms minimum
 });
+*/

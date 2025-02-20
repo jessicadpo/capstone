@@ -297,7 +297,7 @@ input[type='checkbox']:indeterminate { /* Only applies to tri-state checkboxes *
     padding: 5px 20px;
     margin-top: 5px;
     font-size: 1.3rem;
-    font-weight: 500;
+    font-weight: 400;
     color: #537A00;
     background-color: transparent;
     border: none;
@@ -615,15 +615,26 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
 
 /**********************************************************************************************************************/
 /* TAGS */
+
 .tag {
+    text-decoration: none;
     width: fit-content;
-    height: fit-content;
-    max-width: 100%;
-    display: flex; /* May be overwritten to display:none in other CSS files & by JavaScript */
-    flex-direction: row;
-    align-items: stretch;
+
     position: relative; /* So can position the shine animation */
     overflow: hidden; /* Hide animated ::before .tag:hover */
+    display: grid;
+    grid: auto / minmax(min-content, 1fr) min-content;
+    align-items: center;
+
+    & > img:first-child {
+        position: absolute;
+        height: 100%;
+    }
+
+    & img.tag-tip {
+        max-width: 20px;
+        height: 100%;
+    }
 
     &::before { /* Shine effect on hover */
         content: "";
@@ -643,39 +654,20 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
     }
 
     &:hover {
-        transform: scale(1.02);
-    }
-
-    & > img { /* The triangle shape at the end */
-        min-width: 20px;
-        aspect-ratio: 50 / 25;
+        transform: scale(1.03);
     }
 }
 
 .tag-content {
-    flex-grow: 1;
-    flex-shrink: 1;
-    padding: 10px;
+    padding: 10px 5px 10px 10px;
+    height: 100%;
     background-color: #3B6000;
-    position: relative; /* So img max-width works correctly */
-    overflow: hidden; /* Hide img if overflows */
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 5px;
-    height: fit-content;
-    min-width: fit-content;
 
-    & img { /* The light green trapeze svg */
-        position:absolute; /* Positioned relative to grandparent .tag, not parent .tag-text */
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 40px;
-        max-width: 100%;
-    }
-
-    & a {
+    & .tag-value {
         white-space: normal;
         overflow-wrap: break-word; /* Allow text wrapping */
         word-break: break-word; /* Break long words if necessary */
@@ -688,7 +680,7 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
     }
 }
 
-.deletable-tag > .tag-content {
+.deletable-tag .tag-content {
     padding-right: 0px; /* Remove right padding if tag is deletable */
 
     & a {

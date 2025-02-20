@@ -119,9 +119,15 @@ div:has(>.cover-container) {
         min-width: 150px;
     }
 
-    & .tag-list-container {  /* Override styling from tag_modal.css */
+    & .tag-list-container {
         height: fit-content;
         padding: 0px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: start;
+        align-content: start;
+        gap: 10px;
     }
 }
 

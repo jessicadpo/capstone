@@ -33,38 +33,44 @@
             Back to Search Results
         </a>
 
-        <!-- Need <div> result-item class for "Save Item" button JavaScript behaviour (tag_modal.js) -->
-        <div id="item-info-section" class="result-item">
-            <div class="column1 cover-container"> <!-- Div container necessary for consistent sizing -->
+        <!-- Need <div> item-result class for "Save Item" button JavaScript behaviour (tag_modal.js) -->
+        <div id="item-info-section" class="item-result see-more-container">
+            <div class="cover-container"> <!-- Div container necessary for consistent sizing -->
                 <img id="item-cover" src="{{ item.cover }}" alt="{% if item.cover != None %} {{ item.title }} cover {% else %} Cover not found {% endif %}">
             </div>
 
-            <div class="column2">
-                <div id="column2-main-content">
-                    <div id="media-type"><i class="fa fa-book" aria-hidden="true"></i>Book</div>
-                    <!-- Need <p> item-title class for "Save Item" button JavaScript behaviour (tag_modal.js) -->
-                    <p id="item-title" class="item-title"> {{ item.title }}</p>
-                    <p id="item-authors">by <b>{{ item.authors }}</b></p>
-                    <p id="item-pub-date">{{ item.publication_date }}</p>
-                    <h1>Description</h1>
-                    <p id="item-description">{{ item.description }}</p>
+            <div id="middle-column" class="see-more-container">
+                <div class="see-more-content"> <!-- Need this for Read More/Read Less behaviour -->
+                    <div id="title-author-date"> <!-- Need this div for responsive media-query styling -->
+                        <div id="media-type"><i class="fa fa-book" aria-hidden="true"></i>Book</div>
+                        <!-- Need <p> item-title class for "Save Item" button JavaScript behaviour (tag_modal.js) -->
+                        <p id="item-title" class="item-title"> {{ item.title }}</p>
+                        <p id="item-authors">by <b>{{ item.authors }}</b></p>
+                        <p id="item-pub-date">{{ item.publication_date }}</p>
+                    </div>
 
-                    {% if item.subjects %}
-                        <h1>Subject Headings</h1>
-                        <div id="item-subject-headings">
-                            {% for subject in item.subjects %}
-                                <a href="#" class="subject-heading-link">{{ subject }}</a>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
+                    <div id="description-subjects"> <!-- Need this div for responsive media-query styling -->
+                        <h1>Description</h1>
+                        <p id="item-description">{{ item.description }}</p>
+
+                        {% if item.subjects %}
+                            <h1>Subject Headings</h1>
+                            <div id="item-subject-headings">
+                                {% for subject in item.subjects %}
+                                    <a href="#" class="subject-heading-link">{{ subject }}</a>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
                 </div>
-                <button id="column2-read-more-button" class="read-more-button">
+                <button id="read-more-button" class="see-more-button" data-expanded-text="Read less" data-collapsed-text="Read more">
                     Read more
                     <i class="fa fa-angle-down" aria-hidden="true"></i>
                 </button>
             </div>
 
-            <div class="column3">
+            <div id="tags-column">
                 {% if request.user.is_authenticated %}
                     {% include 'components/pin_item_button.html' %}
                 {% endif %}
@@ -84,33 +90,37 @@
                         {% include "components/tag.html" %}
                     {% endfor %}
                 </div>
-                <button id="all-tags-button" class="open-sidebar-button" aria-label="See all tags">See all tags <i class="fa fa-angle-right" aria-hidden="true"></i></button>
+
+                <button id="all-tags-button" class="open-sidebar-button" aria-label="See all tags">
+                    See all tags
+                    <i class="fa fa-angle-right" aria-hidden="true"></i>
+                </button>
             </div>
+
         </div>
 
         <div id="comments-section">
             <h1>Comments</h1>
-            <div id="comments-pane">
-                <!-- If logged-in user has not made a comment for item yet, show comment_form -->
-                {% if user.is_authenticated and item.user_comment == null %}
-                    {% include 'components/comment_form.html' %}
+
+            <!-- If logged-in user has not made a comment for item yet, show comment_form -->
+            {% if user.is_authenticated and item.user_comment == null %}
+                {% include 'components/comment_form.html' %}
+            {% endif %}
+
+            <div class="paginated-content">
+                <!-- NOTE: The user's comment (if there is one) is always put at top of page 1 -->
+                {% for comment in current_page %}
+                    {% include 'components/user_comment.html' %}
+                {% endfor %}
+
+                <!-- Pagination controls for comments -->
+                {% if current_page.paginator.count > 0 %}
+                    {% with "comments" as content_type %}
+                        {% include 'components/pagination_footer.html' %}
+                    {% endwith %}
+                {% else %}
+                    <p>No comments posted yet. Be the first!</p>
                 {% endif %}
-
-                <div class="paginated-content">
-                    <!-- NOTE: The user's comment (if there is one) is always put at top of page 1 -->
-                    {% for comment in current_page %}
-                        {% include 'components/user_comment.html' %}
-                    {% endfor %}
-
-                    <!-- Pagination controls for comments -->
-                    {% if current_page.paginator.count > 0 %}
-                        {% with "comments" as content_type %}
-                            {% include 'components/pagination_footer.html' %}
-                        {% endwith %}
-                    {% else %}
-                        <p>No comments posted yet. Be the first!</p>
-                    {% endif %}
-                </div>
             </div>
         </div>
     </main>
@@ -127,17 +137,15 @@
             <!-- TODO: For loop for ALL item's tags -->
             {% for tag in item.tags %}
                 <div class="tag-entry">
-                    <div class="single-tag-container"> <!-- div is necessary to left-align tag without stretching shape -->
-                        {% include "components/tag.html" %}
-                    </div>
+                    {% include "components/tag.html" %}
+
                     <p class="tag-count">x {{ tag.count }}</p>
-                    <div class="report-button-container"> <!-- Need this for consistency when user is logged in & logged out -->
-                        {% if user.is_authenticated %}
-                          <button class="report-button" aria-label="Report {{ tag.tag }} tag">
-                              <i class="fa fa-flag-o" aria-hidden="true"></i>
-                          </button>
-                        {% endif %}
-                    </div>
+
+                    {% if user.is_authenticated %}
+                      <button class="report-button" aria-label="Report {{ tag.tag }} tag" data-tag="{{ tag.tag }}">
+                          <i class="fa fa-flag-o" aria-hidden="true"></i>
+                      </button>
+                    {% endif %}
                 </div>
             {% endfor %}
         </div>

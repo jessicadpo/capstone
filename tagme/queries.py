@@ -273,7 +273,7 @@ def get_all_comments_for_item(item_id, user=None):
 def get_user_comment_for_item(user, item_id):
     """Function for retrieving a user's comment for a particular item"""
     if not user.is_authenticated:
-        raise PermissionDenied("User must be logged in")
+        return None
 
     user_contrib = UserContribution.objects.filter(user_id=user.id, item_id=item_id)
     if user_contrib.exists() and user_contrib[0].comment is not None:

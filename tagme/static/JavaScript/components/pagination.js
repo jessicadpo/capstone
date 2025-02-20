@@ -1,17 +1,28 @@
 const prevPageButtons = document.querySelectorAll('.prev-page-button');
 const nextPageButtons = document.querySelectorAll('.next-page-button');
 
-// If both pagination_top and pagination_top used in the same page, page will have duplicate fields
+// If both pagination_top and pagination_bottom used in the same page, page will have duplicate fields
 // for storing this info, thus why we're using classes/querySelectorAll instead of ids/getElementById
-const page_url = document.querySelectorAll('.page-url')[0].value; // FIXME: Error on item pages? ([0] is undefined)
-var currentPageNumber = parseInt(document.querySelectorAll('.current-page-number')[0].value);
-var lastPageNumber = parseInt(document.querySelectorAll('.last-page-number')[0].value);
+var page_url = null;
+var currentPageNumber = null;
+var lastPageNumber = null;
+
+if (document.querySelectorAll('.page-url').length > 0) {
+    page_url = document.querySelectorAll('.page-url')[0].value; // FIXME: Error on item pages? ([0] is undefined)
+    currentPageNumber = parseInt(document.querySelectorAll('.current-page-number')[0].value);
+    lastPageNumber = parseInt(document.querySelectorAll('.last-page-number')[0].value);
+}
 
 function setResponsiveBottomPaginationBehaviour() {
     // Need to query the document because elements reset when change pages
     const paginationFooter = document.getElementById('pagination-footer');
     const bottomPaginationRangeText = document.querySelector('#pagination-footer > p');
     const bottomPaginationControls = document.getElementById('bottom-page-controls');
+
+    // Do not continue if page doesn't have a pagination-footer
+    if (paginationFooter === null) {
+        return;
+    }
 
     // Remove go-to-page-buttons & replace with number input only if bottom-page-controls would overflow from screen
     const goToPageButtons = bottomPaginationControls.querySelectorAll(".go-to-page-button");
@@ -32,9 +43,7 @@ function setResponsiveBottomPaginationBehaviour() {
         nextPageNumberForm.querySelector('input').placeholder = currentPageNumber;
     } else {
         const clone = bottomPaginationControls.cloneNode(true);
-        //clone.style.visibility = "hidden";
         clone.style.position = "absolute";
-        //clone.style.left = "-100%"; // Ensures clone does not appear to users nor mess with page layout
         clone.querySelectorAll("*").forEach(child => {
             child.style.display = "block";
         })

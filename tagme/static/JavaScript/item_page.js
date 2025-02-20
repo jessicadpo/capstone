@@ -1,75 +1,15 @@
 const backLink = document.getElementById('back-link');
 
 const entireItemSection = document.getElementById('item-info-section');
-const column2MainContent = document.getElementById('column2-main-content');
-const readMoreButton = document.getElementById('column2-read-more-button');
 
-const tagsContainer = document.getElementById('tags-container');
-const column3Tags = document.querySelectorAll('.column3 .tag');
+const tagsContainer = document.querySelector('#tags-column #tags-container');
+const columnTags = document.querySelectorAll('#tags-column .tag');
 
 const openTagSidebarButtons = document.querySelectorAll('.open-sidebar-button');
 const closeTagSidebarButton = document.getElementById('close-sidebar-button');
 const tagSidebar = document.getElementById('tag-sidebar');
 
 const reportButtons = document.querySelectorAll('.report-button');
-const reportTagDialog = document.getElementById('report-tag-dialog');
-const reportedTagComponent = document.querySelector('#report-tag-dialog .tag-content a');
-
-let isReadingMore = false;
-
-function setMaxHeight() {
-    // Set max-height of column2-main-content based on height of Read More button
-    const readMoreButtonHeight = readMoreButton.offsetHeight;
-    const maxHeight = 510 - readMoreButtonHeight; // 510px is the height of column-3
-    column2MainContent.style.maxHeight = maxHeight + 'px';
-}
-
-function toggleReadMore() {
-    if (isReadingMore) {
-        // If user is reading more --> button should say "Read Less"
-        column2MainContent.classList.remove('reading-less');
-        column2MainContent.style.maxHeight = 'none';
-        entireItemSection.style.maxHeight = 'fit-content';
-        readMoreButton.innerHTML = 'Read less <i class="fa fa-angle-up" aria-hidden="true"></i>';
-    }
-    else {
-        // If user is reading less (i.e., button should say "Read More")
-        column2MainContent.classList.add('reading-less'); // Only apply gradient if button says "Read More"
-        column2MainContent.style.maxHeight = setMaxHeight();
-        entireItemSection.style.maxHeight = '55vh';
-        readMoreButton.innerHTML = 'Read more <i class="fa fa-angle-down" aria-hidden="true"></i>';
-    }
-}
-
-function checkColumn2Overflow() {
-    // If column 2 is overflowing on page load or resize --> show "Read More" button
-    let thresholdHeight = Math.ceil(parseFloat(window.getComputedStyle(entireItemSection).minHeight));
-
-    if (column2MainContent.scrollHeight > thresholdHeight) { // Need to show "Read More" button
-        readMoreButton.style.display = 'inline-block';
-        isReadingMore = false;
-        toggleReadMore();
-    } else { // If column 2 is NOT overflowing --> don't need to show "Read More" button
-        readMoreButton.style.display = 'none';
-        isReadingMore = true; // Is technically "reading more" because everything is visible (no overflow)
-        toggleReadMore();
-    }
-}
-
-function checkTagsOverflow() {
-    const containerRect = tagsContainer.getBoundingClientRect();
-    column3Tags.forEach((tag, index) => {
-        if (index === 0) {
-            return; // Do not hide first tag even if it overflows
-        }
-        const tagRect = tag.getBoundingClientRect();
-        if (tagRect.bottom > containerRect.bottom) {
-            tag.style.display = "none";
-        } else {
-            tag.style.display = "flex";
-        }
-    });
-}
 
 function setBackLink() {
     // Store link to search results page in sessionStorage
@@ -87,10 +27,10 @@ function setBackLink() {
 
     // Show & set href link of "Back to Search Results link only if there's a "search_results_referrer" in sessionStorage
     if (sessionStorage.getItem("search_results_referrer")) {
-        backLink.setAttribute("href", sessionStorage.getItem("search_results_referrer"))
-        backLink.style.display = "flex";
+        backLink.setAttribute("href", sessionStorage.getItem("search_results_referrer"));
+        backLink.classList.add("valid");
     } else {
-        backLink.style.display = "none";
+        backLink.classList.remove("valid");
     }
 }
 
@@ -99,29 +39,30 @@ function openTagSidebar() {
 }
 
 function closeTagSidebar() {
-    reportTagDialog.close();
+    closeReportModal(); // see report_modal.js
     closeSidebar(tagSidebar, true); // see global.js
 }
+
+function hidePartialOverflowTags() {
+    // Hide tags in #tags-column if they overflow, even if just partially
+    columnTags.forEach(tag => {
+        if (tag.getBoundingClientRect().bottom >= tagsContainer.getBoundingClientRect().bottom) {
+            tag.style.visibility = "hidden";
+        } else {
+            tag.style.visibility = ""; /* Reset to whatever it is in CSS */
+        }
+    });
+}
+
+/*--------------------------------------------------------------------------------------------------------------------*/
+window.addEventListener("resize", hidePartialOverflowTags);
 
 // Triggers after DOM content is finished loading
 document.addEventListener("DOMContentLoaded", function () {
     // Determine if "Back to Search Results" link should be displayed + (if yes) set its link
     setBackLink();
 
-    // Determine if "Read More" button should be displayed or not
-    checkColumn2Overflow();
-    checkTagsOverflow();
-
-    // Set behaviour of "Read More" button
-    readMoreButton.addEventListener('click', function () {
-        isReadingMore = isReadingMore === true ? false : true;
-        toggleReadMore();
-    });
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Disable link (keyboard navigation) of reportedTagElement
-    reportedTagComponent.setAttribute('tabindex', '-1');
-    reportedTagComponent.setAttribute('aria-disabled', 'true');
+    hidePartialOverflowTags();
 
     // Open/Close sidebar behaviour
     openTagSidebarButtons.forEach(openTagSidebarButton => {
@@ -134,30 +75,13 @@ document.addEventListener("DOMContentLoaded", function () {
     let lastButton = null; // keep track of the last Report button that was clicked
     reportButtons.forEach(reportButton => {
         reportButton.addEventListener('click', function() {
-            const tagEntry = this.closest('.tag-entry');
-            const reportedTagValue = tagEntry.querySelector('.tag-content a').textContent;
-
             // Reset form if open for a different tag
             if (reportButton != lastButton) {
                 document.getElementById('report-tag-form').reset();
                 lastButton = reportButton;
             }
 
-            // Pre-fill <span> inside tag button (visible)
-            reportedTagComponent.textContent = reportedTagValue;
-
-            // Pre-fill reported-tag-input text field (invisible)
-            document.getElementById('reported-tag-input').value = reportedTagValue;
-
-            // Open dialog
-            reportTagDialog.show();
+            openReportModal(reportButton); // defined in report_modal.js
         });
     });
-});
-
-// Triggers when viewport is resized
-let resizeTimeout;
-window.addEventListener("resize", () => {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(checkColumn2Overflow, 100); // Only run the function every 100ms minimum
 });

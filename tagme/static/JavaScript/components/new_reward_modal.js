@@ -11,7 +11,7 @@ const titleToEquipFormField = document.getElementById('title-to-equip-input');
 const equipSlotFormField = document.getElementById('equip-slot-input');
 
 function setResponsiveNewRewardModalBehaviour() {
-    preventModalFooterOverflow(newRewardModal.querySelector('.modal-footer')); // defined in global.js
+    preventResponsiveGridOverflow(newRewardModal.querySelector('.modal-footer')); // defined in global.js
 
     // MUST BE DONE LAST (i.e., all other responsive layouts have been applied)
     // If height of newRewardModal > 100vh

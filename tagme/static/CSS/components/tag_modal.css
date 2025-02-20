@@ -115,7 +115,7 @@
     }
 }
 
-.tag-list-container {
+#add-tags-modal .tag-list-container {
     height: 40vh;
     width: 100%;
     overflow-y: auto;
@@ -125,7 +125,6 @@
     justify-content: start;
     align-content: start;
     padding: 10px;
-    box-sizing: border-box;
     gap: 10px;
 }
 

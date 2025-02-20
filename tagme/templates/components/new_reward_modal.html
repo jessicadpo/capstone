@@ -12,7 +12,6 @@
             <h1>Congrats!</h1>
             <p>You've reached {{ score_data.user_points }} points and earned:</p>
             <div>
-                {% include "components/reward_title.html" %}
                 {% for reward in score_data.new_rewards %}
                     {% include "components/reward_title.html" %}
                 {% endfor %}

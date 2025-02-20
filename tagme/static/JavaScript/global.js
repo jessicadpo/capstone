@@ -130,26 +130,25 @@ function preventTooltipViewportOverflow() {
     }
 }
 
-function preventModalFooterOverflow(modalFooter) {
-    // TODO; Replace modal footer with responsiveGrid ??
-    if (!modalFooter.classList.contains('modal-footer')) {
+function preventResponsiveGridOverflow(responsiveGrid) {
+    if (!responsiveGrid.classList.contains('responsive-grid')) {
         return null;
     }
 
-    setMinModalFooterButtonWidth(modalFooter);
+    setMinResponsiveGridButtonWidth(responsiveGrid);
 
     // Calculate best possible grid layout
     // Number of columns == However many buttons (when at minButtonWidth) can fit in 1 row
-    // Number of rows == However many are necessary based on the number of children inside modalFooter && number of columns
-    const minButtonWidth = parseFloat(modalFooter.dataset.minButtonWidth);
-    const childrenCount = Array.from(modalFooter.children).filter(child => {
+    // Number of rows == However many are necessary based on the number of children inside responsiveGrid && number of columns
+    const minButtonWidth = parseFloat(responsiveGrid.dataset.minButtonWidth);
+    const childrenCount = Array.from(responsiveGrid.children).filter(child => {
                             return getComputedStyle(child).display != "none";
                         }).length;
-    const columnGap = parseFloat(getComputedStyle(modalFooter).columnGap);
+    const columnGap = parseFloat(getComputedStyle(responsiveGrid).columnGap);
 
-    // Cannot have more buttonsPerRow than actual buttons in modalFooter.
+    // Cannot have more buttonsPerRow than actual buttons in responsiveGrid.
     // + 1 so that the first loop of do-while loop uses the correct buttonsPerRow.
-    var buttonsPerRow = Math.min(childrenCount, Math.floor(modalFooter.clientWidth / minButtonWidth)) + 1;
+    var buttonsPerRow = Math.min(childrenCount, Math.floor(responsiveGrid.clientWidth / minButtonWidth)) + 1;
     var totalColumnGap = 0;
     var minOccupiedSpace = 0;
 
@@ -157,57 +156,57 @@ function preventModalFooterOverflow(modalFooter) {
         buttonsPerRow -= 1;
         totalColumnGap = columnGap * (buttonsPerRow - 1);
         minOccupiedSpace = (minButtonWidth * buttonsPerRow) + totalColumnGap;
-    } while (modalFooter.clientWidth < minOccupiedSpace);
+    } while (responsiveGrid.clientWidth < minOccupiedSpace);
 
     const rowCount = Math.ceil(childrenCount / buttonsPerRow);
     const columnCount = buttonsPerRow;
 
-    modalFooter.style.gridTemplateColumns = "repeat(" + columnCount + ", auto)";
-    modalFooter.style.gridTemplateRows = "repeat(" + rowCount + ", auto)";
+    responsiveGrid.style.gridTemplateColumns = "repeat(" + columnCount + ", auto)";
+    responsiveGrid.style.gridTemplateRows = "repeat(" + rowCount + ", auto)";
 
-    // Add new classes to modalFooter to allow for custom styling in CSS when number of rows/columns increases
+    // Add new classes to responsiveGrid to allow for custom styling in CSS when number of rows/columns increases
     if (rowCount > 1) {
-        modalFooter.classList.add("multi-row");
+        responsiveGrid.classList.add("multi-row");
     } else {
-        modalFooter.classList.remove("multi-row");
+        responsiveGrid.classList.remove("multi-row");
     }
     if (columnCount > 1) {
-        modalFooter.classList.add("multi-column");
+        responsiveGrid.classList.add("multi-column");
     } else {
-        modalFooter.classList.remove('multi-column');
+        responsiveGrid.classList.remove('multi-column');
     }
 }
 
-function setMinModalFooterButtonWidth(modalFooter) {
+function setMinResponsiveGridButtonWidth(responsiveGrid) {
     // Get the width of the biggest modal-footer-button when width: fit-content && everything in 1 row
-    // Store that width in a data-min-button-width attribute (in modalFooter)
-    if (!modalFooter.hasAttribute("data-min-button-width")) { // Only calculate this once per modalFooter
-        modalFooter.classList.remove('responsive-grid'); // Temporarily remove responsive-grid class
-        const modalFooterButtons = modalFooter.querySelectorAll('.modal-footer-button');
+    // Store that width in a data-min-button-width attribute (in responsiveGrid)
+    if (!responsiveGrid.hasAttribute("data-min-button-width")) { // Only calculate this once per responsiveGrid
+        responsiveGrid.classList.remove('responsive-grid'); // Temporarily remove responsive-grid class
+        const responsiveGridButtons = responsiveGrid.querySelectorAll('button');
         var fitButtonWidth = 0;
         var maxFitButtonWidth = 0;
 
-        modalFooterButtons.forEach(modalFooterButton => {
+        responsiveGridButtons.forEach(responsiveGridButton => {
             // Ensure button's width & min-width are fit-content
-            modalFooterButton.style.width = "fit-content";
-            modalFooterButton.style.minWidth = "fit-content";
+            responsiveGridButton.style.width = "fit-content";
+            responsiveGridButton.style.minWidth = "fit-content";
 
-            fitButtonWidth = parseFloat(getComputedStyle(modalFooterButton).width);
+            fitButtonWidth = parseFloat(getComputedStyle(responsiveGridButton).width);
             maxFitButtonWidth = fitButtonWidth > maxFitButtonWidth ? fitButtonWidth : maxFitButtonWidth;
 
             // Return to original styling
-            modalFooterButton.style.width = '';
-            modalFooterButton.style.minWidth = '';
+            responsiveGridButton.style.width = '';
+            responsiveGridButton.style.minWidth = '';
         });
 
-        // Set the minWidth of every modalFooterButton as the minButtonWidth
-        // IMPORTANT for being able to correctly detect when modalFooter.scrollWidth > modalFooter.clientWidth
-        modalFooterButtons.forEach(modalFooterButton => {
-            modalFooterButton.style.minWidth = maxFitButtonWidth + "px";
+        // Set the minWidth of every responsiveGridButton as the minButtonWidth
+        // IMPORTANT for being able to correctly detect when responsiveGrid.scrollWidth > responsiveGrid.clientWidth
+        responsiveGridButtons.forEach(responsiveGridButton => {
+            responsiveGridButton.style.minWidth = maxFitButtonWidth + "px";
         })
 
-        modalFooter.setAttribute("data-min-button-width", maxFitButtonWidth + "px");
-        modalFooter.classList.add('responsive-grid'); // Return to responsive-grid
+        responsiveGrid.setAttribute("data-min-button-width", maxFitButtonWidth + "px");
+        responsiveGrid.classList.add('responsive-grid'); // Return to responsive-grid
     }
 }
 
@@ -365,52 +364,72 @@ function cycleTriStateValues(checkbox, select, label) {
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* SEE MORE / SEE LESS BEHAVIOUR */
-/* TODO */
-/*
+
 function toggleSeeMore(seeMoreButton) {
-    const seeMoreContainer = seeMoreButton.closest('.see-more-container');
-    const seeMoreContent = seeMoreContainer.querySelector('.see-more-content');
+    const seeMoreContent = seeMoreButton.closest('.see-more-container').querySelector('.see-more-content');
+
+    // Adjust ALL ancestor see-more-containers
+    let seeMoreContainers = [];
+    let currentAncestorElement = seeMoreButton.parentElement;
+    while (currentAncestorElement) {
+        if (currentAncestorElement.classList.contains('see-more-container')) {
+            seeMoreContainers.push(currentAncestorElement);
+        }
+        currentAncestorElement = currentAncestorElement.parentElement;
+    }
 
     if (seeMoreContent.classList.contains('collapsed')) { // If seeMoreContent is collapsed --> Expand --> button should say "See less"
         seeMoreContent.classList.remove('collapsed');
         seeMoreContent.classList.add('expanded'); // Need this for checkNeedSeeMoreButton
+
+        seeMoreContent.style.maxHeight = "fit-content";
         seeMoreContent.style.height = "fit-content";
-        seeMoreContainer.style.height = "fit-content";
-        seeMoreButton.innerHTML = 'See less <i class="fa fa-angle-up" aria-hidden="true"></i>';
+        seeMoreContainers.forEach(seeMoreContainer => {
+            seeMoreContainer.style.maxHeight = "fit-content";
+        });
+
+        const expandedText = seeMoreButton.getAttribute('data-expanded-text') != null ? seeMoreButton.getAttribute('data-expanded-text') : "See less";
+        seeMoreButton.innerHTML = expandedText + ' <i class="fa fa-angle-up" aria-hidden="true"></i>';
     }
     else { // If seeMoreContent is expanded --> Collapse --> Button should say "See more"
         seeMoreContent.classList.add('collapsed'); // Only apply gradient if button says "Read More"
         seeMoreContent.classList.remove("expanded");
+
+        seeMoreContent.style.maxHeight = '';
         seeMoreContent.style.height = '';
-        seeMoreContainer.style.height = '';
-        seeMoreButton.innerHTML = 'See more <i class="fa fa-angle-down" aria-hidden="true"></i>';
+        seeMoreContainers.forEach(seeMoreContainer => {
+            seeMoreContainer.style.maxHeight = '';
+        });
+
+        const collapsedText = seeMoreButton.getAttribute('data-collapsed-text') != null ? seeMoreButton.getAttribute('data-collapsed-text') : "See more";
+        seeMoreButton.innerHTML = collapsedText + ' <i class="fa fa-angle-down" aria-hidden="true"></i>';
     }
 }
 
-function checkNeedSeeMoreButtons() {
+function checkNeedSeeMoreButtons(expandedText) {
     seeMoreButtons.forEach(seeMoreButton => {
         const seeMoreContainer = seeMoreButton.closest('.see-more-container');
         const seeMoreContent = seeMoreContainer.querySelector('.see-more-content');
 
-        const spaceBetween = seeMoreButton.getBoundingClientRect().top - seeMoreContent.getBoundingClientRect().bottom;
-        const expectedSpaceBetween = parseFloat(getComputedStyle(seeMoreButton).marginTop) + parseFloat(getComputedStyle(seeMoreContainer).gap);
+        // Save seeMoreContainer's original maxHeight for future reference
+        if (seeMoreContainer.getAttribute('data-og-max-height') == null) {
+            seeMoreContainer.setAttribute('data-og-max-height', getComputedStyle(seeMoreContainer).getPropertyValue("max-height"));
+        }
 
-        if (seeMoreContent.scrollHeight > seeMoreContent.clientHeight) {  //&& spaceBetween < seeMoreButtonSpace
+        const originalMaxHeight = parseFloat(seeMoreContainer.getAttribute('data-og-max-height'));
+
+        if (seeMoreContent.scrollHeight > originalMaxHeight && !seeMoreContent.classList.contains("expanded")) {
             seeMoreButton.style.display = "block";
             seeMoreContent.classList.remove("collapsed"); // Ensures collapsed styling is applied by toggleSeeMore()
             toggleSeeMore(seeMoreButton);
-        }
-        else if (seeMoreContent.classList.contains("collapsed")) {
+        } else if (seeMoreContent.scrollHeight < originalMaxHeight) {
             seeMoreButton.style.display = "none";
             seeMoreContent.classList.remove("collapsed"); // Remove gradient
-        } else if (seeMoreContent.classList.contains("expanded") && spaceBetween > expectedSpaceBetween) {
-            seeMoreButton.style.display = "none";
-            seeMoreContent.classList.remove("collapsed"); // Ensures collapsed styling is applied by toggleSeeMore()
-            toggleSeeMore(seeMoreButton); // Revert back to collapsed styling
+            seeMoreContent.classList.remove('expanded'); // Reset if resized while in expanded set
         }
     });
 }
-*/
+
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* CAROUSELS / SLIDESHOWS */
@@ -577,10 +596,10 @@ function undoTransitionPrep(carousel) {
 // Triggers after window has finished loading (i.e., all CSS and JavaScript has already been applied)
 preventTooltipViewportOverflow(); // Need to call function twice like this for best results
 window.addEventListener("load", preventTooltipViewportOverflow);
-// TODO window.addEventListener("load", checkNeedSeeMoreButtons);
+window.addEventListener("load", checkNeedSeeMoreButtons);
 
 // Triggers when window is resized
-//TODO window.addEventListener("resize", checkNeedSeeMoreButtons);
+window.addEventListener("resize", checkNeedSeeMoreButtons);
 window.addEventListener("resize", preventTooltipViewportOverflow);
 window.addEventListener("resize", function() {
     var openedDropdowns = document.querySelectorAll('.dropdown-options.show');
@@ -602,13 +621,11 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // Set behaviour of "See More" buttons
-    /* TODO
     seeMoreButtons.forEach(seeMoreButton => {
         seeMoreButton.addEventListener('click', function () {
             toggleSeeMore(seeMoreButton);
         });
-    }
-    */
+    });
 
     // Set tooltip behaviour (responsive)
     tooltips.forEach(tooltip => {

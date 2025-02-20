@@ -245,12 +245,15 @@ def item_page(request, item_id):
     all_item_comments = get_all_comments_for_item(item_id, request.user)
 
     if request.user.is_authenticated:
+        #all_item_comments = get_all_comments_for_item(item_id, request.user)
         user_public_tags, user_private_tags = get_user_tags_for_item(request.user, item_id)
         item_data['user_public_tags'] = user_public_tags
         item_data['user_private_tags'] = user_private_tags
         item_data['user_comment'] = get_user_comment_for_item(request.user, item_id)
         item_data['is_pinned'] = get_is_item_pinned(request.user, item_id)
         item_data['points_earned'] = get_user_points_for_item(request.user, item_data["item_id"])
+   #else:
+        #all_item_comments = get_all_comments_for_item(item_id, None)
 
     if not item_data:
         raise Http404("Item not found")

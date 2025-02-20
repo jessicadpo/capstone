@@ -2,17 +2,19 @@
     <div class="comment-header">
         <h2>{{ comment.username }}</h2>
 
-        {% if comment.equipped_title_1 != null %}
-            {% with comment.equipped_title_1 as reward %}
-                {% include 'components/reward_title.html' %}
-            {% endwith %}
-        {% endif %}
+        <div class="comment-equipped-titles"> <!-- So that the titles move together for responsive layouts -->
+            {% if comment.equipped_title_1 != null %}
+                {% with comment.equipped_title_1 as reward %}
+                    {% include 'components/reward_title.html' %}
+                {% endwith %}
+            {% endif %}
 
-        {% if comment.equipped_title_2 != null %}
-            {% with comment.equipped_title_2 as reward %}
-                {% include 'components/reward_title.html' %}
-            {% endwith %}
-        {% endif %}
+            {% if comment.equipped_title_2 != null %}
+                {% with comment.equipped_title_2 as reward %}
+                    {% include 'components/reward_title.html' %}
+                {% endwith %}
+            {% endif %}
+        </div>
 
         <span class="comment-date">{{ comment.datetime }}</span>
 
@@ -24,16 +26,19 @@
         {% endif %}
     </div>
 
-    <div class="comment-text">
-        {% for text in comment.paragraphs %}
-            <p>{{ text }}</p>
-        {% endfor %}
+    <div class="see-more-container">
+        <div class="comment-text see-more-content">
+            {% for text in comment.paragraphs %}
+                <p>{{ text }}</p>
+            {% endfor %}
+        </div>
+
+        <button class="comment-read-more see-more-button" data-expanded-text="Read less" data-collapsed-text="Read more">
+            Read more
+            <i class="fa fa-angle-down" aria-hidden="true"></i>
+        </button>
     </div>
 
-    <button class="comment-read-more read-more-button">
-        Read more
-        <i class="fa fa-angle-down" aria-hidden="true"></i>
-    </button>
 
     {% if comment.username == request.user.username %}
         {% include 'components/comment_form.html' %}
