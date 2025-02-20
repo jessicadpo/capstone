@@ -55,6 +55,18 @@ function hidePartialOverflowTags() {
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
+document.addEventListener('keydown', function(event) {
+    // Only close sidebar with Escape key if reportTagModal already closed
+    // reportTagModal defined in tag_modal.js
+    if ((event.key === 'Escape' || event.keyCode === 27) && tagSidebar.classList.contains("open")) {
+        if (reportTagModal.dataset.justClosed == "true") {
+            reportTagModal.setAttribute("data-just-closed", "false");
+        } else {
+            closeTagSidebar();
+        }
+    }
+});
+
 window.addEventListener("resize", hidePartialOverflowTags);
 
 // Triggers after DOM content is finished loading
@@ -68,8 +80,8 @@ document.addEventListener("DOMContentLoaded", function () {
     openTagSidebarButtons.forEach(openTagSidebarButton => {
         openTagSidebarButton.addEventListener('click', openTagSidebar);
     });
-    closeTagSidebarButton.addEventListener('click', closeTagSidebar);
     sidebarOverlay.addEventListener('click', closeTagSidebar); //sidebarOverlay defined in global.js
+    closeTagSidebarButton.addEventListener('click', closeTagSidebar);
 
     // Set report button behaviour
     let lastButton = null; // keep track of the last Report button that was clicked

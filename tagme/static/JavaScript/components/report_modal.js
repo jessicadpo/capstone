@@ -51,6 +51,7 @@ window.addEventListener("resize", setResponsiveReportModalBehaviour);
 
 document.addEventListener('keydown', function(event) {
     if ((event.key === 'Escape' || event.keyCode === 27) && reportTagModal.open) {
+        reportTagModal.setAttribute("data-just-closed", "true"); // To prevent both modal AND sidebar closing on ESC keypress
         closeReportModal();
     }
 });

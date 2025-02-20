@@ -207,6 +207,12 @@ function closeFilterMenu() {
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
+document.addEventListener('keydown', function(event) {
+    if ((event.key === 'Escape' || event.keyCode === 27) && filterSidebar.classList.contains("open")) {
+        closeFilterMenu();
+    }
+});
+
 // Triggers after DOM content is finished loading
 document.addEventListener("DOMContentLoaded", function () {
     // Set open & close filter menu behavior

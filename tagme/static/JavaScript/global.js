@@ -271,6 +271,7 @@ function openSidebar(sidebar, fromRight) {
     }
 
     sidebarOverlay.classList.add('active');
+    sidebar.classList.add('open');
     document.documentElement.style.overflowY = "hidden"; // Disable scrolling on the main content
     topBar.setAttribute('inert', ''); // Disable keyboard interaction
     footer.setAttribute('inert', '');
@@ -293,6 +294,7 @@ function closeSidebar(sidebar, toRight) {
     }
 
     sidebarOverlay.classList.remove('active');
+    sidebar.classList.remove('open');
     document.documentElement.style.overflowY = ''; // Re-enable scrolling on the main content
     topBar.removeAttribute('inert');
     footer.removeAttribute('inert');
@@ -431,7 +433,6 @@ function checkNeedSeeMoreButtons() {
         }
     });
 }
-
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* CAROUSELS / SLIDESHOWS */
