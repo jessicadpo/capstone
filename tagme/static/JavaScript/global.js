@@ -406,22 +406,24 @@ function toggleSeeMore(seeMoreButton) {
     }
 }
 
-function checkNeedSeeMoreButtons(expandedText) {
+function checkNeedSeeMoreButtons() {
     seeMoreButtons.forEach(seeMoreButton => {
         const seeMoreContainer = seeMoreButton.closest('.see-more-container');
         const seeMoreContent = seeMoreContainer.querySelector('.see-more-content');
 
         // Save seeMoreContainer's original maxHeight for future reference
-        if (seeMoreContainer.getAttribute('data-og-max-height') == null) {
+        if (seeMoreContainer.dataset.ogMaxHeight == null || seeMoreContainer.dataset.ogMaxHeight == "none") {
             seeMoreContainer.setAttribute('data-og-max-height', getComputedStyle(seeMoreContainer).getPropertyValue("max-height"));
         }
 
         const originalMaxHeight = parseFloat(seeMoreContainer.getAttribute('data-og-max-height'));
 
-        if (seeMoreContent.scrollHeight > originalMaxHeight && !seeMoreContent.classList.contains("expanded")) {
+        if (seeMoreContent.scrollHeight > originalMaxHeight) {
             seeMoreButton.style.display = "block";
-            seeMoreContent.classList.remove("collapsed"); // Ensures collapsed styling is applied by toggleSeeMore()
-            toggleSeeMore(seeMoreButton);
+            if (!seeMoreContent.classList.contains("expanded")) {
+                seeMoreContent.classList.remove("collapsed"); // Ensures collapsed styling is applied by toggleSeeMore()
+                toggleSeeMore(seeMoreButton);
+            }
         } else if (seeMoreContent.scrollHeight < originalMaxHeight) {
             seeMoreButton.style.display = "none";
             seeMoreContent.classList.remove("collapsed"); // Remove gradient
