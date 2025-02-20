@@ -532,7 +532,7 @@ def delete_user_comment_for_item(user, item_id):
 
 
 def create_tag_report(user, item_id, report_data):
-    """View for tag reporting"""
+    """Function for creating a tag report"""
     reported_tag = report_data['reported_tag']
     is_irrelevant = report_data['is_irrelevant']
     is_vulgar = report_data['is_vulgar']
@@ -744,6 +744,47 @@ def _query_loc_api(params, requested_page_number):
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
         return [], 0
+
+
+def query_loc_single_item(item_id):
+    """Function for retrieving the data of a singular item from LOC API"""
+    query = "https://www.loc.gov/item/" + item_id + "/?fo=json"
+    try:
+        response = requests.get(query)
+        response.raise_for_status()  # Raise an error if the request fails
+        data = response.json()  # Parse the JSON response
+        item = data.get("item")
+
+        title = decode_unicode(strip_punctuation(item.get("item").get('title', 'No title available')))
+        publication_date = decode_unicode(item.get('date', 'No publication date available'))
+        description = decode_unicode('\n'.join(item.get('description', 'No description available')))
+
+        subjects = item.get('subject', [])
+        for i in range(len(subjects)):
+            subjects[i] = to_title_case(subjects[i])
+
+        authors = item.get('contributor_names', ['Unknown'])
+        for i in range(len(authors)):
+            authors[i] = decode_unicode(authors[i])
+
+        covers = item.get('image_url', None)
+        cover = covers[0] if covers else None
+
+        item_data = {
+            'item_id': item_id,
+            'title': to_title_case(title),
+            'authors': to_title_case('; '.join(authors)),  # Combine authors into a single string
+            'publication_date': publication_date,
+            'description': description,
+            'subjects': subjects,
+            'cover': cover,
+         }
+
+        return item_data
+
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred: {e}")
+        return None
 
 
 # Comprehension is actually necessary, or Django crashes

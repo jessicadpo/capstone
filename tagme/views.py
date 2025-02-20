@@ -233,6 +233,8 @@ def item_page(request, item_id):
                   "equip_form": EquipForm()}
     score_data = {'user_points': -1, 'new_rewards': None}
     item_data = get_item_from_session(request, item_id)  # Get the specific item's LOC API data using the item ID
+    if item_data is None:  # If accessing item page by directly pasting a URL, for example
+        item_data = query_loc_single_item(item_id)
 
     if request.method == "POST":
         form_result = process_post_form(request, item_data)
