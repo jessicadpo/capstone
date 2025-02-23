@@ -198,19 +198,20 @@ def get_all_tags_for_item(item_id):
     item = Item.objects.filter(item_id=item_id)
     if item.exists():
         # Return an array of dicts, each dict contains a tag and its count
-        # Exclude contributions with 0 public tags
-        public_tags_with_counts = (UserContribution.objects
-                                   .filter(item_id=item_id)
-                                   .values('public_tags')
-                                   .annotate(count=Count('public_tags'))
-                                   .filter(count__gt=0)
-                                   .order_by('-count'))
+        # Exclude globally-blacklisted tags
+        # TODO: Comment
+        item_public_tags_with_counts = (Tag.objects
+                                        .filter(public_tags__item_id=item_id, global_blacklist=False)
+                                        .exclude(item_blacklist__item_id=item_id)  # TODO: Test
+                                        .annotate(count=Count('public_tags'))
+                                        .order_by('-count'))
 
-        # Rename "public_tags" key to just "tag"
-        for tag_dict in public_tags_with_counts:
-            tag_dict['tag'] = tag_dict.pop('public_tags')
+        all_tags_for_item = []
+        for tag in item_public_tags_with_counts:
+            tag_dict = {'count': tag.count, 'tag': tag.tag}
+            all_tags_for_item.append(tag_dict)
 
-        return list(public_tags_with_counts)
+        return all_tags_for_item
     return None
 
 
@@ -394,24 +395,15 @@ def get_related_tags(search_string):
     return related_tags
 
 
-
-def filter_blacklisted_tags(search_string, global_blacklist):
-    """Function for identifying search strings that are blacklisted"""
-    # TODO: Blacklist tag filtering
-
-    blacklisted = "blank"
-    i = 0
-
-    for blacklisted in search_string:
-        if search_string[i] == global_blacklist:
-            blacklisted = search_string.pop(i)
-
-        else:
-            i=+1
-
-    blacklisted = "adult"
-
-    return search_string, blacklisted
+def remove_globally_banned_tags_from_tag_search(search_string):
+    """
+    Function for removing globally banned TAGS (not subject headings, titles, etc.) from search string.
+    Returns a search_string without the banned tags, so now TAG searches will exclude items with that tag.
+    """
+    banned_tags = set(Tag.objects.filter(global_blacklist=True).values_list('tag', flat=True))
+    regex_pattern = r"|".join(map(re.escape, banned_tags))
+    cleaned_search_string = re.sub(regex_pattern, "", search_string)  # Replace all banned terms with an empty string
+    return cleaned_search_string
 
 #######################################################
 # SETTERS
@@ -603,6 +595,13 @@ def set_global_blacklist(sender, **kwargs):
     if sender.name == 'tagme':
         for word in GLOBAL_BLACKLIST:
             Tag.objects.get_or_create(tag=word, global_blacklist=True)
+
+
+@receiver(post_save, sender=Report)
+def update_tag_with_report_decision(sender, instance, **kwargs):
+    """Function for updating the banlist/allowlist of a tag when a decision is made on a report"""
+    if instance.decision:
+        instance.tag.update_based_on_decision(instance.decision, instance.item_id)
 
 
 @receiver(post_migrate)
