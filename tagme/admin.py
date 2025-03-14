@@ -1,18 +1,7 @@
 """Module for registering models (i.e., SQLite3 database tables)"""
 
 from django.contrib import admin
-from django.contrib import messages
-from django.db.models import Q
-from django.http import JsonResponse
-
 from .models import *
-
-# Register your models here.
-admin.site.register(Item)
-admin.site.register(Tag)
-admin.site.register(Reward)
-admin.site.register(UserProfile)
-admin.site.register(UserContribution)
 
 
 class DecisionFilter(admin.SimpleListFilter):
@@ -43,7 +32,7 @@ class ReportAdmin(admin.ModelAdmin):
     change_form_template = 'admin_panel/report_change_form.html'
     list_display = ('report_id', 'item_id', 'user_id', 'tag', 'reason', 'creation_datetime', 'decision')
     list_filter = ('creation_datetime', DecisionFilter, 'user_id')
-    search_fields = ('reason', 'user_id__username', 'tag__tag')
+    search_fields = ('reason', 'user_id__username', 'tag__tag', 'item_id__item_id', 'item_id__title', 'decision')
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -53,30 +42,48 @@ class ReportAdmin(admin.ModelAdmin):
         extra_context = extra_context or {}
         report = self.get_object(request, object_id)  # Get the report being edited
         if report:
-            # NOTE: Impossible for users to report tags that are globally banned by default
-            # All other global bans/allows can (should) only be set via a previous report
+            other_tag_reports = (Report.objects
+                                 .filter(tag=report.tag)
+                                 .exclude(report_id=report.report_id)
+                                 .order_by('-decision_datetime')
+                                 .values("report_id", "decision", "item_id"))
 
-            # NOTE: Message should appear if trying to whitelist a tag that's been globally blacklisted (regardless of item)
-            # TODO
+            # Pass all other reports for the same tag when the page is OPENED (NOT when "Save" button is clicked)
+            # Need to convert reported_tag's data to HTML/Django readable value
+            reported_tag = {
+                'tag': report.tag.tag,
+                'global_blacklist': str(report.tag.global_blacklist),
+                'global_whitelist': str(report.tag.global_whitelist),
+                'has_any_in_item_blacklist': "True" if report.tag.item_blacklist.exists() else "False",
+                'has_item_in_item_blacklist': "True" if report.tag.item_blacklist.filter(item_id=report.item_id).exists() else "True",
+                'has_any_in_item_whitelist': "True" if report.tag.item_whitelist.exists() else "False",
+                'has_item_in_item_whitelist': "True" if report.tag.item_whitelist.filter(item_id=report.item_id).exists() else "False"
+            }
 
-            # NOTE: Message should appear if trying to blacklist a tag that's been globally whitelisted (regardless of item)
-            # TODO
+            extra_context["reported_tag"] = reported_tag
 
-            # TODO: Do not show message if prev decision is Ignore Report or null? (filter out identical report with Ignore Report decision? (null not counted by system already/by default?))
-            # TODO: Do not show message if new decision is Ignore Report or null? (JavaScript)
-
-            # NOTE: Changing back to null decision == does NOT reset Tag object
-            # NOTE: Clicking "Ignore Report" == reset Tag object EVEN IF prev report still has valid decision
-            # TODO (see Models TODO): Sync tag decision to most recent decision for that tag (that isn't null or Ignore Report) --> if none, then reset Tag object
-
-            identical_reports = (Report.objects
-                                 .filter(item_id=report.item_id, tag=report.tag)
-                                 .exclude(report_id=report.report_id)  # Exclude the current report being edited
-                                 .values("report_id", "decision"))
-
-            # Pass all identical reports when the page is OPENED (NOT when "Save" button is clicked)
-            extra_context["identical_reports"] = list(identical_reports)
+            if other_tag_reports:
+                extra_context["other_tag_reports"] = list(other_tag_reports)
         return super().change_view(request, object_id, form_url, extra_context)
 
 
+class ItemAdmin(admin.ModelAdmin):
+    list_display = ('item_id', 'title', 'authors', 'publication_date')
+    search_fields = ('item_id', 'title', 'authors', 'publication_date')
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs
+
+
+class RewardAdmin(admin.ModelAdmin):
+    list_display = ('title', 'points_required')
+
+
+# Register your models here.
 admin.site.register(Report, ReportAdmin)
+admin.site.register(Item, ItemAdmin)
+admin.site.register(Tag)
+admin.site.register(Reward, RewardAdmin)
+admin.site.register(UserProfile)
+admin.site.register(UserContribution)
