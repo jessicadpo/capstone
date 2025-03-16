@@ -4,10 +4,11 @@ Module for querying models AND Library of Congress & Datamuse APIs
 
 RATE LIMIT FOR LIBRARY OF CONGRESS API: 20 queries per 10 seconds && 80 queries per 1 minute
 """
+import copy
 from collections import Counter
 from urllib.parse import quote
 from django.utils.timezone import localtime
-from django.db import connection
+from django.db import connection, transaction
 from django.db.models import Count
 from django.forms.models import model_to_dict
 from django.contrib.auth import PermissionDenied
@@ -199,13 +200,11 @@ def get_all_tags_for_item(item_id):
     if item.exists():
         # Return an array of dicts, each dict contains a tag and its count
         # Exclude globally-blacklisted tags
-        # TODO: Comment
         item_public_tags_with_counts = (Tag.objects
                                         .filter(public_tags__item_id=item_id, global_blacklist=False)
                                         .exclude(item_blacklist__item_id=item_id)  # TODO: Test
                                         .annotate(count=Count('public_tags'))
                                         .order_by('-count'))
-
         all_tags_for_item = []
         for tag in item_public_tags_with_counts:
             tag_dict = {'count': tag.count, 'tag': tag.tag}
@@ -405,6 +404,7 @@ def remove_globally_banned_tags_from_tag_search(search_string):
     cleaned_search_string = re.sub(regex_pattern, "", search_string)  # Replace all banned terms with an empty string
     return cleaned_search_string
 
+
 #######################################################
 # SETTERS
 def set_item(item_data):
@@ -583,6 +583,94 @@ def delete_user(user):
     user.delete()
 
 
+def update_tag_lists(updated_report, simulation=False, pre_save_report_id=None):
+    """
+    Function for updating the banlist/allowlist of a tag based on a particular report.
+    - If simulation is True, the tag will not actually be updated in the database
+    - If simulation is True, pre_save_report_id is required because updated_report
+    is not a Report object that actually exists in the database
+    """
+    if simulation and not Report.objects.filter(report_id=pre_save_report_id).exists():
+        raise ValueError("Valid report_id is required if simulation is True.")
+    if not simulation:
+        pre_save_report_id = updated_report.report_id
+
+    with (transaction.atomic()):
+        tag = Tag.objects.filter(tag=updated_report.tag.tag)[0]
+
+        match updated_report.decision:
+            case "global_blacklist":
+                tag.global_blacklist = True
+                tag.global_whitelist = False
+                tag.item_whitelist.remove(updated_report.item_id)
+            case "global_whitelist":
+                tag.global_blacklist = False
+                tag.global_whitelist = True
+                tag.item_blacklist.remove(updated_report.item_id)
+            case "item_blacklist":
+                tag.global_whitelist = False
+                tag.item_blacklist.add(updated_report.item_id)
+                tag.item_whitelist.remove(updated_report.item_id)
+
+                # Set tag's global_blacklist to False ONLY IF no longer have any reports with "global_blacklist" decision
+                # or the most recent "global"-type decision for this tag is NOT "global_blacklist"
+                # TODO: Test report #1 global black. report #2 global white. report #3 item_black --> BOTH globals should now be false
+                global_decisions = (Report.objects
+                                    .filter(decision__contains="global", tag=tag)
+                                    .exclude(report_id=pre_save_report_id)
+                                    .order_by('-decision_datetime'))
+
+                if not global_decisions.exists() or global_decisions[0].decision != "global_blacklist":
+                    tag.global_blacklist = False
+                elif global_decisions[0].decision == "global_blacklist":
+                    tag.global_blacklist = True
+
+            case "item_whitelist":
+                tag.global_blacklist = False
+                tag.item_blacklist.remove(updated_report.item_id)
+                tag.item_whitelist.add(updated_report.item_id)
+
+                # Set tag's global_whitelist to False ONLY IF no longer have any reports with "global_whitelist" decision
+                # or the most recent "global"-type decision for this tag is NOT "global_whitelist"
+                global_decisions = (Report.objects
+                                    .filter(decision__contains="global", tag=tag)
+                                    .exclude(report_id=pre_save_report_id)
+                                    .order_by('-decision_datetime'))
+                if not global_decisions.exists() or global_decisions[0].decision != "global_whitelist":
+                    tag.global_whitelist = False
+                elif global_decisions[0].decision == "global_whitelist":
+                    tag.global_whitelist = True
+
+            case _:  # Ignore Report or null
+                # Reset all the tag's blacklist/whitelist attributes
+                tag.global_blacklist = False
+                tag.global_whitelist = False
+                tag.item_blacklist.clear()
+                tag.item_whitelist.clear()
+
+                global_decisions = (Report.objects
+                                    .filter(decision__contains="global", tag=tag)
+                                    .exclude(report_id=pre_save_report_id))
+                item_decisions = (Report.objects
+                                  .filter(decision__contains="item", tag=tag, item_id=updated_report.item_id)
+                                  .exclude(report_id=pre_save_report_id)
+                                  .order_by("decision_datetime"))
+                all_decisions = (global_decisions | item_decisions).order_by("decision_datetime")  # From oldest to newest
+                if all_decisions.exists():
+                    for report in all_decisions:
+                        tag = update_tag_lists(report)  # RECURSION HERE (sets tag's blacklist/whitelist attributes from previous reports)
+
+        if simulation:
+            # Need to copy item lists because ManyToMany field not actually set until .save() is called
+            simulated_new_item_blacklist = list(tag.item_blacklist.values_list('item_id', flat=True))
+            simulated_new_item_whitelist = list(tag.item_whitelist.values_list('item_id', flat=True))
+            transaction.set_rollback(True)
+            return tag, simulated_new_item_blacklist, simulated_new_item_whitelist
+        else:
+            tag.save()
+            return tag  # Returns the updated tag
+
+
 #######################################################
 # SIGNALS (AUTO-SETTERS)
 
@@ -599,9 +687,8 @@ def set_global_blacklist(sender, **kwargs):
 
 @receiver(post_save, sender=Report)
 def update_tag_with_report_decision(sender, instance, **kwargs):
-    """Function for updating the banlist/allowlist of a tag when a decision is made on a report"""
-    if instance.decision:
-        instance.tag.update_based_on_decision(instance.decision, instance.item_id)
+    """Auto-trigger function for updating the banlist/allowlist of a tag when a decision is made on a report"""
+    update_tag_lists(instance)
 
 
 @receiver(post_migrate)

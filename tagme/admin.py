@@ -1,7 +1,10 @@
 """Module for registering models (i.e., SQLite3 database tables)"""
 
 from django.contrib import admin
+from django.urls import path
+from django.http import JsonResponse
 from .models import *
+from .queries import update_tag_lists
 
 
 class DecisionFilter(admin.SimpleListFilter):
@@ -38,33 +41,29 @@ class ReportAdmin(admin.ModelAdmin):
         qs = super().get_queryset(request)
         return qs
 
-    def change_view(self, request, object_id, form_url='', extra_context=None):
-        extra_context = extra_context or {}
-        report = self.get_object(request, object_id)  # Get the report being edited
-        if report:
-            other_tag_reports = (Report.objects
-                                 .filter(tag=report.tag)
-                                 .exclude(report_id=report.report_id)
-                                 .order_by('-decision_datetime')
-                                 .values("report_id", "decision", "item_id"))
+    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
+        # If is AJAX request
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            item = Item.objects.get(item_id=request.POST['item_id'])
+            old_tag = Tag.objects.get(tag=request.POST['tag'])
+            user = User.objects.get(id=request.POST['user_id'])
+            updated_report = Report(item_id=item, user_id=user, tag=old_tag, decision=request.POST['decision'], reason=request.POST['reason'])
+            new_tag, new_ib, new_iw = update_tag_lists(updated_report, simulation=True, pre_save_report_id=request.POST['report_id'])
 
-            # Pass all other reports for the same tag when the page is OPENED (NOT when "Save" button is clicked)
-            # Need to convert reported_tag's data to HTML/Django readable value
-            reported_tag = {
-                'tag': report.tag.tag,
-                'global_blacklist': str(report.tag.global_blacklist),
-                'global_whitelist': str(report.tag.global_whitelist),
-                'has_any_in_item_blacklist': "True" if report.tag.item_blacklist.exists() else "False",
-                'has_item_in_item_blacklist': "True" if report.tag.item_blacklist.filter(item_id=report.item_id).exists() else "True",
-                'has_any_in_item_whitelist': "True" if report.tag.item_whitelist.exists() else "False",
-                'has_item_in_item_whitelist': "True" if report.tag.item_whitelist.filter(item_id=report.item_id).exists() else "False"
-            }
+            simulated_new_tag = {'gb': new_tag.global_blacklist,   # New tag lists if update goes through
+                                 'gw': new_tag.global_whitelist,
+                                 'ib': item.item_id in new_ib,
+                                 'iw': item.item_id in new_iw}
 
-            extra_context["reported_tag"] = reported_tag
+            tag_changes = {'gb_changed': old_tag.global_blacklist != simulated_new_tag['gb'],
+                           'gw_changed': old_tag.global_whitelist != simulated_new_tag['gw'],
+                           'ib_changed': old_tag.item_blacklist.filter(item_id=item).exists() != simulated_new_tag['ib'],
+                           'iw_changed': old_tag.item_whitelist.filter(item_id=item).exists() != simulated_new_tag['iw']}
 
-            if other_tag_reports:
-                extra_context["other_tag_reports"] = list(other_tag_reports)
-        return super().change_view(request, object_id, form_url, extra_context)
+            return JsonResponse({'reported_tag': new_tag.tag,
+                                 'new_tag': simulated_new_tag,
+                                 'tag_changes': tag_changes})
+        return super().changeform_view(request, object_id, form_url, extra_context)
 
 
 class ItemAdmin(admin.ModelAdmin):
