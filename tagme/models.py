@@ -117,6 +117,7 @@ class UserProfile(models.Model):
     def __str__(self):
         return str(self.user)  # For proper display on admin site
 
+
 class Report(models.Model):
     """Class for TagReports database table"""
     class ReportDecision(models.TextChoices):
@@ -139,7 +140,7 @@ class Report(models.Model):
     # Do NOT use auto_now=True because decision_datetime should not be set when report is first created
 
     def save(self, *args, **kwargs):
-        #If decision has not been made, Set decision to now
+        # If decision has been made, set decision to now
         if self.decision:
             self.decision_datetime = timezone.now()
         super().save(*args, **kwargs)
