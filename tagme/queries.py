@@ -4,19 +4,18 @@ Module for querying models AND Library of Congress & Datamuse APIs
 
 RATE LIMIT FOR LIBRARY OF CONGRESS API: 20 queries per 10 seconds && 80 queries per 1 minute
 """
-import copy
-import requests
 from datetime import datetime
 from collections import Counter
 from urllib.parse import quote
+import requests
+
 from django.utils.timezone import localtime
-from django.db import connection, transaction
+from django.db import transaction
 from django.db.models import Count
 from django.forms.models import model_to_dict
 from django.contrib.auth import PermissionDenied
 from django.db.models.signals import pre_save, post_save, pre_delete, post_delete, post_migrate
 from django.dispatch import receiver
-from .apps import TagMeConfig
 from .helper_functions import *
 from .models import *
 from .constants import *
@@ -598,7 +597,7 @@ def update_tag_lists(updated_report, simulation=False, pre_save_report_id=None):
     if not simulation:
         pre_save_report_id = updated_report.report_id
 
-    with (transaction.atomic()):
+    with transaction.atomic():
         tag = Tag.objects.filter(tag=updated_report.tag.tag)[0]
 
         match updated_report.decision:
@@ -668,9 +667,10 @@ def update_tag_lists(updated_report, simulation=False, pre_save_report_id=None):
             simulated_new_item_whitelist = list(tag.item_whitelist.values_list('item_id', flat=True))
             transaction.set_rollback(True)
             return tag, simulated_new_item_blacklist, simulated_new_item_whitelist
-        else:
-            tag.save()
-            return tag  # Returns the updated tag
+
+        # If not simulation
+        tag.save()
+        return tag  # Returns the updated tag
 
 
 #######################################################

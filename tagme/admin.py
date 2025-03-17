@@ -24,7 +24,7 @@ class DecisionFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         if self.value() == 'new_report':
             return queryset.filter(decision__isnull=True)
-        elif self.value():
+        if self.value():
             return queryset.filter(decision=self.value())
         return queryset
 
@@ -73,8 +73,8 @@ class ReportAdmin(admin.ModelAdmin):
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
         # If is AJAX request (i.e., so that JavaScript can check if need to display a warning message)
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            item = Item.objects.get(item_id=request.POST['item_id'])
-            old_tag = Tag.objects.get(tag=request.POST['tag'])
+            item = Item.objects.get(item_id=request.POST['item_id'])  # pylint: disable=no-member
+            old_tag = Tag.objects.get(tag=request.POST['tag'])  # pylint: disable=no-member
             user = User.objects.get(id=request.POST['user_id'])
             updated_report = Report(item_id=item, user_id=user, tag=old_tag, decision=request.POST['decision'], reason=request.POST['reason'])
             new_tag, new_ib, new_iw = update_tag_lists(updated_report, simulation=True, pre_save_report_id=request.POST['report_id'])
@@ -96,6 +96,7 @@ class ReportAdmin(admin.ModelAdmin):
 
 
 class ItemAdmin(admin.ModelAdmin):
+    """Customized Admin panel for Items"""
     list_display = ('item_id', 'title', 'authors', 'publication_date')
     search_fields = ('item_id', 'title', 'authors', 'publication_date')
 
@@ -105,19 +106,23 @@ class ItemAdmin(admin.ModelAdmin):
 
 
 class RewardAdmin(admin.ModelAdmin):
+    """Customized Admin panel for Reports"""
     list_display = ('title', 'points_required')
 
 
 class TagAdmin(admin.ModelAdmin):
+    """Customized Admin panel for Tags"""
     list_display = ('tag', 'global_blacklist', 'global_whitelist', 'item_blacklist_count', 'item_whitelist_count')
     list_filter = ('global_blacklist', 'global_whitelist', BlacklistedForItemsFilter, WhitelistedForItemsFilter)
     search_fields = ('tag', 'item_blacklist__item_id', 'item_blacklist__title', 'item_blacklist__authors',
                      'item_whitelist__item_id', 'item_whitelist__title', 'item_whitelist__authors')
 
     def item_blacklist_count(self, obj):
+        """Custom display field for showing how many items a tag has in its item_blacklist"""
         return obj.item_blacklist.count()
 
     def item_whitelist_count(self, obj):
+        """Custom display field for showing how many items a tag has in its item_whitelist"""
         return obj.item_whitelist.count()
 
     def get_queryset(self, request):
