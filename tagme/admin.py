@@ -1,7 +1,6 @@
 """Module for registering models (i.e., SQLite3 database tables)"""
 
 from django.contrib import admin
-from django.urls import path
 from django.http import JsonResponse
 from .models import *
 from .queries import update_tag_lists
@@ -30,6 +29,36 @@ class DecisionFilter(admin.SimpleListFilter):
         return queryset
 
 
+class BlacklistedForItemsFilter(admin.SimpleListFilter):
+    """Custom filter to allow filtering of tags that have at least 1 item in their item_blacklist"""
+    title = "Blacklisted for # Items"
+    parameter_name = "blacklisted_for_items"
+
+    def lookups(self, request, model_admin):
+        return [("yes", "Has at least 1 tag")]
+
+    def queryset(self, request, queryset):
+        if self.value() == "yes":
+            return queryset.exclude(item_blacklist=None)
+        return queryset  # Return full queryset if no filter applied
+
+
+class WhitelistedForItemsFilter(admin.SimpleListFilter):
+    """Custom filter to allow filtering of tags that have at least 1 item in their item_whitelist"""
+    title = "Whitelisted for # Items"
+    parameter_name = "whitelisted_for_items"
+
+    def lookups(self, request, model_admin):
+        return [("yes", "Has at least 1 tag")]
+
+    def queryset(self, request, queryset):
+        if self.value() == "yes":
+            return queryset.exclude(item_whitelist=None)
+        return queryset  # Return full queryset if no filter applied
+
+
+########################################################################################################################
+
 class ReportAdmin(admin.ModelAdmin):
     """Admin view for reporting. Creates display fields, filters, and then search fields for navigation."""
     change_form_template = 'admin_panel/report_change_form.html'
@@ -42,7 +71,7 @@ class ReportAdmin(admin.ModelAdmin):
         return qs
 
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
-        # If is AJAX request
+        # If is AJAX request (i.e., so that JavaScript can check if need to display a warning message)
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             item = Item.objects.get(item_id=request.POST['item_id'])
             old_tag = Tag.objects.get(tag=request.POST['tag'])
@@ -79,10 +108,30 @@ class RewardAdmin(admin.ModelAdmin):
     list_display = ('title', 'points_required')
 
 
+class TagAdmin(admin.ModelAdmin):
+    list_display = ('tag', 'global_blacklist', 'global_whitelist', 'item_blacklist_count', 'item_whitelist_count')
+    list_filter = ('global_blacklist', 'global_whitelist', BlacklistedForItemsFilter, WhitelistedForItemsFilter)
+    search_fields = ('tag', 'item_blacklist__item_id', 'item_blacklist__title', 'item_blacklist__authors',
+                     'item_whitelist__item_id', 'item_whitelist__title', 'item_whitelist__authors')
+
+    def item_blacklist_count(self, obj):
+        return obj.item_blacklist.count()
+
+    def item_whitelist_count(self, obj):
+        return obj.item_whitelist.count()
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs
+
+    item_blacklist_count.short_description = "Blacklisted for # Items"
+    item_whitelist_count.short_description = "Whitelisted for # Items"
+
+
 # Register your models here.
 admin.site.register(Report, ReportAdmin)
 admin.site.register(Item, ItemAdmin)
-admin.site.register(Tag)
+admin.site.register(Tag, TagAdmin)
 admin.site.register(Reward, RewardAdmin)
 admin.site.register(UserProfile)
 admin.site.register(UserContribution)
