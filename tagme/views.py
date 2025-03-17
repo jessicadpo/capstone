@@ -327,7 +327,7 @@ def process_signup_form(request):
     signup_form = SignUpForm(request.POST)
     if signup_form.is_valid():
         signup_form.save()
-        username = signup_form.cleaned_data.get('username')
+        username = signup_form.cleaned_data.get('username').lower()
         password = signup_form.cleaned_data.get('password1')
         user = authenticate(request, username=username, password=password)
         login(request, user)
@@ -343,7 +343,7 @@ def process_login_form(request):
     """
     login_form = LoginForm(request.POST)
     if login_form.is_valid():
-        username = login_form.cleaned_data.get('username')
+        username = login_form.cleaned_data.get('username').lower()
         password = login_form.cleaned_data.get('password')
         user = authenticate(request, username=username, password=password)
         login(request, user)

@@ -1105,7 +1105,9 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
     background-color: transparent;
     border-color: transparent;
     font-size: 1em;
-    width: 215px;
+    min-width: 215px;
+    width: fit-content;
+    max-width: 20vw;
     padding: 5px 30px 5px 20px;
     display: flex;
     flex-direction: row; /* Main axis = Horizontal */
