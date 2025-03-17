@@ -178,7 +178,7 @@ class LoginForm(forms.Form):
     def clean(self):
         """Ensures password and username match"""
         cleaned_data = super().clean()
-        username = cleaned_data.get('username')
+        username = cleaned_data.get('username').lower()
         password = cleaned_data.get('password')
         user = User.objects.filter(username=username)
         if user.count() == 0:

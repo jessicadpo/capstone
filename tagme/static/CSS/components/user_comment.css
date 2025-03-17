@@ -2,6 +2,7 @@
 /* COMMENT FORM */
 #comment-form {
     width: 100%;
+    height: fit-content;
     padding-top: 20px;
     display: none; /* Set to 'flex' via JavaScript (user_comment.js) */
     flex-direction: column;
@@ -75,33 +76,44 @@ div:has(>#id_request_delete_comment) {
 /* -------------------------------------------------------------------------------------------------------------------*/
 /* ACTUAL COMMENTS */
 .comment {
-    box-sizing: border-box;
     max-height: fit-content;
+    height: fit-content;
     padding: 30px 20px;
     border-bottom: solid 1px #8A8A8A;
     display: flex;
     flex-direction: column;
     align-items: start;
-
-    &:first-of-type {
-        padding-top: 0px;
-
-    }
 }
 
 .comment-header {
     width: 100%;
     display: flex;
     flex-direction: row;
-    justify-content: start;
+    flex-wrap: wrap;
     align-items: center;
     gap: 15px;
+
+    & *:not(h2) {
+        white-space: nowrap;
+    }
 
     & > h2 { /* Username */
         margin: 0;
         margin-right: 30px;
         font-size: 2rem;
         font-weight: 600;
+        word-break: break-word;
+    }
+
+    & .comment-equipped-titles {
+        display: grid;
+        grid: auto / max-content max-content;
+        gap: 15px;
+    }
+
+    & .reward-title {
+        min-width: fit-content;
+        max-width: fit-content;
     }
 
     & .comment-date {
@@ -114,7 +126,6 @@ div:has(>#id_request_delete_comment) {
 }
 
 #edit-comment-button {
-    margin-left: 10px;
     background: none;
     border: none;
     display: flex;
@@ -148,10 +159,12 @@ div:has(>#id_request_delete_comment) {
     }
 }
 
-.comment-text {
+.see-more-container {
+    max-height: 125px;
     width: 100%;
-    max-height: 100px; /* Changes to 'fit-content' when click 'Read more' button via JavaScript */
-    overflow: hidden;
+}
+
+.comment-text {
     & * {
         font-size: 1.2rem;
     }
@@ -161,17 +174,32 @@ div:has(>#id_request_delete_comment) {
     }
 }
 
-.comment-text.reading-less {  /* "Read More" button is visible + currently saying "Read More" */
-    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    -webkit-mask-size: 100% 100%;
-    mask-size: 100% 100%;
-}
-
 .comment-read-more {
+    width: fit-content;
     align-self: end;
 }
 
+/**********************************************************************************************************************/
+/* RESPONSIVE STYLING */
+/* See user_comment.js */
+
+.comment-header.compact {
+    flex-direction: column;
+    align-items: start;
+    gap: 5px;
+
+    & h2 {
+        margin-right: 0px;
+    }
+
+    & .comment-equipped-titles {
+        grid: min-content min-content / auto;
+        gap: 5px;
+        margin-bottom: 10px;
+    }
+
+    & .comment-date {
+        margin-bottom: 5px;
+    }
+}
 

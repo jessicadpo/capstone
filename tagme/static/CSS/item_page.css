@@ -5,31 +5,31 @@ html {
 main {
     display: flex;
     flex-direction: column; /* Main axis = Vertical */
-    padding: 0px 3vw;
+    padding: 30px;
     border-top: solid 1px #8A8A8A;
-}
+    gap: 15px;
 
-/* -------------------------------------------------------------------------------------------------------------------*/
-/* GENERAL */
-h1 {
-    margin: 0;
-    font-size: 2.2rem;
-    font-weight: 500;
+    &:has(#back-link.valid) {
+        padding-top: 15px;
+    }
 }
 
 /* -------------------------------------------------------------------------------------------------------------------*/
 /* BACK LINK */
 #back-link {
     width: fit-content;
-    margin-top: 10px;
-    padding: 0px 10px;
     font-size: 1.3rem;
     text-decoration: none;
     vertical-align: middle;
-    display: none; /* Changes to flex via JavaScript (item_page.js) */
+    display: none;
     flex-direction: row; /* Main axis = Horizontal */
     align-items: center;
     gap: 20px;
+
+    &.valid { /* Valid class set via JavaScript (item_page.js) */
+        display: flex;
+    }
+
     & i {
         font-size: 2.5rem;
     }
@@ -47,73 +47,68 @@ h1 {
 
 /* -------------------------------------------------------------------------------------------------------------------*/
 /* ITEM INFO SECTION */
+
+/*
 #item-info-section {
-    max-height: 55vh; /* Changes to fit-content on "Read More" button click */
-    min-height: 55vh; /* Necessary for checkColumn2Overflow() JavaScript function */
+    max-height: 55vh; /* Changes to fit-content on "Read More" button click
+    min-height: 55vh; /* Necessary for checkColumn2Overflow() JavaScript function
     display: flex;
-    flex-direction: row; /* Main axis = Horizontal */
+    flex-direction: row; /* Main axis = Horizontal
     align-items: start;
     padding: 2vh 0;
     gap: 30px;
 }
+*/
 
-/* -----------COLUMN 1-------------*/
-.column1 {
-    width: 360px;
-    max-height: 100%;
-    aspect-ratio: 36 / 51;
-    max-width: 20%;
+#item-info-section {
+    width: 100%;
+    max-height: 400px;
+    display: grid;
+    grid: min-content / auto minmax(50%, 1fr) 30%;
+    gap: 20px;
+
+    & > * {
+        max-height: 400px;
+    }
+
+    & h1 {
+        margin: 15px 0px 10px 0px;
+        font-size: 2.2rem;
+        font-weight: 500;
+    }
+
+    p {
+        margin: 0px;
+    }
+}
+
+/* -----------LEFT (COVER) COLUMN-------------*/
+.cover-container {
+    width: 100%;
+    max-width: 350px;
+
+    aspect-ratio: 1 / 1.5;
     overflow: hidden;
+
     display: flex;
     justify-content: center;
     align-items: center;
     border: solid 1px black;
     border-radius: 8px;
+
+    & #item-cover {
+        height: 100%;
+        width: 100%;
+        color: #8A8A8A; /* Text color if no cover found */
+    }
 }
 
-#item-cover {
-    height: 100%;
-    width: 100%;
-    color: #8A8A8A; /* Text color if no cover found */
-}
-
-/* -----------COLUMN 2-------------*/
-.column2 {
-    height: 100%;
-    width: 50%;
-    font-size: 1.6rem;
-    display: flex;
-    flex-direction: column; /* Main axis = Vertical */
-    justify-content: space-between;
-    align-items: center;
-}
-
-#column2-main-content {
-    width: 100%;
-    margin: 0;
+/* -----------MIDDLE COLUMN-------------*/
+#middle-column {
+    position: relative; /* So can position read-more-button inside it */
     overflow: hidden;
-    -webkit-mask-image: none;
-    mask-image: none;
 
-    & h1 {
-        font-size: 2rem;
-        margin: 0px;
-        margin-top: 5%;
-        margin-bottom: 10px;
-    }
-
-    & *:not(h1) {
-        margin: 0px;
-    }
-}
-
-#column2-main-content.reading-less {  /* "Read More" button is visible + currently saying "Read More" */
-    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    -webkit-mask-size: 100% 100%;
-    mask-size: 100% 100%;
+    /* See global.css for styling of see-more-content */
 }
 
 #media-type {
@@ -121,22 +116,27 @@ h1 {
     flex-direction: row;
     align-items: center;
     gap: 10px;
-    margin: 15px 0px;
-}
+    font-size: 1.2rem;
 
-#media-type i {
-    font-size: 2rem;
+    & i {
+        font-size: 1.8rem;
+    }
 }
 
 #item-title {
-    font-size: 4rem;
+    font-size: 2.7rem;
     font-weight: 600;
     text-decoration: none;
 }
 
+
 #item-authors {
-    font-size: 2.2rem;
-    margin-bottom: 10px;
+    font-size: 1.7rem;
+}
+
+#item-pub-date {
+    font-size: 1.4rem;
+    margin-top: 5px !important;
 }
 
 #item-description {
@@ -144,7 +144,6 @@ h1 {
 }
 
 #item-subject-headings {
-    margin: 40px 0px 20px 0px;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -166,14 +165,18 @@ h1 {
     }
 }
 
-/* -----------COLUMN 3-------------*/
-.column3 {
-    max-height: 100%;
-    height: 510px;
-    width: 30%;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+/* -----------RIGHT (TAGS) COLUMN-------------*/
+#tags-column {
+    width: 100%;
+    display: grid;
+
+    &:has(.pin-item-button) { /* User is logged in */
+        grid: min-content min-content 1fr min-content / auto;
+    }
+
+    &:not(:has(.pin-item-button)) { /* User is logged out */
+        grid: min-content 1fr min-content / auto;
+    }
 }
 
 /* pin-item-button styling in global.css */
@@ -188,11 +191,13 @@ h1 {
 }
 
 #report-tag-button {
-    font-size: 1.3rem;
-    text-align: left;
     padding: 5px 10px;
     background-color: transparent;
     border: none;
+    font-size: 1.3rem;
+    text-align: left;
+    white-space: nowrap;
+
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -208,10 +213,10 @@ h1 {
     text-decoration: underline;
 }
 
-#tags-container {
+#tags-column #tags-container {
     flex-grow: 1;
     width: 100%;
-    overflow-y: auto;
+    overflow: hidden;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -233,7 +238,7 @@ h1 {
     align-self: end; /* align to right edge of container */
     width: fit-content;
     font-size: 1.3rem;
-    padding: 5px 15px;
+    padding: 5px 15px 0px 15px;
     color: #537A00;
     font-weight: 400;
     background-color: transparent;
@@ -263,103 +268,96 @@ h1 {
 /* -------------------------------------------------------------------------------------------------------------------*/
 /* COMMENTS SECTION */
 #comments-section {
-    box-sizing: border-box;
+    flex-grow: 1; /* Take up any remaining vertical space */
     border-top: solid 1px #8A8A8A;
-    display: flex;
-    flex-direction: row; /* Main axis = Horizontal */
-}
+    padding: 30px 30px 0px 30px;
+    display: grid;
+    gap: 15px;
 
-#comments-section h1 {
-    box-sizing: border-box;
-    padding: 30px;
-    min-width: 20%;
-    max-width: 20%;
-    overflow: hidden;
-    text-overflow: ellipsis; /* TODO: Deal with overflowing text a different way? (diff. layout / etc. ?) */
-}
-
-#comments-pane {
-    box-sizing: border-box;
-    width: 80%;
-    flex-grow: 1;
-    padding: 30px;
-
-    & > *:first-of-type {
-        padding-top: 0px; /* Remove the top-padding of the first comment/form in comments-pane */
+    &:has(> #comment-form) {
+        grid: min-content 1fr / min-content auto;
     }
+
+    &:not(:has(> #comment-form)) {
+        grid: 100% / min-content auto;
+    }
+
+    & > h1 {
+        grid-row: 1 / -1;
+        margin: 0px;
+        padding-top: 30px;
+        padding-right: 50px;
+        font-weight: 400;
+    }
+
+    & .paginated-content {
+        height: 100%;
+        width: 100%;
+        grid-column: 2;
+        display: grid;
+        grid: min-content / minmax(0, auto);
+    }
+
+    & #pagination-footer {
+        height: fit-content;
+        align-self: end;
+        margin-bottom: 0px;
+    }
+
 }
 
 /* -------------------------------------------------------------------------------------------------------------------*/
 /* REPORT LAYER (SIDEBAR & DIALOG) */
 
-#report-tag-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 999;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.75);
-    opacity: 0;
-    visibility: hidden; /* Like display: none, but transitionable */
-    transition: opacity 0.3s ease-in-out, visibility 0s linear 0.5s;
-}
-
-#report-tag-overlay.active {
-    opacity: 1;
-    visibility: visible;
-    transition: opacity 0.3s ease-in-out, visibility 0s linear 0s;
-    pointer-events: auto; /* Make visible overlay section clickable */
-}
-
-/* -----------TAG SIDEBAR-------------*/
 #tag-sidebar {
-    width: 30vw;
+    min-width: min(575px, 99vw);
+    max-width: 100vw;
     height: 100%;
     padding: 20px 30px;
     position: fixed;
     top: 0;
-    right: calc(-40vw - 60px); /* Hidden by default */
+    right: -100%; /* Hidden by default */
     transition: right 0.3s ease-in-out;
     z-index: 1000;
     background-color: #F7F7F7;
     display: flex;
     flex-direction: column;
     gap: 10px;
-}
 
-#tag-sidebar.active {
-    right: 0;
+    & h1 {
+        font-weight: 400;
+        font-size: 2rem;
+        margin: 0px;
+    }
 }
 
 #sidebar-main-content {
     overflow-y: auto;
     overflow-x: hidden;
-    box-sizing: border-box;
     padding: 0px 30px 30px 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
 
 .tag-entry {
-    display: flex;
-    flex-direction: row;
-    justify-content: end;
+    display: grid;
     align-items: center;
     gap: 5%;
-}
 
-.single-tag-container {
-    flex-grow: 1;
-    max-width: 50%;
+    &:has(.report-button) { /* User is logged in */
+        grid: min-content / 1fr 20% 50px;
+    }
+
+    &:not(:has(.report-button)) { /* User is logged out */
+        grid: min-content / 1fr 20%;
+    }
 }
 
 .tag-count {
-    width: 30%;
     text-align: left;
     font-size: 1.1em;
-}
-
-.report-button-container{
-    width: 10%;
+    margin: 0px;
 }
 
 .report-button {
@@ -376,4 +374,69 @@ h1 {
 
 .report-button:hover > i {
     color: #3B6000;
+}
+
+/**********************************************************************************************************************/
+/* RESPONSIVE STYLING */
+@media (width < 1000px) {
+    #item-info-section {
+        grid: 250px auto auto auto / auto;
+        max-height: none;
+        justify-items: center;
+
+        & > * {
+            max-height: none;
+        }
+    }
+
+    .cover-container {
+        max-height: none;
+        height: 100%;
+        width: auto;
+        max-width: none;
+    }
+
+    #middle-column, #middle-column > div {
+        display: contents;
+    }
+
+    #title-author-date {
+        width: 100%;
+
+        & #media-type {
+            justify-content: center;
+        }
+
+        & p {
+            text-align: center;
+            margin-top: 15px;
+        }
+    }
+
+    #description-subjects {
+        width: 100%;
+        grid-row: 4;
+    }
+
+    #tags-column {
+        max-width: 650px;
+        padding: 20px;
+        border: solid 1px #8A8A8A;
+        border-radius: 15px; /* Same radius as pin-item-button */
+    }
+
+    #tags-column #tags-container {
+        height: 250px;
+    }
+
+    #comments-section {
+        display: flex;
+        flex-direction: column;
+        padding: 30px 0px 0px 0px;
+
+        & > h1 {
+            font-weight: 500;
+            padding: 0px;
+        }
+    }
 }

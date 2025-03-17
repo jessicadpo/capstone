@@ -236,6 +236,8 @@ def item_page(request, item_id):
                   "equip_form": EquipForm()}
     score_data = {'user_points': -1, 'new_rewards': None}
     item_data = get_item_from_session(request, item_id)  # Get the specific item's LOC API data using the item ID
+    if item_data is None:  # If accessing item page by directly pasting a URL, for example
+        item_data = query_loc_single_item(item_id)
 
     if request.method == "POST":
         form_result = process_post_form(request, item_data)
@@ -325,7 +327,7 @@ def process_signup_form(request):
     signup_form = SignUpForm(request.POST)
     if signup_form.is_valid():
         signup_form.save()
-        username = signup_form.cleaned_data.get('username')
+        username = signup_form.cleaned_data.get('username').lower()
         password = signup_form.cleaned_data.get('password1')
         user = authenticate(request, username=username, password=password)
         login(request, user)
@@ -341,7 +343,7 @@ def process_login_form(request):
     """
     login_form = LoginForm(request.POST)
     if login_form.is_valid():
-        username = login_form.cleaned_data.get('username')
+        username = login_form.cleaned_data.get('username').lower()
         password = login_form.cleaned_data.get('password')
         user = authenticate(request, username=username, password=password)
         login(request, user)

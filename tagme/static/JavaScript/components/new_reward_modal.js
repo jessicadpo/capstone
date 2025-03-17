@@ -10,14 +10,35 @@ const equipForm = document.getElementById('equip-title-form');
 const titleToEquipFormField = document.getElementById('title-to-equip-input');
 const equipSlotFormField = document.getElementById('equip-slot-input');
 
+function setResponsiveNewRewardModalBehaviour() {
+    preventResponsiveGridOverflow(newRewardModal.querySelector('.modal-footer')); // defined in global.js
+
+    // MUST BE DONE LAST (i.e., all other responsive layouts have been applied)
+    // If height of newRewardModal > 100vh
+    // --> Transform modalContent into slideshow/carousel (activate carousel behaviour (ONLY ONCE))
+    const modalContent = newRewardModal.querySelector('.modal-content');
+    if (newRewardModal.scrollHeight > window.innerHeight && !modalContent.classList.contains("carousel")) {
+        activateCarouselBehaviour(newRewardModal); // defined in global.js
+    } else {
+        // Check scrollHeight if modal NOT in carousel layout
+        newRewardModal.classList.remove("carousel");
+        if (newRewardModal.scrollHeight <= window.innerHeight) {
+            deactivateCarouselBehaviour(newRewardModal); // defined in global.js
+        } else {
+            newRewardModal.classList.add("carousel");
+        }
+    }
+}
+
 function openNewRewardModal() {
     newRewardOverlay.classList.add('active');
-    document.body.style.overflow = 'hidden'; // Disable scrolling on the main content
+    document.documentElement.style.overflowY = "hidden"; // Disable scrolling on the main content
 
     // Make modal (& overlay) fade in on open
     newRewardModal.style.opacity = 0;
     newRewardModal.style.visibility = 'visible';
     newRewardModal.showModal();
+    setResponsiveNewRewardModalBehaviour();
     setTimeout(() => {
         newRewardOverlay.style.opacity = 0.75;
         newRewardModal.style.opacity = 1;
@@ -28,7 +49,7 @@ function openNewRewardModal() {
 
 function closeNewRewardModal() {
     newRewardModal.close();
-    document.body.style.overflow = ''; // Re-enable scrolling on the main content
+    document.documentElement.style.overflowY = ''; // Re-enable scrolling on the main content
     newRewardOverlay.classList.remove('active');
 }
 
@@ -63,9 +84,17 @@ function equipTitle(slotNumber) {
     equipForm.submit();
 }
 
+/*--------------------------------------------------------------------------------------------------------------------*/
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape' || event.keyCode === 27) {
         closeNewRewardModal();
+    }
+});
+
+// Triggers when window is resized
+window.addEventListener("resize", function() {
+    if (newRewardModal.open) {
+        setResponsiveNewRewardModalBehaviour();
     }
 });
 

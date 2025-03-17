@@ -5,50 +5,18 @@ main {
 }
 
 /* -------------------------------------------------------------------------------------------------------------------*/
-/* SIDE BAR */
-#my-profile-sidebar-link {
-    background-color: #3B6000;
-    color: white;
-
-    & * {
-        color: white !important; /* Use !important to guarantee override of global.css */
-    }
-
-    &:hover { /* No change on hover */
-        background-color: #3B6000 !important;
-        color: white !important;
-    }
-}
-
-/* -------------------------------------------------------------------------------------------------------------------*/
 /* PROFILE SECTION (MAIN CONTENT) */
-#main-content {
+#profile-content {
+    box-sizing: border-box;
     flex-grow: 1;
     padding: 25px;
-    display: flex;
-    flex-direction: column; /* Main axis = Vertical */
-}
-
-#profile-section {
-    flex-grow: 1;
-    padding: 5px; /* To give enough space for box-shadow */
-    display: flex;
-    flex-direction: column; /* Main axis = Vertical */
-    gap: 15px;
+    display: grid;
+    grid: min-content / calc(50% - 15px / 2) calc(50% - 15px / 2);
+    grid-gap: 15px;
 
     & h1 {
         margin: 0;
         font-weight: 400;
-    }
-}
-
-#progress-equip-row {
-    display: flex;
-    flex-direction: row;
-    gap: 15px;
-
-    & > div {
-        width: 50%;
     }
 }
 
@@ -60,13 +28,18 @@ main {
 
 /* ------------------------------------------------------------*/
 /* PROGRESS SECTION  */
+#progress-section {
+    container-type: inline-size;
+    container-name: progress;
+}
+
 #progress-bar {
     width: 100%;
     display: flex;
     flex-direction: row; /* Main axis = Horizontal */
     position: relative; /* So can position end-tickmark & current-progress-bar relative to progress bar */
 
-    &::before {  /* Background progress bar */
+    &::before {  /* Background of progress bar */
         content: "";
         width: inherit;
         height: 25px;
@@ -130,28 +103,29 @@ main {
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: space-evenly;
+    gap: 15px;
     margin-top: 15px;
 
-    & h2 {
-        font-weight: 400;
-    }
-
-    & #total-points { /* Only the span containing the total points */
+    & span:not(.reward-title span) {  /* Does not apply to spans inside reward-titles */
         font-size: 1.4rem;
-    }
-
-    & > div {
-        flex-grow: 1; /* Proportionally occupy max-available width */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
         display: flex;
         flex-direction: row;
         align-items: center;
-        justify-content: center;
-        gap: 15px;
+        gap: 10px;
     }
 }
 
 /* ------------------------------------------------------------*/
 /* EQUIPPED TITLES SECTION  */
+#equipped-titles-section {
+    container-type: inline-size; /* For adaptive styling (see end of this file) */
+    container-name: equipped-titles;
+}
+
 #equipped-titles-header {
     display: flex;
     flex-direction: row;
@@ -166,11 +140,12 @@ main {
 
 #equipped-titles-content {
     box-sizing: border-box; /* Sizing includes padding */
+    flex-grow: 1; /* Occupy remaining height */
     width: 100%;
-    height: 100%;
-    padding: 0px 20px;
+    padding: 20px;
     display: flex;
-    flex-direction: row; /* Main axis = Horizontal */
+    flex-direction: row;
+    align-items: center;
     gap: 10%;
 
     & .dropdown-options {
@@ -178,17 +153,21 @@ main {
     }
 }
 
-.equipped-title-widget {
-    width: 50%;
-    display: flex;
-    flex-direction: row; /* Main axis = Horizontal */
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
 
-    & > .dropdown {
-        flex-grow: 1; /* Takes all available width not occupied by edit button */
-    }
+.equipped-title-widget {
+    box-sizing: border-box;
+    width: 100%;
+    height: min-content;
+    display: grid;
+    grid: auto / calc(100% - 32px - 15px); /* 32px = width of edit button. 15px = gap */
+}
+
+
+.edit-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%); /* Vertically center with dropzone */
+    left: calc(100% + 15px); /* To the right of dropzone + 15px gap */
 }
 
 .dropzone.hovered {
@@ -198,17 +177,21 @@ main {
     }
 
     & > .reward-title::after {
-        height: inherit;
-        width: inherit;
+        content: "";
+        box-sizing: border-box;
+        height: 100%;
+        width: 100%;
         position: absolute;
         border: dashed 2px #006996;
+        border-radius: 10px;
         background-color: rgba(0, 105, 150, 0.25); /* Same blue colour, but more transparent */
     }
 }
 
 .empty-equip {
-    height: 30px;
-
+    box-sizing: border-box;
+    height: 40px;
+    width: 100%;
     padding: 5px 15px 5px 15px;
     border: dashed 2px #8A8A8A;
     border-radius: 10px;
@@ -246,13 +229,15 @@ main {
 }
 
 /* Applies to the .empty-equip or > .reward-title only when "show" class is added to dropdown-options */
-.dropdown:has(>.show) .dropzone > .empty-equip, .dropdown:has(>.show) .dropzone > .reward-title {
+.dropdown:has(.show) .dropzone  .empty-equip, .dropdown:has(.show) .dropzone .reward-title {
     border-radius: 10px 10px 0px 0px;
 }
 
-
 /* ------------------------------------------------------------*/
 /* EARNED TITLES SECTION  */
+#earned-titles-section {
+    grid-column: 1 / 3; /* Span 2 columns */
+}
 
 #earned-titles-content {
     width: 100%;
@@ -270,6 +255,60 @@ main {
     }
 }
 
+/**********************************************************************************************************************/
+/* RESPONSIVE STYLING */
+@media (width < 1700px) {
+    #profile-content {
+        grid: min-content min-content auto / auto;
+    }
+
+    #earned-titles-section {
+        grid-column: 1 / 2;
+    }
+}
+
+@media (width < 750px) or (orientation:portrait) {
+    main {
+        flex-direction: column; /* Main axis = Vertical */
+    }
+}
+
+/*--------PROGRESS SECTION (RESPONSIVE)---------*/
+@container progress (width < 575px) {
+    #progress-info-line {
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 20px;
+    }
+}
+
+@container progress (width < 400px) {
+    #progress-info-line > span:last-child {
+        flex-direction: column !important;
+    }
+}
+
+/*--------EQUIPPED TITLES SECTION (RESPONSIVE)---------*/
+@container equipped-titles (width > 900px) {
+    #equipped-titles-content {
+        padding: 20px 15%;
+    }
+}
+
+@container equipped-titles (width < 640px) {
+    #equipped-titles-content {
+        flex-direction: column;
+        padding: 20px 15%;
+        gap: 20px;
+    }
+}
+
+@container equipped-titles (width < 400px) {
+    #equipped-titles-content {
+        flex-direction: column;
+        padding: 20px 0%;
+    }
+}
 
 
 

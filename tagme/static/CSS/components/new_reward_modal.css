@@ -10,15 +10,32 @@
 }
 
 #new-reward-modal {
-    padding: 40px 60px 30px 60px;
+    height: fit-content;
+    max-height: 100vh;
+    width: 750px;
+    max-width: 100vw;
+    padding: 0px; /* Remove default */
+
     opacity: 0;
     transition: opacity 1s ease;
-    &[open] { /* Fade in on open */
+    &[open] { /* TODO (done via JavaScript?) Fade in on open */
         opacity: 1;
     }
 }
 
-.modal-content {
+#new-reward-modal .modal-content {
+    /* Apply horizontal padding to this instead of #new-reward-model
+    so that slide transitions (when carousel) cut at edge of dialog */
+    width: 100%;
+    padding: 40px 60px 30px 60px;
+    display: flex;
+    flex-direction: column; /* Changes to row */
+    align-items: center;
+    justify-content: center;
+}
+
+.slide-card {
+    width: 100%;
     display: flex;
     flex-direction: column; /* Main axis = Vertical */
     align-items: center;
@@ -31,6 +48,7 @@
     }
 
     & > p {
+        text-align: center;
         font-size: 1.3rem;
         font-weight: 400;
         margin: 0 0 15px 0;
@@ -51,22 +69,15 @@
     }
 }
 
-#new-reward-modal .modal-footer { /* Overrides global.css */
-    gap: 30px;
-}
-
-#new-reward-modal .modal-footer-button { /* Overrides global.css */
-    white-space: nowrap;
-    width: fit-content;
-    min-width: fit-content;
-    padding: 10px;
-}
-
 #skip-equip-button {
     background: none;
     border: none;
 
-    &:hover {
+    & span {
+        color: black;
+    }
+
+    &:hover span {
         text-decoration: underline;
     }
 }
@@ -83,7 +94,26 @@
 }
 
 /**********************************************************************************************************************/
-/* FIREWORKS ANIMATION (from: https://alvaromontoro.com/blog/68002/creating-a-firework-effect-with-css) */
+/* RESPONSIVE STYLING */
+
+/* See global.css for carousel styling */
+.carousel #equip-title-line {
+    margin-top: 0px;
+}
+
+/* NOTE: More .responsive-grid styling in global.css */
+
+#new-reward-modal .modal-footer.responsive-grid.multi-row {
+    padding-top: 25px;
+
+    & #skip-equip-button {
+        grid-row-end: -1; /* Always in last row */
+        grid-column: 1 / -1; /* Span all of row */
+    }
+}
+
+/**********************************************************************************************************************/
+/* FIREWORKS ANIMATION (from: https://alvaromontoro.com/blog/68002/creating-a-firework-effect-with-css with some modifications) */
 
 @keyframes firework {
   0% { transform: translate(var(--x), var(--initialY)); width: var(--initialSize); opacity: 1; }
@@ -92,7 +122,8 @@
 }
 
 .firework.playing, .firework.playing::before, .firework.playing::after {
-    z-index: 1003;
+    z-index: 1003; /* Put fireworks above new-reward-overlay */
+    overflow: hidden; /* Prevents weird overflow & movement on smaller screens */
     opacity: 0;
     --initialSize: 0.5vmin;
     --finalSize: 45vmin;
@@ -173,12 +204,12 @@
     transform: translate(-50%, -50%) rotate(170deg) scale(1.15) rotateY(-30deg);
 }
 
-.firework.playing:nth-child(3) {
+.firework.playing:nth-of-type(2) {
     --x: 30vmin;
     --y: -50vmin;
 }
 
-.firework.playing:nth-child(3), .firework.playing:nth-child(3)::before, .firework.playing:nth-child(3)::after {
+.firework.playing:nth-of-type(2), .firework.playing:nth-of-type(2)::before, .firework.playing:nth-of-type(2)::after {
     --color1: pink;
     --color2: violet;
     --color3: fuchsia;
@@ -191,12 +222,12 @@
     animation-delay: -0.25s;
 }
 
-.firework.playing:nth-child(4) {
+.firework.playing:nth-of-type(3) {
     --x: -30vmin;
     --y: -50vmin;
 }
 
-.firework.playing:nth-child(4), .firework.playing:nth-child(4)::before, .firework.playing:nth-child(4)::after {
+.firework.playing:nth-of-type(3), .firework.playing:nth-of-type(3)::before, .firework.playing:nth-of-type(3)::after {
     --color1: cyan;
     --color2: lightcyan;
     --color3: lightblue;

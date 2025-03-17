@@ -1,12 +1,82 @@
 const prevPageButtons = document.querySelectorAll('.prev-page-button');
 const nextPageButtons = document.querySelectorAll('.next-page-button');
 
-// If both pagination_top and pagination_top used in the same page, page will have duplicate fields
+// If both pagination_top and pagination_bottom used in the same page, page will have duplicate fields
 // for storing this info, thus why we're using classes/querySelectorAll instead of ids/getElementById
-const page_url = document.querySelectorAll('.page-url')[0].value;
-var currentPageNumber = parseInt(document.querySelectorAll('.current-page-number')[0].value);
-var lastPageNumber = parseInt(document.querySelectorAll('.last-page-number')[0].value);
+var page_url = null;
+var currentPageNumber = null;
+var lastPageNumber = null;
 
+if (document.querySelectorAll('.page-url').length > 0) {
+    page_url = document.querySelectorAll('.page-url')[0].value; // FIXME: Error on item pages? ([0] is undefined)
+    currentPageNumber = parseInt(document.querySelectorAll('.current-page-number')[0].value);
+    lastPageNumber = parseInt(document.querySelectorAll('.last-page-number')[0].value);
+}
+
+function setResponsiveBottomPaginationBehaviour() {
+    // Need to query the document because elements reset when change pages
+    const paginationFooter = document.getElementById('pagination-footer');
+    const bottomPaginationRangeText = document.querySelector('#pagination-footer > p');
+    const bottomPaginationControls = document.getElementById('bottom-page-controls');
+
+    // Do not continue if page doesn't have a pagination-footer
+    if (paginationFooter === null) {
+        return;
+    }
+
+    // Remove go-to-page-buttons & replace with number input only if bottom-page-controls would overflow from screen
+    const goToPageButtons = bottomPaginationControls.querySelectorAll(".go-to-page-button");
+    const nextPageNumberForm = document.querySelector('.next-page-input-form');
+    const prevPageNumberForm = document.querySelector('.prev-page-input-form');
+    const nextInputIsVisible = nextPageNumberForm.classList.contains("invisible") ? false : true;
+    const prevInputIsVisible = prevPageNumberForm.classList.contains("invisible") ? false : true;
+
+    if (bottomPaginationControls.scrollWidth > bottomPaginationControls.clientWidth) {
+        goToPageButtons.forEach(goToPageButton => {
+            goToPageButton.style.display = "none";
+        });
+
+        const currentPageNumber = document.querySelector('.current-page-number').value;
+
+        prevPageNumberForm.classList.add("invisible");
+        nextPageNumberForm.classList.remove("invisible");
+        nextPageNumberForm.querySelector('input').placeholder = currentPageNumber;
+    } else {
+        const clone = bottomPaginationControls.cloneNode(true);
+        clone.style.position = "absolute";
+        clone.querySelectorAll("*").forEach(child => {
+            child.style.display = "block";
+        })
+
+        document.body.appendChild(clone);
+        const minWidth = clone.scrollWidth;
+        document.body.removeChild(clone);
+
+        if (paginationFooter.scrollWidth > minWidth) {
+            goToPageButtons.forEach(goToPageButton => {
+                goToPageButton.style.display = "block";
+            });
+
+            nextPageNumberForm.querySelector('input').placeholder = '';
+            if (nextInputIsVisible) {
+                nextPageNumberForm.classList.remove("invisible");
+            }
+            if (prevInputIsVisible) {
+                prevPageNumberForm.classList.remove("invisible");
+            }
+        }
+    }
+
+    // Move the pagination range text above controls if overflow
+    if (bottomPaginationRangeText.scrollWidth > bottomPaginationRangeText.clientWidth) {
+        paginationFooter.classList.add('two-line');
+    } else {
+        const columnWidths = getComputedStyle(paginationFooter).gridTemplateColumns.split(' ');
+        if (bottomPaginationRangeText.scrollWidth < parseFloat(columnWidths[0])) {
+            paginationFooter.classList.remove('two-line');
+        }
+    }
+}
 
 function fetchPage(pageNumberToFetch) {
     // Send AJAX request to get next page of comments (without reloading the page)
@@ -27,6 +97,8 @@ function fetchPage(pageNumberToFetch) {
             setCommentsBehaviour(); // defined in user_comment.js
         } else if (data.url_name === 'pinned_items') { // TODO: Also call if search_results page?
             setPinItemButtonBehaviour(); // defined in tag_modal.js
+            setResponsiveBottomPaginationBehaviour();
+            document.getElementById('open-filter-menu-button').addEventListener("click", openFilterMenu);
         }
     });
 }
@@ -63,3 +135,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // Prev & Next button behaviour set in HTML via onclick attribute
     setPaginationFormBehaviour();
 });
+
+// Triggers after window has finished loading (i.e., all CSS and JavaScript has already been applied)
+window.addEventListener("load", setResponsiveBottomPaginationBehaviour);
+
+// Triggers when window is resized
+window.addEventListener("resize", setResponsiveBottomPaginationBehaviour);

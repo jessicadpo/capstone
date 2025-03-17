@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="page-name" content="{{ request.resolver_match.url_name }}">
     <title>TagMe | Search Results</title>
+    <link rel="icon" type="image/x-icon" href="../../static/icons/favicon.png">
 
     <!-- Roboto font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,9 +28,14 @@
     {% include "components/top_bar.html" %}
     {% include "components/new_reward_modal.html" %}
 
+    <div class="sidebar-overlay"></div>
+
     <main>
-        <div id="sidebar">
-            <h2><b>Synonymous Tags</b></h2>
+        <div id="search-sidebar">
+            <h2>
+                <b>Synonymous Tags</b>
+                <button id="close-search-sidebar-button" aria-label="Close synonymous & related tags sidebar">✖</button>
+            </h2>
             <div class="tag-container">
                 {% for tag in synonymous_tags %}
                     {% include 'components/tag.html' %}
@@ -43,32 +50,11 @@
             </div>
         </div>
 
-        <div id="results-section">
+        <div id="main-content" class="results-section"> <!-- Need main-content id for openSidebar() function (see global.js) -->
             <div id="results-header">
                 <h1>{{ request.GET.search_type}} results for: <b>"{{ request.GET.search_string }}"</b></h1>
-
-                <!-- TODO: Replace with include components/pagination_top.html once have Search figured out -->
-                <p> {{ pagination.from }} to {{ pagination.to }} of {{ pagination.of }} results</p>
-
-                {% if pagination.current == 1 %}
-                    <a class="top-prev-page" aria-label="Previous page" href="{% url 'search_results' 1 %}?search_type={{ request.GET.search_type }}&search_string={{ request.GET.search_string }}">
-                        <i class="fa fa-angle-left" aria-hidden="true"></i>
-                    </a>
-                {% else %}
-                    <a class="top-prev-page" aria-label="Previous page" href="{% url 'search_results' pagination.current|subtract:1 %}?search_type={{ request.GET.search_type }}&search_string={{ request.GET.search_string }}">
-                        <i class="fa fa-angle-left" aria-hidden="true"></i>
-                    </a>
-                {% endif %}
-
-                {% if pagination.current == pagination.total %}
-                    <a class="top-next-page" aria-label="Next page" href="{% url 'search_results' pagination.total %}?search_type={{ request.GET.search_type }}&search_string={{ request.GET.search_string }}">
-                        <i class="fa fa-angle-right" aria-hidden="true"></i>
-                    </a>
-                {% else %}
-                    <a class="top-next-page" aria-label="Next page" href="{% url 'search_results' pagination.current|add:1 %}?search_type={{ request.GET.search_type }}&search_string={{ request.GET.search_string }}">
-                        <i class="fa fa-angle-right" aria-hidden="true"></i>
-                    </a>
-                {% endif %}
+                <button id="open-search-sidebar-button" aria-label="Browse synonymous & related tags">Browse tags</button>
+                {% include 'components/pagination_top.html' %}
             </div>
 
             <div id="results-list">

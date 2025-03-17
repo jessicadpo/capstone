@@ -1,0 +1,100 @@
+/* SIDE NAV (USER PROFILE / SAVED ITEMS / ACCOUNT SETTINGS) */
+#user-account-sidenav {
+    box-sizing: border-box;
+    width: 13%;
+    min-width: fit-content;
+    border-right: solid 1px #537A00;
+    display: flex;
+    flex-direction: column; /* Main axis = Vertical */
+
+    & a, #current-page-header {  /* Both current-page-link & all user-sidenav-links > a */
+        padding: 15px 20px;
+        font-size: 1.3rem;
+        font-weight: 300;
+        text-decoration: none;
+        display: flex;
+        flex-direction: row; /* Main axis = horizontal */
+        align-items: center;
+        gap: 10px;
+    }
+}
+
+#user-sidenav-links a {
+    border-bottom: solid 1px #537A00;
+
+    & i {
+        color: #537A00;
+    }
+
+    & span {
+        flex-grow: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &:hover {
+        background-color: #E0EEAC;
+    }
+
+}
+
+#current-page-header {
+    display: none !important; /* Changes to flex via media queries (see end of file) */
+    background-color: #3B6000;
+    color: white;
+
+    & * {
+        color: white;
+    }
+
+    & span {
+        flex-grow: 1;
+    }
+}
+
+#open-user-sidenav-button {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+
+    &:hover > i {
+        color: #E0EEAC;
+    }
+}
+
+/**********************************************************************************************************************/
+/* RESPONSIVE STYLING */
+@media (width >= 750px) and (orientation:landscape)  { /* When viewport width > viewport height */
+    #user-sidenav-links a.active {  /* active class set via JavaScript */
+        background-color: #3B6000;
+        color: white;
+
+        & * {
+            color: white !important; /* Use !important to guarantee override of user_sidenav.css */
+        }
+
+        &:hover { /* No change on hover */
+            background-color: #3B6000 !important;
+            color: white !important;
+        }
+    }
+}
+
+@media (width < 750px) or (orientation:portrait) {
+    #user-account-sidenav {
+        width: 100%;
+        height: fit-content;
+    }
+
+    #current-page-header {
+        display: flex !important;
+    }
+
+    #user-sidenav-links {
+        max-height: 0px;
+        overflow: hidden;
+        transition: max-height 0.2s ease-out;
+    }
+}

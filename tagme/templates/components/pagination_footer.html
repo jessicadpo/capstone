@@ -21,11 +21,9 @@
         <button class="go-to-page-button" aria-label="Page 1" onclick="fetchPage(1)">1</button>
         {% endif %}
 
-        {% if current_page.number > 4 %}
-            <form class="pagination-form">
-                <input class="page-number-input" aria-label="Enter a previous page number to go to" type="number" min="1" max="{{ current_page.paginator.num_pages }}"/>
-            </form>
-        {% endif %}
+        <form class="pagination-form prev-page-input-form {% if current_page.number <= 4 %} invisible {% endif %}">
+            <input class="page-number-input" aria-label="Enter a previous page number to go to" type="number" min="1" max="{{ current_page.paginator.num_pages }}"/>
+        </form>
 
         {% if current_page.number > 2 %}
             <button class="go-to-page-button" aria-label="Page {{ current_page.number|subtract:2 }}" onclick="fetchPage({{ current_page.number|subtract:2 }})">
@@ -57,11 +55,9 @@
             </button>
         {% endif %}
 
-        {% if current_page.number < current_page.paginator.num_pages|subtract:3 %}
-            <form class="pagination-form">
-                <input class="page-number-input" aria-label="Enter the next page number to go to" type="number" min="1" max="{{ current_page.paginator.num_pages }}"/>
-            </form>
-        {% endif %}
+        <form class="pagination-form next-page-input-form {% if current_page.number >= current_page.paginator.num_pages|subtract:3 %} invisible {% endif %}">
+            <input class="page-number-input" aria-label="Enter the next page number to go to" type="number" min="1" max="{{ current_page.paginator.num_pages }}"/>
+        </form>
 
         {% if current_page.number < current_page.paginator.num_pages|subtract:2 %}
             <button class="go-to-page-button" aria-label="Page {{ current_page.paginator.num_pages }}" onclick="fetchPage({{current_page.paginator.num_pages}})">

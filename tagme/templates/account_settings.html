@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="page-name" content="{{ request.resolver_match.url_name }}">
     <title>TagMe | Account Settings </title>
+    <link rel="icon" type="image/x-icon" href="../static/icons/favicon.png">
 
     <!-- Roboto font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,6 +16,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <link rel="stylesheet" href="../../static/CSS/global.css">
+    <link rel="stylesheet" href="../../static/CSS/components/user_sidenav.css">
     <link rel="stylesheet" href="../../static/CSS/account_settings.css">
 </head>
 
@@ -29,27 +32,27 @@
 
                 <div class="grid-content">
                     <!-- Username row(s) -->
-                    <h2 class="first-grid-row">Username</h2>
-                    <span class="first-grid-row">{{ request.user.username }}</span>
-                    <button id="edit-username-button" class="edit-button first-grid-row" aria-label="Change username">
+                    <h2>Username</h2>
+                    <span title="{{ request.user.username }}">{{ request.user.username }}</span>
+                    <button id="edit-username-button" class="edit-button" aria-label="Change username">
                         <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
                         <span>Edit</span>
                     </button>
 
                     <form id="username-change-form"
-                          class="single-field-form {% if not forms.username_change_form.errors %} invisible {% endif %}"
+                          class="{% if not forms.username_change_form.errors %} invisible {% endif %}"
                           method="POST">
                         {% csrf_token %}
 
                         {% for field in forms.username_change_form %}
                             {% if not field.is_hidden %}
                                 <label for="{{ field.auto_id }}">{{ field.label }}</label>
-                                <div class="column-2">
-                                    {{ field }}
-                                    {% if field.errors %}
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="form-errors">
                                         {{ field.errors }}
-                                    {% endif %}
-                                </div>
+                                    </div>
+                                {% endif %}
                             {% else %}
                                 {{ field }} <!-- e.g., form_id field -->
                             {% endif %}
@@ -61,26 +64,26 @@
 
                     <!-- Email row(s) -->
                     <h2>Email address</h2>
-                    <span>{{ request.user.email }}</span>
+                    <span title="{{ request.user.email }}">{{ request.user.email }}</span>
                     <button id="edit-email-button" class="edit-button" aria-label="Change email address">
                         <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
                         <span>Edit</span>
                     </button>
 
                     <form id="email-change-form"
-                          class="single-field-form {% if not forms.email_change_form.errors %} invisible {% endif %}"
+                          class="{% if not forms.email_change_form.errors %} invisible {% endif %}"
                           method="POST">
                         {% csrf_token %}
 
                         {% for field in forms.email_change_form %}
                             {% if not field.is_hidden %}
                                 <label for="{{ field.auto_id }}">{{ field.label }}</label>
-                                <div class="column-2">
-                                    {{ field }}
-                                    {% if field.errors %}
+                                {{ field }}
+                               {% if field.errors %}
+                                    <div class="form-errors">
                                         {{ field.errors }}
-                                    {% endif %}
-                                </div>
+                                    </div>
+                                {% endif %}
                             {% else %}
                                 {{ field }} <!-- e.g., form_id field -->
                             {% endif %}
@@ -99,13 +102,13 @@
                     </button>
 
                     <form id="password-change-form"
-                          class="multi-field-form {% if not forms.password_change_form.errors %} invisible {% endif %}"
+                          class="{% if not forms.password_change_form.errors %} invisible {% endif %}"
                           method="POST">
                         {% csrf_token %}
 
                         {% for field in forms.password_change_form %}
                             {% if not field.is_hidden %}
-                                <div class="column-1">
+                                <div> <!-- Necessary for aligning tooltip with label horizontally -->
                                     <label for="{{ field.auto_id }}">{{ field.label }}</label>
 
                                     {% if field.help_text %}
@@ -122,12 +125,10 @@
                                     {% endif %}
                                 </div>
 
-                                <div class="column-2">
-                                    {{ field }}
-                                </div>
+                                {{ field }}
 
                                 {% if field.errors %}
-                                    <div class="column-2">
+                                    <div class="form-errors">
                                         {{ field.errors }}
                                     </div>
                                 {% endif %}
@@ -138,7 +139,7 @@
                         {% endfor %}
                         <input type="submit" class="column-3" value="Save Password"/>
                     </form>
-                    <hr class="last-grid-row">
+                    <hr>
                 </div> <!-- End of grid container -->
 
                 <div id="settings-footer">
@@ -158,5 +159,6 @@
     <!-- JavaScript -->
     <script type="text/javascript" src="../../static/JavaScript/global.js"></script>
     <script type="text/javascript" src="../../static/JavaScript/account_settings.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/components/user_sidenav.js"></script>
 </body>
 </html>

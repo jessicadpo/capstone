@@ -5,27 +5,12 @@ main {
 }
 
 /* -------------------------------------------------------------------------------------------------------------------*/
-/* SIDE BAR */
-#pinned-items-sidebar-link {
-    background-color: #3B6000;
-    color: white;
-
-    & * {
-        color: white !important; /* Use !important to guarantee override of global.css */
-    }
-
-    &:hover { /* No change on hover */
-        background-color: #3B6000 !important;
-        color: white !important;
-    }
-}
-
-/* -------------------------------------------------------------------------------------------------------------------*/
 /* PINNED ITEMS SECTION (MAIN CONTENT) */
 #main-content {
+    container-type: inline-size !important;
+    container: main-content;
+
     flex-grow: 1;
-    width: calc(100% - 13%);
-    overflow-y: auto;
     display: flex;
     flex-direction: row;
 }
@@ -35,18 +20,22 @@ main {
     flex-grow: 1;
     width: calc(100% - 300px);
     padding: 1vh 1vw;
+
     display: flex;
     flex-direction: column; /* Main axis = Horizontal */
     gap: 10px;
 
     & #pinned-items-header {
+        padding: 10px;
         display: flex;
         flex-direction: row;
+        align-items: center;
+        gap: 15px;
     }
 
     & h1 {
         flex-grow: 1;
-        margin: 10px 0px;
+        margin: 0px;
         white-space: nowrap;
     }
 
@@ -58,7 +47,69 @@ main {
     }
 }
 
+#open-filter-menu-button {
+    height: 35px;
+    width: min-content;
+    padding: 0px 20px;
+    background-color: #006996;
+    border: 1px solid #004868;
+    border-radius: 5px;
+    cursor: pointer;
+
+    display: none; /* Changed to flex via media query (see end of this file ) */
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
+    &:hover {
+        background-color: #004868;
+    }
+
+    &:focus {
+        background-color: #004868;
+    }
+
+    & * {
+        color: white;
+        font-size: 1.1rem;
+        white-space: nowrap;
+    }
+}
+
 /* Rest of styling for individual pinned items in item_result.css */
+
+#filter-sidebar {
+    display: contents; /* Changed to block via media query (see end of this file) */
+}
+
+#close-filter-menu-button {
+    cursor: pointer;
+    padding: 0px 5px;
+    font-weight: 400;
+    font-size: 1.2rem;
+    color: #006996; /* Blue */
+    background: none;
+    border: none;
+    display: none; /* Changed to flex via media query (see end of this file) */
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    gap: 8px;
+
+    & span {
+        color: #006996; /* Blue */
+        font-size: 1.5rem;
+    }
+
+    &:hover, #close-filter-menu-button:focus {
+        color: #004868; /* Dark Blue */
+
+        & span {
+            color: #004868; /* Dark Blue */
+        }
+    }
+
+}
 
 #filter-menu {
     box-sizing: border-box;
@@ -120,7 +171,7 @@ main {
         color: #006996;
     }
 
-    & input[type="submit"]:hover, input[type="submit"]focus {
+    & input[type="submit"]:hover, input[type="submit"]:focus {
         background-color: #004868; /* Dark Blue */
         border-color: #004868;
     }
@@ -173,7 +224,7 @@ main {
         font-size: 1.2rem;
     }
 
-    & .remove-filter-button {
+    & .remove-open-filter-menu-button {
         background: none;
         border: none;
         color: #006996; /* Blue */
@@ -181,8 +232,125 @@ main {
         white-space: nowrap;
     }
 
-    & .remove-filter-button:hover {
+    & .remove-open-filter-menu-button:hover {
         text-decoration: underline;
         color: #004868; /* Dark Blue */
+    }
+}
+
+
+/**********************************************************************************************************************/
+/* RESPONSIVE STYLING */
+@media (width < 750px) or (orientation:portrait) {
+    main {
+        flex-direction: column; /* Main axis = Vertical */
+    }
+
+    #main-content {
+        width: 100%;
+    }
+}
+
+@container main-content (width >= 1000px) {
+    #filter-menu .tooltip {
+        position: relative;
+        top: initial !important; /* When going from smaller to larger viewport width --> Overrides any changes to top
+                                    made via JavaScript (see below) */
+    }
+}
+
+@container main-content (width < 1000px) {
+    #filter-sidebar {
+        display: block;
+        background-color: #F7F7F7;
+        height: 100vh;
+        z-index: 1000;
+        position: fixed;
+        top: 0%;
+        right: -100%; /* Off to the right (outside viewable screen) */
+        transition: right 0.3s ease-in-out;
+
+        & .tooltip {
+            position: absolute; /* Is treated as overflow hidden otherwise */
+            top: initial;
+            /* Vertical position set via JavaScript on scroll (see pinned_items.js) */
+        }
+
+        & .tooltip i {
+            position: relative;
+            top: 5px;
+        }
+
+        & .heading-container:has(.tooltip) > h2 {
+            padding-left: 30px;
+        }
+    }
+
+    #filter-menu {
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    #open-filter-menu-button, #close-filter-menu-button {
+        display: flex;
+    }
+}
+
+@container main-content (width < 875px) {
+    #pinned-items-header {
+        display: grid !important;
+        grid: auto auto / auto min-content;
+        gap: 10px !important;
+
+        & h1 {
+            grid-column: 1 / span 2;
+            border-bottom: 1px solid #8A8A8A;
+            padding-bottom: 15px;
+            margin-bottom: 5px;
+        }
+
+        & #open-filter-menu-button {
+            grid-row: 2;
+            grid-column: 1;
+            margin: 0px;
+        }
+
+        & #pagination-top {
+            grid-row: 2;
+            grid-column: 2;
+        }
+    }
+}
+
+@container main-content (width < 500px) {
+    #pinned-items-header {
+        grid: auto auto auto / auto auto;
+        justify-items: start;
+
+        & h1 {
+            width: 100%;
+        }
+
+        & #open-filter-menu-button {
+            grid-row: 3;
+        }
+    }
+
+    #pagination-top {
+        display: contents;
+
+        & > p {
+            grid-column: 1 / span 2;
+            grid-row: 2;
+            justify-self: end;
+            margin: 0px;
+        }
+
+        & > div {
+            display: flex;
+            grid-row: 3;
+            grid-column: 2;
+            justify-self: end;
+        }
     }
 }

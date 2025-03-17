@@ -174,7 +174,7 @@ def paginate(request, to_paginate, template_name, page_forms, item_data=None):
     if to_paginate is None:
         to_paginate = []
 
-    current_page = Paginator(to_paginate, 1).get_page(request.GET.get('page', 1))
+    current_page = Paginator(to_paginate, 15).get_page(request.GET.get('page', 1))
 
     # If AJAX request (i.e., page already loaded)
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':

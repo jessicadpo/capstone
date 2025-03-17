@@ -1,9 +1,17 @@
-<div class="result-item content-box">
-    <div class="item-data-section">
-        <!-- TODO: Create default cover -->
-        <div class="cover-container"> <!-- Div container necessary for consistent sizing -->
-            <!-- Invalid src= URLs causes pages to be requested twice, so only include src= attribute if item.cover is not None -->
-            <img class="result-cover" {% if item.cover %} src="{{ item.cover }}" {% endif %} alt="{% if item.cover != None %} {{ item.title }} cover {% else %} Cover not found {% endif %}">
+<div class="item-result-container"> <!-- Need this div for responsive layout -->
+    <div class="item-result content-box">
+        {% load html_functions %}
+
+        <div> <!-- Show Date Pinned in pinned-items page (responsive) (requires loading of html_functions) -->
+            <!-- TODO: Create default cover -->
+            <div class="cover-container"> <!-- Div container necessary for consistent sizing -->
+                <!-- Invalid src= URLs causes pages to be requested twice, so only include src= attribute if item.cover is not None -->
+                <img class="result-cover" {% if item.cover %} src="{{ item.cover }}" {% endif %} alt="{% if item.cover != None %} {{ item.title }} cover {% else %} Cover not found {% endif %}">
+            </div>
+
+            {% if request|url_contains_pinned_items %}
+                <span class="date-pinned attached-to-cover">Date Pinned:&nbsp;<span>{{ item.date_pinned }}</span></span>
+            {% endif %}
         </div>
 
         <div class="result-text-info">
@@ -20,34 +28,37 @@
         {% if request.user.is_authenticated %}
             {% include "components/pin_item_button.html" %}
         {% endif %}
+
+        <!-- Show Date Pinned in pinned-items page (required loading of html_functions) -->
+        {% load html_functions %}
+        {% if request|url_contains_pinned_items %}
+            <span class="date-pinned attached-to-pin-button">Date Pinned:&nbsp;<span>{{ item.date_pinned }}</span></span>
+        {% endif %}
+
+        <!-- Show user's tags in pinned-items page (required loading of html_functions) -->
+        {% load html_functions %}
+        {% if request|url_contains_pinned_items %}
+            {% if item.user_public_tags %}
+                <div class="user-tags-section">
+                    <p>Public Tags:</p>
+                    <div class="tag-list-container"> <!-- Styling from tag_modal.css -->
+                        {% for tag in item.user_public_tags %}
+                            {% include 'components/tag.html' %}
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if item.user_private_tags %}
+                <div class="user-tags-section">
+                    <p>Private Tags:</p>
+                    <div class="tag-list-container"> <!-- Styling from tag_modal.css -->
+                        {% for tag in item.user_private_tags %}
+                            {% include 'components/tag.html' %}
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
     </div>
-
-    <!-- Show user's tags in pinned-items page (required loading of html_functions) -->
-    {% load html_functions %}
-    {% if request|url_contains_pinned_items %}
-        {% if item.user_public_tags %}
-            <div class="user-tags-section">
-                <p>Public Tags:</p>
-                <div class="tag-list-container"> <!-- Styling from tag_modal.css -->
-                    {% for tag in item.user_public_tags %}
-                        {% include 'components/tag.html' %}
-                    {% endfor %}
-                </div>
-            </div>
-        {% endif %}
-
-        {% if item.user_private_tags %}
-            <div class="user-tags-section">
-                <p>Private Tags:</p>
-                <div class="tag-list-container"> <!-- Styling from tag_modal.css -->
-                    {% for tag in item.user_private_tags %}
-                        {% include 'components/tag.html' %}
-                    {% endfor %}
-                </div>
-            </div>
-        {% endif %}
-    {% endif %}
-
-
-
 </div>

@@ -4,10 +4,13 @@ const addTagsOverlay = document.getElementById('add-tags-overlay');
 const addTagsModal = document.getElementById('add-tags-modal');
 var userTagsForm = document.getElementById('user-tags-form');
 const closeXButton = document.getElementById('close-tag-modal-button');
+
+const addTagsModalFooter = document.getElementById('add-tags-modal-footer');
 const cancelButton = document.getElementById('cancel-tags-modal-button');
 const saveTagsButton = document.getElementById('save-tags-button');
 var unpinItemButton = document.getElementById('unpin-item-button');
 
+const taggingSection = document.getElementById('tagging-section');
 const publicTagsContainer = document.getElementById('public-tags-list-container');
 const privateTagsContainer = document.getElementById('private-tags-list-container');
 
@@ -22,18 +25,72 @@ const privateTagsFormField = document.getElementById('private-tags-form-field');
 const isPinnedFormField = document.getElementById('is-pinned-input'); // Invisible to users
 const totalPointsEarnedFormField = document.getElementById('total-points-for-item-field'); // Invisible to users
 
+/*--------------------------------------------------------------------------------------------------------------------*/
+/* RESPONSIVE BEHAVIOUR */
+function setResponsiveTagModalBehaviour() {
+    // If viewport width < 700px OR height of addTagsModal > 100vh
+    // --> Switch to vertical layout
+    if (window.innerWidth < 700 || addTagsModal.scrollHeight > window.innerHeight) {
+        taggingSection.classList.add("vertical");
+    } else {
+        taggingSection.classList.remove("vertical");
+    }
+
+    // Get header rows AFTER applying vertical/horizontal layout (makes sure have the right dimensions)
+    const publicTagsHeaderRow = document.querySelector("#public-tags-section .tag-section-header");
+    const privateTagsHeaderRow = document.querySelector("#private-tags-section .tag-section-header");
+
+    // In sync with container query (see tag_modal.css)
+    if (publicTagsHeaderRow.clientWidth < 280) {
+        publicTagsHeaderRow.classList.add("under280Width");
+        privateTagsHeaderRow.classList.add("under280Width");
+    } else {
+        publicTagsHeaderRow.classList.remove("under280Width");
+        privateTagsHeaderRow.classList.remove("under280Width");
+    }
+
+    // Make sure height of Private Tags header is same as Public Tags header at all times
+    // ONLY WHEN taggingSection's flex-direction is row
+    if (getComputedStyle(taggingSection).flexDirection === "row") {
+        privateTagsHeaderRow.style.height = publicTagsHeaderRow.getBoundingClientRect().height + "px";
+    } else {
+        privateTagsHeaderRow.style.height = '';
+    }
+
+    // Responsive layout if modal-footer has overflow
+    preventResponsiveGridOverflow(addTagsModalFooter); // defined in global.js
+
+    // MUST BE DONE LAST (i.e., all other responsive layouts have been applied)
+    // If height of addTagsModal > 100vh (ONLY THEN. Otherwise, tooltips get cut-off)
+    // --> Make sure width is also 99vw
+    // --> Set overflow-y to scroll
+    if (addTagsModal.scrollHeight > window.innerHeight) {
+        addTagsModal.style.width = "99vw";
+        addTagsModal.style.overflowY = "auto";
+    } else {
+        addTagsModal.style.width = "960px";
+        addTagsModal.style.overflowY = "";
+    }
+}
+
+/*--------------------------------------------------------------------------------------------------------------------*/
 function openTagsModal() {
     setTagScore();
     setTotalPointsEarned();
     addTagsOverlay.classList.add('active');
-    document.body.style.overflow = 'hidden'; // Disable scrolling on the main content
+    document.documentElement.style.overflowY = "hidden"; // Disable scrolling on the main content
     addTagsModal.showModal();
+    requestAnimationFrame(() => {
+        addTagsModal.classList.add('visible');  // Fade-in the modal
+    });
+    setResponsiveTagModalBehaviour();
 }
 
 function closeTagsModal() {
     animatedTagScore.classList.remove('play-animation'); // Prevent animation playing on modal re-open
+    addTagsModal.classList.remove('visible'); // Ensures next re-open of modal will also fade in
     addTagsModal.close();
-    document.body.style.overflow = ''; // Re-enable scrolling on the main content
+    document.documentElement.style.overflowY = ''; // Re-enable scrolling on the main content
     addTagsOverlay.classList.remove('active');
 }
 
@@ -57,7 +114,7 @@ function addTag(newTagValue, isPublic) {
         const tagObject = tagTemplate.content.children[0].cloneNode(true);
 
         // Insert user input into tagObject's <a> element
-        tagObject.querySelector('a').textContent = newTagValue;
+        tagObject.querySelector('.tag-value').textContent = newTagValue;
 
         // Add tag to public/private-tags-list-container
         if (isPublic) {
@@ -77,21 +134,6 @@ function removeTag(removeButton) {
         tagDiv.remove();
         setTotalPointsEarned();
     }
-}
-
-function setTotalPointsEarned() {
-    // Total points earned should be based on number of tags currently added
-    // but should NEVER decrement below initial minimum to prevent delete-then-re-add exploit
-    // Initial minimum --> based on number of public tags already added by user --> get from server when page loads / refreshes
-    const currentPublicTags = publicTagsContainer.querySelectorAll('.tag');
-    let totalPointsEarned = 0;
-    currentPublicTags.forEach((tag, index) => {
-        if (index <= 10) {
-            totalPointsEarned += (10 - index);
-        }
-    });
-    totalPointsEarned = Math.max(initialTotalPointsEarned, totalPointsEarned);
-    totalPointsEarnedElement.textContent = totalPointsEarned + " pts";
 }
 
 function setTagScore(addTagSuccess) {
@@ -120,6 +162,21 @@ function playScoreAnimation() {
     animatedTagScore.classList.add('play-animation');
 }
 
+function setTotalPointsEarned() {
+    // Total points earned should be based on number of tags currently added
+    // but should NEVER decrement below initial minimum to prevent delete-then-re-add exploit
+    // Initial minimum --> based on number of public tags already added by user --> get from server when page loads / refreshes
+    const currentPublicTags = publicTagsContainer.querySelectorAll('.tag');
+    let totalPointsEarned = 0;
+    currentPublicTags.forEach((tag, index) => {
+        if (index <= 10) {
+            totalPointsEarned += (10 - index);
+        }
+    });
+    totalPointsEarned = Math.max(initialTotalPointsEarned, totalPointsEarned);
+    totalPointsEarnedElement.textContent = totalPointsEarned + " pts";
+}
+
 // In its own function so that pagination.js can call it whenever it fetches a new search_resuls or pinned_items page
 function setPinItemButtonBehaviour() {
     pinItemButtons = document.querySelectorAll('.pin-item-button');
@@ -130,7 +187,7 @@ function setPinItemButtonBehaviour() {
 
     pinItemButtons.forEach(pinItemButton => {
         pinItemButton.addEventListener('click', function() {
-            const pinningItem = this.closest('.result-item'); // i.e., closest common ancestor of "Pin Item" button and element containing item title
+            const pinningItem = this.closest('.item-result'); // i.e., closest common ancestor of "Pin Item" button and element containing item title
             const pinningItemTitle = pinningItem.querySelector('.item-title').textContent;
             const pinningItemId = this.value;
 
@@ -170,6 +227,7 @@ function setPinItemButtonBehaviour() {
 
             // Pre-fill <b> inside modal header (visible)
             document.getElementById('saving-item-title').textContent = pinningItemTitle;
+            document.getElementById('saving-item-title').setAttribute('title', pinningItemTitle.trim());
 
             // Pre-fill item-id-input text field (invisible)
             document.getElementById('item-id-input').value = pinningItemId;
@@ -180,9 +238,17 @@ function setPinItemButtonBehaviour() {
     });
 }
 
+
 /*--------------------------------------------------------------------------------------------------------------------*/
+// Triggers when window is resized
+window.addEventListener("resize", function() {
+    if (addTagsModal.open) {
+        setResponsiveTagModalBehaviour();
+    }
+});
+
 document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape' || event.keyCode === 27) {
+    if ((event.key === 'Escape' || event.keyCode === 27) && addTagsModal.open) {
         closeTagsModal();
     }
 });

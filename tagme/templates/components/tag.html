@@ -1,7 +1,8 @@
-<div class="tag"> <!-- TODO: Make the entire div a link (not just the <a> element) -->
+<a href="#" class="tag" aria-label="{{ tag.tag }}">
+    <img src="../../static/icons/tag-bg-light.svg"/>
     <div class="tag-content">
-        <img src="../../static/icons/tag-bg-light.svg"/>
-        <a href="#" aria-label="{{ tag.tag }}">{{ tag.tag }}</a>
+        <!-- Need the "tag-value" class for JavaScript code (see tag_modal.js) -->
+        <span class="tag-value">{{ tag.tag }}</span>
     </div>
-    <img src="../../static/icons/tag-bg-triangle.svg"/>
-</div>
+    <img class="tag-tip" src="../../static/icons/tag-bg-triangle.svg"/>
+</a>
