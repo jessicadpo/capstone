@@ -5,7 +5,10 @@
 4. Open the capstone folder in PyCharm.
 5. In PyCharm's terminal:
    1. Windows: `pip install -r requirements.txt` 
-   2. macOS: `pip3 install -r requirements.txt'
+   2. macOS: `pip3 install -r requirements.txt`
+6. In PyCharm's terminal (Initialize the database):
+   1. Windows: `python manage.py migrate` 
+   2. macOS: `python3 manage.py migrate`
 
 # CREATE A NEW BRANCH
 1. Create a new branch per task, NOT per person.

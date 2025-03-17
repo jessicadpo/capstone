@@ -5,6 +5,8 @@ Module for querying models AND Library of Congress & Datamuse APIs
 RATE LIMIT FOR LIBRARY OF CONGRESS API: 20 queries per 10 seconds && 80 queries per 1 minute
 """
 import copy
+import requests
+from datetime import datetime
 from collections import Counter
 from urllib.parse import quote
 from django.utils.timezone import localtime
@@ -14,7 +16,6 @@ from django.forms.models import model_to_dict
 from django.contrib.auth import PermissionDenied
 from django.db.models.signals import pre_save, post_save, pre_delete, post_delete, post_migrate
 from django.dispatch import receiver
-import requests
 from .apps import TagMeConfig
 from .helper_functions import *
 from .models import *
@@ -501,7 +502,7 @@ def set_user_tags_for_item(user, tags_data):
             user_contrib.private_tags.remove(*private_tags_to_remove)
 
         user_contrib.is_pinned = eval(tags_data.get('is_pinned'))
-        user_contrib.points_earned = tags_data.get('total_points_for_item')  # TODO: Add a check to make sure points_earned cannot ever decrease?
+        user_contrib.points_earned = tags_data.get('total_points_for_item')
         user_contrib.save()
     else:
         user_contrib = UserContribution(user=user, item_id=item_id,
@@ -566,12 +567,14 @@ def create_tag_report(user, item_id, report_data):
     item = Item.objects.get(item_id=item_id)
     tag = Tag.objects.get(tag=reported_tag)
 
-    # If tag whitelisted globally or for item --> do not create report
-    if tag.global_whitelist or item in tag.item_whitelist.all():
-        return
-
     # Create the report in the database
     report = Report(item_id=item, user_id=user, tag=tag, reason=reason)
+
+    # If tag whitelisted globally or for item --> auto-set decision to "Ignore Report"
+    if tag.global_whitelist or item in tag.item_whitelist.all():
+        report.decision = Report.ReportDecision.IGNORE_REPORT
+        report.decision_datetime = datetime.now()
+
     report.save()
 
 
@@ -614,7 +617,6 @@ def update_tag_lists(updated_report, simulation=False, pre_save_report_id=None):
 
                 # Set tag's global_blacklist to False ONLY IF no longer have any reports with "global_blacklist" decision
                 # or the most recent "global"-type decision for this tag is NOT "global_blacklist"
-                # TODO: Test report #1 global black. report #2 global white. report #3 item_black --> BOTH globals should now be false
                 global_decisions = (Report.objects
                                     .filter(decision__contains="global", tag=tag)
                                     .exclude(report_id=pre_save_report_id)
@@ -700,14 +702,6 @@ def set_reward_list(sender, **kwargs):
             hex_colour = REWARD_LIST.get(title)
             Reward.objects.get_or_create(title=title, hex_colour=hex_colour, points_required=points_required)
             points_required += 60
-
-
-# Automatically set global blacklist & rewards if database already exists (i.e., already migrated)
-if "tagme_tag" in connection.introspection.table_names():
-    set_global_blacklist(sender=TagMeConfig)
-
-if "tagme_reward" in connection.introspection.table_names():
-    set_reward_list(sender=TagMeConfig)
 
 
 @receiver(post_save, sender=User)
