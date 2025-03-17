@@ -4,17 +4,18 @@ Module for querying models AND Library of Congress & Datamuse APIs
 
 RATE LIMIT FOR LIBRARY OF CONGRESS API: 20 queries per 10 seconds && 80 queries per 1 minute
 """
+from datetime import datetime
 from collections import Counter
 from urllib.parse import quote
+import requests
+
 from django.utils.timezone import localtime
-from django.db import connection
+from django.db import transaction
 from django.db.models import Count
 from django.forms.models import model_to_dict
 from django.contrib.auth import PermissionDenied
 from django.db.models.signals import pre_save, post_save, pre_delete, post_delete, post_migrate
 from django.dispatch import receiver
-import requests
-from .apps import TagMeConfig
 from .helper_functions import *
 from .models import *
 from .constants import *
@@ -198,19 +199,18 @@ def get_all_tags_for_item(item_id):
     item = Item.objects.filter(item_id=item_id)
     if item.exists():
         # Return an array of dicts, each dict contains a tag and its count
-        # Exclude contributions with 0 public tags
-        public_tags_with_counts = (UserContribution.objects
-                                   .filter(item_id=item_id)
-                                   .values('public_tags')
-                                   .annotate(count=Count('public_tags'))
-                                   .filter(count__gt=0)
-                                   .order_by('-count'))
+        # Exclude globally-blacklisted tags
+        item_public_tags_with_counts = (Tag.objects
+                                        .filter(public_tags__item_id=item_id, global_blacklist=False)
+                                        .exclude(item_blacklist__item_id=item_id)  # TODO: Test
+                                        .annotate(count=Count('public_tags'))
+                                        .order_by('-count'))
+        all_tags_for_item = []
+        for tag in item_public_tags_with_counts:
+            tag_dict = {'count': tag.count, 'tag': tag.tag}
+            all_tags_for_item.append(tag_dict)
 
-        # Rename "public_tags" key to just "tag"
-        for tag_dict in public_tags_with_counts:
-            tag_dict['tag'] = tag_dict.pop('public_tags')
-
-        return list(public_tags_with_counts)
+        return all_tags_for_item
     return None
 
 
@@ -394,6 +394,17 @@ def get_related_tags(search_string):
     return related_tags
 
 
+def remove_globally_banned_tags_from_tag_search(search_string):
+    """
+    Function for removing globally banned TAGS (not subject headings, titles, etc.) from search string.
+    Returns a search_string without the banned tags, so now TAG searches will exclude items with that tag.
+    """
+    banned_tags = set(Tag.objects.filter(global_blacklist=True).values_list('tag', flat=True))
+    regex_pattern = r"|".join(map(re.escape, banned_tags))
+    cleaned_search_string = re.sub(regex_pattern, "", search_string)  # Replace all banned terms with an empty string
+    return cleaned_search_string
+
+
 #######################################################
 # SETTERS
 def set_item(item_data):
@@ -490,7 +501,7 @@ def set_user_tags_for_item(user, tags_data):
             user_contrib.private_tags.remove(*private_tags_to_remove)
 
         user_contrib.is_pinned = eval(tags_data.get('is_pinned'))
-        user_contrib.points_earned = tags_data.get('total_points_for_item')  # TODO: Add a check to make sure points_earned cannot ever decrease?
+        user_contrib.points_earned = tags_data.get('total_points_for_item')
         user_contrib.save()
     else:
         user_contrib = UserContribution(user=user, item_id=item_id,
@@ -555,12 +566,14 @@ def create_tag_report(user, item_id, report_data):
     item = Item.objects.get(item_id=item_id)
     tag = Tag.objects.get(tag=reported_tag)
 
-    # If tag whitelisted globally or for item --> do not create report
-    if tag.global_whitelist or item in tag.item_whitelist.all():
-        return
-
     # Create the report in the database
     report = Report(item_id=item, user_id=user, tag=tag, reason=reason)
+
+    # If tag whitelisted globally or for item --> auto-set decision to "Ignore Report"
+    if tag.global_whitelist or item in tag.item_whitelist.all():
+        report.decision = Report.ReportDecision.IGNORE_REPORT
+        report.decision_datetime = datetime.now()
+
     report.save()
 
 
@@ -570,6 +583,94 @@ def delete_user(user):
     Note: Related objects in other models are automatically deleted via on_delete=models.CASCADE or Django signals
     """
     user.delete()
+
+
+def update_tag_lists(updated_report, simulation=False, pre_save_report_id=None):
+    """
+    Function for updating the banlist/allowlist of a tag based on a particular report.
+    - If simulation is True, the tag will not actually be updated in the database
+    - If simulation is True, pre_save_report_id is required because updated_report
+    is not a Report object that actually exists in the database
+    """
+    if simulation and not Report.objects.filter(report_id=pre_save_report_id).exists():
+        raise ValueError("Valid report_id is required if simulation is True.")
+    if not simulation:
+        pre_save_report_id = updated_report.report_id
+
+    with transaction.atomic():
+        tag = Tag.objects.filter(tag=updated_report.tag.tag)[0]
+
+        match updated_report.decision:
+            case "global_blacklist":
+                tag.global_blacklist = True
+                tag.global_whitelist = False
+                tag.item_whitelist.remove(updated_report.item_id)
+            case "global_whitelist":
+                tag.global_blacklist = False
+                tag.global_whitelist = True
+                tag.item_blacklist.remove(updated_report.item_id)
+            case "item_blacklist":
+                tag.global_whitelist = False
+                tag.item_blacklist.add(updated_report.item_id)
+                tag.item_whitelist.remove(updated_report.item_id)
+
+                # Set tag's global_blacklist to False ONLY IF no longer have any reports with "global_blacklist" decision
+                # or the most recent "global"-type decision for this tag is NOT "global_blacklist"
+                global_decisions = (Report.objects
+                                    .filter(decision__contains="global", tag=tag)
+                                    .exclude(report_id=pre_save_report_id)
+                                    .order_by('-decision_datetime'))
+
+                if not global_decisions.exists() or global_decisions[0].decision != "global_blacklist":
+                    tag.global_blacklist = False
+                elif global_decisions[0].decision == "global_blacklist":
+                    tag.global_blacklist = True
+
+            case "item_whitelist":
+                tag.global_blacklist = False
+                tag.item_blacklist.remove(updated_report.item_id)
+                tag.item_whitelist.add(updated_report.item_id)
+
+                # Set tag's global_whitelist to False ONLY IF no longer have any reports with "global_whitelist" decision
+                # or the most recent "global"-type decision for this tag is NOT "global_whitelist"
+                global_decisions = (Report.objects
+                                    .filter(decision__contains="global", tag=tag)
+                                    .exclude(report_id=pre_save_report_id)
+                                    .order_by('-decision_datetime'))
+                if not global_decisions.exists() or global_decisions[0].decision != "global_whitelist":
+                    tag.global_whitelist = False
+                elif global_decisions[0].decision == "global_whitelist":
+                    tag.global_whitelist = True
+
+            case _:  # Ignore Report or null
+                # Reset all the tag's blacklist/whitelist attributes
+                tag.global_blacklist = False
+                tag.global_whitelist = False
+                tag.item_blacklist.clear()
+                tag.item_whitelist.clear()
+
+                global_decisions = (Report.objects
+                                    .filter(decision__contains="global", tag=tag)
+                                    .exclude(report_id=pre_save_report_id))
+                item_decisions = (Report.objects
+                                  .filter(decision__contains="item", tag=tag, item_id=updated_report.item_id)
+                                  .exclude(report_id=pre_save_report_id)
+                                  .order_by("decision_datetime"))
+                all_decisions = (global_decisions | item_decisions).order_by("decision_datetime")  # From oldest to newest
+                if all_decisions.exists():
+                    for report in all_decisions:
+                        tag = update_tag_lists(report)  # RECURSION HERE (sets tag's blacklist/whitelist attributes from previous reports)
+
+        if simulation:
+            # Need to copy item lists because ManyToMany field not actually set until .save() is called
+            simulated_new_item_blacklist = list(tag.item_blacklist.values_list('item_id', flat=True))
+            simulated_new_item_whitelist = list(tag.item_whitelist.values_list('item_id', flat=True))
+            transaction.set_rollback(True)
+            return tag, simulated_new_item_blacklist, simulated_new_item_whitelist
+
+        # If not simulation
+        tag.save()
+        return tag  # Returns the updated tag
 
 
 #######################################################
@@ -586,6 +687,12 @@ def set_global_blacklist(sender, **kwargs):
             Tag.objects.get_or_create(tag=word, global_blacklist=True)
 
 
+@receiver(post_save, sender=Report)
+def update_tag_with_report_decision(sender, instance, **kwargs):
+    """Auto-trigger function for updating the banlist/allowlist of a tag when a decision is made on a report"""
+    update_tag_lists(instance)
+
+
 @receiver(post_migrate)
 def set_reward_list(sender, **kwargs):
     """Function for creating the list of reward titles in the database automatically after db is created"""
@@ -595,14 +702,6 @@ def set_reward_list(sender, **kwargs):
             hex_colour = REWARD_LIST.get(title)
             Reward.objects.get_or_create(title=title, hex_colour=hex_colour, points_required=points_required)
             points_required += 60
-
-
-# Automatically set global blacklist & rewards if database already exists (i.e., already migrated)
-if "tagme_tag" in connection.introspection.table_names():
-    set_global_blacklist(sender=TagMeConfig)
-
-if "tagme_reward" in connection.introspection.table_names():
-    set_reward_list(sender=TagMeConfig)
 
 
 @receiver(post_save, sender=User)

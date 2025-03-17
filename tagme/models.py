@@ -117,6 +117,7 @@ class UserProfile(models.Model):
     def __str__(self):
         return str(self.user)  # For proper display on admin site
 
+
 class Report(models.Model):
     """Class for TagReports database table"""
     class ReportDecision(models.TextChoices):
