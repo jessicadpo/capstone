@@ -152,7 +152,6 @@ def get_new_rewards(prev_score, new_score):
 
 def get_synonymous_tags(search_string):
     """Function for getting tags that are synonyms of a list of given words"""
-    # TODO: Parse AND/OR/NOT
 
     synonyms = query_datamuse_synonyms(search_string)
     synonymous_tags = []
@@ -169,8 +168,6 @@ def get_synonymous_tags(search_string):
 
 def get_related_tags(search_string):
     """Function for getting tags that are related to a list of given words"""
-    # TODO: Parse AND/OR/NOT
-
     related_words = query_datamuse_related_words(search_string)
     related_tags = []
     for related_word in related_words:
@@ -333,13 +330,27 @@ def update_user_profile_points_on_delete(sender, instance, **kwargs):  # pylint:
 
 
 def query_datamuse_synonyms(word):
-    """Function for synonyms of a given word (may or may NOT exist as tags in our database)"""
-    return list(f"placeholder code {word}")
+    url = f"https://api.datamuse.com/words?rel_syn={word}&max=20"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        words = response.json()
+        sorted_words = sorted(words, key=lambda x: x.get('score', 0), reverse=True)
+        return [entry['word'] for entry in sorted_words]
+
+    print(f"Synonyms API failed for '{word}', status code:", response.status_code)
+    return []
 
 
 def query_datamuse_related_words(word):
-    """Function for words related to a given word (may or may NOT exist as tags in our database)"""
-    return list(f"placeholder code {word}")
+    url = f"https://api.datamuse.com/words?ml={word}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        words = response.json()
+        sorted_words = sorted(words, key=lambda x: x.get('score', 0), reverse=True)
+        return [entry['word'] for entry in sorted_words]
+    print(f"Related API failed for '{word}', status code:", response.status_code)
+    return []
 
 
 ########################################################################################################################
