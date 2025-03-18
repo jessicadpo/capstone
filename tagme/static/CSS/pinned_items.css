@@ -1,0 +1,356 @@
+main {
+    display: flex;
+    flex-direction: row; /* Main axis = Horizontal */
+    border-top: solid 1px #8A8A8A;
+}
+
+/* -------------------------------------------------------------------------------------------------------------------*/
+/* PINNED ITEMS SECTION (MAIN CONTENT) */
+#main-content {
+    container-type: inline-size !important;
+    container: main-content;
+
+    flex-grow: 1;
+    display: flex;
+    flex-direction: row;
+}
+
+#pinned-items-section {
+    box-sizing: border-box;
+    flex-grow: 1;
+    width: calc(100% - 300px);
+    padding: 1vh 1vw;
+
+    display: flex;
+    flex-direction: column; /* Main axis = Horizontal */
+    gap: 10px;
+
+    & #pinned-items-header {
+        padding: 10px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 15px;
+    }
+
+    & h1 {
+        flex-grow: 1;
+        margin: 0px;
+        white-space: nowrap;
+    }
+
+    & #pinned-items-list {
+        flex-grow: 1; /* Fixes footer to bottom of #pinned-items-section */
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+}
+
+#open-filter-menu-button {
+    height: 35px;
+    width: min-content;
+    padding: 0px 20px;
+    background-color: #006996;
+    border: 1px solid #004868;
+    border-radius: 5px;
+    cursor: pointer;
+
+    display: none; /* Changed to flex via media query (see end of this file ) */
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
+    &:hover {
+        background-color: #004868;
+    }
+
+    &:focus {
+        background-color: #004868;
+    }
+
+    & * {
+        color: white;
+        font-size: 1.1rem;
+        white-space: nowrap;
+    }
+}
+
+/* Rest of styling for individual pinned items in item_result.css */
+
+#filter-sidebar {
+    display: contents; /* Changed to block via media query (see end of this file) */
+}
+
+#close-filter-menu-button {
+    cursor: pointer;
+    padding: 0px 5px;
+    font-weight: 400;
+    font-size: 1.2rem;
+    color: #006996; /* Blue */
+    background: none;
+    border: none;
+    display: none; /* Changed to flex via media query (see end of this file) */
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    gap: 8px;
+
+    & span {
+        color: #006996; /* Blue */
+        font-size: 1.5rem;
+    }
+
+    &:hover, #close-filter-menu-button:focus {
+        color: #004868; /* Dark Blue */
+
+        & span {
+            color: #004868; /* Dark Blue */
+        }
+    }
+
+}
+
+#filter-menu {
+    box-sizing: border-box;
+    width: 300px;
+    padding: 15px;
+    border-left: solid 1px #8A8A8A;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    & h2, h3 {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: 400;
+    }
+
+    & h3 {
+        margin: 5px 0px;
+    }
+
+    & p {
+        margin: 0px;
+    }
+
+    & #sort-order-select {
+        padding: 8px 10px;
+        border: solid 1px #595959; /* Dark Grey */
+        border-radius: 5px;
+        font-size: 0.9rem;
+        background-color: white;
+    }
+
+    & input[type="text"] { /* Override global.css */
+        margin: 10px 0px 15px 0px;
+    }
+
+    & input[type="text"]:last-of-type {
+        margin-bottom: 0px;
+    }
+
+    & input[type="submit"], #clear-filters-button {
+        cursor: pointer;
+        padding: 5px;
+        font-weight: 400;
+        font-size: 0.9rem;
+        border-radius: 5px;
+        border: solid 2px #006996; /* Blue */
+    }
+
+    & input[type="submit"] {
+        background-color: #006996; /* Blue */
+        color: white;
+    }
+
+    & #clear-filters-button {
+        width: 100%;
+        background-color: white;
+        color: #006996;
+    }
+
+    & input[type="submit"]:hover, input[type="submit"]:focus {
+        background-color: #004868; /* Dark Blue */
+        border-color: #004868;
+    }
+
+    & #clear-filters-button:hover, #clear-filters-button:focus {
+        background-color: #E7F8FF; /* Light Blue */
+        border-color: #004868; /* Dark Blue */
+        color: #004868;
+    }
+}
+
+.form-section {
+    display: flex; /* So that direct child elements fill full width of this container */
+    flex-direction: column;
+
+    & > h2 {
+        padding-bottom: 5px;
+        border-bottom: solid 1px #8A8A8A;
+        margin: 5px 0px 10px 0px;
+    }
+
+    & .heading-container {
+        padding-bottom: 5px;
+        border-bottom: solid 1px #8A8A8A;
+        margin: 5px 0px 10px 0px;
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+    }
+
+    & .heading-container > h2 {
+        margin: 0px;
+    }
+
+    & .heading-container > .tooltip i {
+        color: #595959;
+        font-size: 1.3rem;
+    }
+}
+
+.tri-state-checkbox-container { /* Override global.css */
+    & input[type="checkbox"] {
+        border-width: 2px;
+        height: 25px;
+        width: 25px;
+        font-size: 1rem;
+    }
+
+    & label {
+        font-size: 1.2rem;
+    }
+
+    & .remove-open-filter-menu-button {
+        background: none;
+        border: none;
+        color: #006996; /* Blue */
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+
+    & .remove-open-filter-menu-button:hover {
+        text-decoration: underline;
+        color: #004868; /* Dark Blue */
+    }
+}
+
+
+/**********************************************************************************************************************/
+/* RESPONSIVE STYLING */
+@media (width < 750px) or (orientation:portrait) {
+    main {
+        flex-direction: column; /* Main axis = Vertical */
+    }
+
+    #main-content {
+        width: 100%;
+    }
+}
+
+@container main-content (width >= 1000px) {
+    #filter-menu .tooltip {
+        position: relative;
+        top: initial !important; /* When going from smaller to larger viewport width --> Overrides any changes to top
+                                    made via JavaScript (see below) */
+    }
+}
+
+@container main-content (width < 1000px) {
+    #filter-sidebar {
+        display: block;
+        background-color: #F7F7F7;
+        height: 100vh;
+        z-index: 1000;
+        position: fixed;
+        top: 0%;
+        right: -100%; /* Off to the right (outside viewable screen) */
+        transition: right 0.3s ease-in-out;
+
+        & .tooltip {
+            position: absolute; /* Is treated as overflow hidden otherwise */
+            top: initial;
+            /* Vertical position set via JavaScript on scroll (see pinned_items.js) */
+        }
+
+        & .tooltip i {
+            position: relative;
+            top: 5px;
+        }
+
+        & .heading-container:has(.tooltip) > h2 {
+            padding-left: 30px;
+        }
+    }
+
+    #filter-menu {
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    #open-filter-menu-button, #close-filter-menu-button {
+        display: flex;
+    }
+}
+
+@container main-content (width < 875px) {
+    #pinned-items-header {
+        display: grid !important;
+        grid: auto auto / auto min-content;
+        gap: 10px !important;
+
+        & h1 {
+            grid-column: 1 / span 2;
+            border-bottom: 1px solid #8A8A8A;
+            padding-bottom: 15px;
+            margin-bottom: 5px;
+        }
+
+        & #open-filter-menu-button {
+            grid-row: 2;
+            grid-column: 1;
+            margin: 0px;
+        }
+
+        & #pagination-top {
+            grid-row: 2;
+            grid-column: 2;
+        }
+    }
+}
+
+@container main-content (width < 500px) {
+    #pinned-items-header {
+        grid: auto auto auto / auto auto;
+        justify-items: start;
+
+        & h1 {
+            width: 100%;
+        }
+
+        & #open-filter-menu-button {
+            grid-row: 3;
+        }
+    }
+
+    #pagination-top {
+        display: contents;
+
+        & > p {
+            grid-column: 1 / span 2;
+            grid-row: 2;
+            justify-self: end;
+            margin: 0px;
+        }
+
+        & > div {
+            display: flex;
+            grid-row: 3;
+            grid-column: 2;
+            justify-self: end;
+        }
+    }
+}

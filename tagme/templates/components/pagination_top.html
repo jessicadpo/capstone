@@ -1,0 +1,22 @@
+<div id="pagination-top">
+    <!-- Store here for JavaScript (pagination.js) (HIDDEN FROM USERS) -->
+    <input type="hidden" class="page-url" value="{{ request.path }}"/>
+    <input type="hidden" class="current-page-number" value="{{ current_page.number }}"/>
+    <input type="hidden" class="last-page-number" value="{{ current_page.paginator.num_pages }}"/>
+
+    <!--
+    NOTE: content_type MUST be specified using a {% with "string" as content_type %}{% endwith %} tag
+    whenever "components/pagination_top.html" is included in a .html file
+    -->
+    <p> {{ current_page.start_index }} to {{ current_page.end_index }} of {{ current_page.paginator.count }} {{ content_type }}</p>
+
+    <div> <!-- Div required for responsive design -->
+        <button class="prev-page-button arrow-button" aria-label="Previous page" onclick="goToPreviousPage()">
+            <i class="fa fa-angle-left" aria-hidden="true"></i>
+        </button>
+
+        <button class="next-page-button arrow-button" aria-label="Next page" onclick="goToNextPage()">
+            <i class="fa fa-angle-right" aria-hidden="true"></i>
+        </button>
+    </div>
+</div>

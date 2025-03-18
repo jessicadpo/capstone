@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ item.title }}</title>
+    <meta name="page-name" content="{{ request.resolver_match.url_name }}">
+    <title>TagMe | {{ item.title }}</title>
+    <link rel="icon" type="image/x-icon" href="../../static/icons/favicon.png">
 
     <!-- Roboto font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,8 +16,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <link rel="stylesheet" href="../../static/CSS/global.css">
-    <link rel="stylesheet" href="../../static/CSS/tag_modal.css">
-    <link rel="stylesheet" href="../../static/CSS/new_reward_modal.css">
+    <link rel="stylesheet" href="../../static/CSS/components/report_modal.css">
+    <link rel="stylesheet" href="../../static/CSS/components/tag_modal.css">
+    <link rel="stylesheet" href="../../static/CSS/components/new_reward_modal.css">
+    <link rel="stylesheet" href="../../static/CSS/components/user_comment.css">
+    <link rel="stylesheet" href="../../static/CSS/components/pagination.css">
     <link rel="stylesheet" href="../../static/CSS/item_page.css">
 </head>
 
@@ -24,29 +29,49 @@
     {% include "components/new_reward_modal.html" %}
 
     <main id="main-content"> <!-- Need the main-content id for JavaScript -->
-        <a id="back-link" href="#" aria-label="Back to search results"><i class="fa fa-angle-left" aria-hidden="true"></i>Back to Search Results</a>
+        <a id="back-link" href="#" aria-label="Back to search results"> <!-- Link set via JavaScript -->
+            <i class="fa fa-angle-left" aria-hidden="true"></i>
+            Back to Search Results
+        </a>
 
-        <!-- Need <div> result-item class for "Save Item" button JavaScript behaviour (tag_modal.js) -->
-        <div id="item-info-section" class="result-item">
-            <div class="column1 cover-container"> <!-- Div container necessary for consistent sizing -->
+        <!-- Need <div> item-result class for "Save Item" button JavaScript behaviour (tag_modal.js) -->
+        <div id="item-info-section" class="item-result see-more-container">
+            <div class="cover-container"> <!-- Div container necessary for consistent sizing -->
                 <img id="item-cover" src="{{ item.cover }}" alt="{% if item.cover != None %} {{ item.title }} cover {% else %} Cover not found {% endif %}">
             </div>
 
-            <div class="column2">
-                <div id="column2-main-content">
-                    <div id="media-type"><i class="fa fa-book" aria-hidden="true"></i>Book</div>
-                    <!-- Need <p> item-title class for "Save Item" button JavaScript behaviour (tag_modal.js) -->
-                    <p id="item-title" class="item-title"> {{ item.title }}</p>
-                    <p id="item-authors">by <b>{{ item.authors }}</b></p>
-                    <p id="item-pub-date">{{ item.publication_date }}</p>
+            <div id="middle-column" class="see-more-container">
+                <div class="see-more-content"> <!-- Need this for Read More/Read Less behaviour -->
+                    <div id="title-author-date"> <!-- Need this div for responsive media-query styling -->
+                        <div id="media-type"><i class="fa fa-book" aria-hidden="true"></i>Book</div>
+                        <!-- Need <p> item-title class for "Save Item" button JavaScript behaviour (tag_modal.js) -->
+                        <p id="item-title" class="item-title"> {{ item.title }}</p>
+                        <p id="item-authors">by <b>{{ item.authors }}</b></p>
+                        <p id="item-pub-date">{{ item.publication_date }}</p>
+                    </div>
 
-                    <h1 id="description-header">Description</h1>
-                    <p id="item-description">{{ item.description }}</p>
+                    <div id="description-subjects"> <!-- Need this div for responsive media-query styling -->
+                        <h1>Description</h1>
+                        <p id="item-description">{{ item.description }}</p>
+
+                        {% if item.subjects %}
+                            <h1>Subject Headings</h1>
+                            <div id="item-subject-headings">
+                                {% for subject in item.subjects %}
+                                    <a href="#" class="subject-heading-link">{{ subject }}</a>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
                 </div>
-                <button id="column2-read-more-button">Read more <i class="fa fa-angle-down" aria-hidden="true"></i></button>
+                <button id="read-more-button" class="see-more-button" data-expanded-text="Read less" data-collapsed-text="Read more">
+                    Read more
+                    <i class="fa fa-angle-down" aria-hidden="true"></i>
+                </button>
             </div>
 
-            <div class="column3">
+            <div id="tags-column">
                 {% if request.user.is_authenticated %}
                     {% include 'components/pin_item_button.html' %}
                 {% endif %}
@@ -66,35 +91,42 @@
                         {% include "components/tag.html" %}
                     {% endfor %}
                 </div>
-                <button id="all-tags-button" class="open-sidebar-button" aria-label="See all tags">See all tags <i class="fa fa-angle-right" aria-hidden="true"></i></button>
+
+                <button id="all-tags-button" class="open-sidebar-button" aria-label="See all tags">
+                    See all tags
+                    <i class="fa fa-angle-right" aria-hidden="true"></i>
+                </button>
             </div>
+
         </div>
 
         <div id="comments-section">
             <h1>Comments</h1>
-            <div id="comments-pane">
-                <textarea placeholder="Add comment..."></textarea>
 
-                <!-- TODO: For loop for each comment on current page -->
-                <div class="comment">
-                    <div class="comment-header">
-                        <p>Username</p>
-                        <p><i class="fa fa-star" aria-hidden="true"></i>Reward Title 1</p>
-                        <p><i class="fa fa-star" aria-hidden="true"></i>Reward Title 2</p>
-                        <button><i class="fa fa-pencil-square-o" aria-hidden="true"></i>Edit comment</button>
-                    </div>
-                    <p>Date</p>
-                    <p>Comment</p>
-                    <button>Read more <i class="fa fa-angle-down" aria-hidden="true"></i></button>
-                </div>
+            <!-- If logged-in user has not made a comment for item yet, show comment_form -->
+            {% if user.is_authenticated and item.user_comment == null %}
+                {% include 'components/comment_form.html' %}
+            {% endif %}
 
-                <p>1 to 15 of 999,999,999 comments</p>
-                <!-- TODO: Paste similar pagination as in search results page -->
+            <div class="paginated-content">
+                <!-- NOTE: The user's comment (if there is one) is always put at top of page 1 -->
+                {% for comment in current_page %}
+                    {% include 'components/user_comment.html' %}
+                {% endfor %}
+
+                <!-- Pagination controls for comments -->
+                {% if current_page.paginator.count > 0 %}
+                    {% with "comments" as content_type %}
+                        {% include 'components/pagination_footer.html' %}
+                    {% endwith %}
+                {% else %}
+                    <p>No comments posted yet. Be the first!</p>
+                {% endif %}
             </div>
         </div>
     </main>
 
-    <div id="report-tag-overlay"></div> <!-- id so overlay behaves differently from add-tags-overlay -->
+    <div class="sidebar-overlay"></div> <!-- TODO: id so overlay behaves differently from add-tags-overlay -->
 
     <aside id="tag-sidebar">
         <div class="header-with-x-button">
@@ -106,50 +138,21 @@
             <!-- TODO: For loop for ALL item's tags -->
             {% for tag in item.tags %}
                 <div class="tag-entry">
-                    <div class="single-tag-container"> <!-- div is necessary to left-align tag without stretching shape -->
-                        {% include "components/tag.html" %}
-                    </div>
+                    {% include "components/tag.html" %}
+
                     <p class="tag-count">x {{ tag.count }}</p>
-                    <div class="report-button-container"> <!-- Need this for consistency when user is logged in & logged out -->
-                        {% if user.is_authenticated %}
-                          <button class="report-button" aria-label="Report {{ tag.tag }} tag">
-                              <i class="fa fa-flag-o" aria-hidden="true"></i>
-                          </button>
-                        {% endif %}
-                    </div>
+
+                    {% if user.is_authenticated %}
+                      <button class="report-button" aria-label="Report {{ tag.tag }} tag" data-tag="{{ tag.tag }}">
+                          <i class="fa fa-flag-o" aria-hidden="true"></i>
+                      </button>
+                    {% endif %}
                 </div>
             {% endfor %}
         </div>
     </aside>
 
-    <dialog id="report-tag-dialog">
-        <form id="report-tag-form" method="POST">
-            <div class="header-with-x-button">
-                <h1>Report Tag</h1>
-                <button formmethod="dialog" id="close-report-modal-button" class="close-x-button" aria-label="Close Report Tag form">✖</button>
-            </div>
-
-            {% include "components/tag.html" %}
-
-            <h2>What is wrong with this tag?</h2>
-            {% csrf_token %}
-            {% for field in forms.report_form %}
-                <div>
-                    {{ field }}
-                    {% if field.label != False %}
-                        <label for="{{ field.id_for_label }}">
-                            <span class="fake-checkbox"></span> <!-- Because actual checkboxes can't be styled as easily -->
-                            {{ field.label }}
-                        </label>
-                    {% endif %}
-                </div>
-            {% endfor %}
-            <div id="report-form-footer">
-                <button id="cancel-tag-report-button" class="form-footer-button" formmethod="dialog">Cancel</button>
-                <input id="submit-tag-report-button" class="form-footer-button" type="submit" value="Report">
-            </div>
-        </form>
-    </dialog>
+    {% include "components/report_modal.html" %}
 
     {% include "components/tag_modal.html" %}
 
@@ -157,8 +160,11 @@
 
     <!-- JavaScript -->
     <script type="text/javascript" src="../../static/JavaScript/global.js"></script>
-    <script type="text/javascript" src="../../static/JavaScript/tag_modal.js"></script>
-    <script type="text/javascript" src="../../static/JavaScript/new_reward_modal.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/components/report_modal.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/components/tag_modal.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/components/new_reward_modal.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/components/user_comment.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/components/pagination.js"></script>
     <script type="text/javascript" src="../../static/JavaScript/item_page.js"></script>
 </body>
 </html>

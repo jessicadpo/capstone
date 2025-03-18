@@ -1,40 +1,49 @@
 <div id="new-reward-overlay" class="modal-overlay"></div> <!-- id so behaves differently from report-tag-overlay -->
 
-<div class="firework invisible"></div>
-<div class="firework invisible"></div>
-<div class="firework invisible"></div>
+<dialog id="new-reward-modal" class="modal"> <!-- carousel class added via JavaScript for responsive layout -->
+    <!-- Must be inside modal to be visible in all screen sizes -->
+    <div class="firework invisible"></div>
+    <div class="firework invisible"></div>
+    <div class="firework invisible"></div>
 
-<dialog id="new-reward-modal" class="modal">
-    <!-- TODO: Need to redesign to allow choosing of equip slot (1 or 2) + if 2 new rewards at the same time -->
-    <div class="modal-content"> <!-- Need this because can't apply display=flex to <dialog> directly -->
-        <h1>Congrats!</h1>
-        <p>You've reached {{ score_data.user_points }} points and earned:</p>
-        <div>
-            {% for reward in score_data.new_rewards %}
-                {% include "components/reward_title.html" %}
-            {% endfor %}
-        </div>
-
-        <div id="equip-title-line">
-           <p>Equip title?</p>
-            <div class="tooltip">
-                <i id="equip-tooltip" class="fa fa-question-circle" aria-label="Tooltip for equipping titles" tabindex="0"></i>
-                <div class="tooltip-bubble yellow-bubble bubble-on-right">
-                    <div class="bubble-tail-outline"></div>
-                    <div class="bubble-tail"></div>
-                    <div class="bubble-content">
-                        <p><b>Equipped titles</b> are displayed next to your username on any comment you leave.</p>
-                        <p>You can always equip titles later from your profile page.</p>
-                    </div>
-                </div>
+    <button class="slide-controls prev-slide-button"><i class="fa fa-angle-left" aria-hidden="true"></i></button>
+    <div class="modal-content carousel-strip"> <!-- Need this because can't apply display: flex on <dialog> elements + need carousel-strip -->
+        <div class="slide-card">
+            <h1>Congrats!</h1>
+            <p>You've reached {{ score_data.user_points }} points and earned:</p>
+            <div>
+                {% for reward in score_data.new_rewards %}
+                    {% include "components/reward_title.html" %}
+                {% endfor %}
             </div>
         </div>
 
-        <div class="modal-footer">
-            <button id="skip-equip-button" class="modal-footer-button">Not right now</button>
-            <button id="yes-equip-button" class="modal-footer-button" autofocus>Yes</button>
+        <div class="slide-card">
+            <div id="equip-title-line">
+               <p>Equip title?</p>
+                <div class="tooltip">
+                    <i id="equip-tooltip" class="fa fa-question-circle" aria-label="Tooltip for equipping titles" tabindex="0"></i>
+                    <div class="tooltip-bubble yellow-bubble bubble-on-right">
+                        <div class="bubble-tail-outline"></div>
+                        <div class="bubble-tail"></div>
+                        <div class="bubble-content">
+                            <p><b>Equipped titles</b> are displayed next to your username on any comment you leave.</p>
+                            <p>You can always equip titles later from your profile page.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer responsive-grid">
+                <!-- Text inside <span> to make sure text is considered content for width: fit-content -->
+                <button id="skip-equip-button" class="modal-footer-button"><span>Not right now</span></button>
+                <button id="slot-1-equip-button" class="modal-footer-button" autofocus><span>Equip in Slot #1</span></button>
+                <button id="slot-2-equip-button" class="modal-footer-button"><span>Equip in Slot #2</span></button>
+            </div>
         </div>
     </div>
+
+    <button class="slide-controls next-slide-button" autofocus><i class="fa fa-angle-right" aria-hidden="true"></i></button>
 
     <!-- NOT VISIBLE -->
     <form id="equip-title-form" class="invisible" method="POST">
@@ -42,4 +51,3 @@
         {{ forms.equip_form }}
     </form>
 </dialog>
-

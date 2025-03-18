@@ -1,23 +1,30 @@
-<button class="pin-item-button pin-{{ item.is_pinned }}" value="{{ item.item_id }}">
-    <i class="fa fa-thumb-tack" aria-hidden="true"></i>
-    {% if item.is_pinned %}
-        <span>Pinned Item</span>
-    {% else %}
-        <span>Pin Item</span>
-    {% endif %}
-</button>
+<div class="pin-item-button-container">
+    <button class="pin-item-button pin-{{ item.is_pinned }}"
+            value="{{ item.item_id }}"
+            aria-label="{% if item.is_pinned %} Unpin or Edit Pin {% else %} Pin Item {% endif %}"
+            title="{% if item.is_pinned %} Unpin or Edit Pin {% else %} Pin Item {% endif %}">
+        <i class="fa fa-thumb-tack" aria-hidden="true"></i>
+        {% if item.is_pinned %}
+            <span>Pinned Item</span>
+        {% else %}
+            <span>Pin Item</span>
+        {% endif %}
+    </button>
 
-<div class="public-user-tags-for-item invisible"> <!-- Hidden from user (Need this to pre-fill "Add tags" form in Search results page in JavaScript -->
-    {% for tag in item.user_public_tags %}
-        <span>{{ tag }}</span>
-    {% endfor %}
+    <div class="public-user-tags-for-item invisible"> <!-- Hidden from user (Need this to pre-fill "Add tags" form in Search results page in JavaScript -->
+        {% for tag in item.user_public_tags %}
+            <span>{{ tag.tag }}</span>
+        {% endfor %}
+    </div>
+    <div class="private-user-tags-for-item invisible"> <!-- Hidden from user (Need this to pre-fill "Add tags" form in Search results page in JavaScript -->
+        {% for tag in item.user_private_tags %}
+            <span>{{ tag.tag }}</span>
+        {% endfor %}
+    </div>
+    <div class="points-earned-for-item invisible"> <!-- Hidden from user (Need this to pre-fill "Add tags" form in Search results page in JavaScript -->
+        <span>{{ item.points_earned }}</span>
+    </div>
 </div>
-<div class="private-user-tags-for-item invisible"> <!-- Hidden from user (Need this to pre-fill "Add tags" form in Search results page in JavaScript -->
-    {% for tag in item.user_private_tags %}
-        <span>{{ tag }}</span>
-    {% endfor %}
-</div>
-<div class="points-earned-for-item invisible"> <!-- Hidden from user (Need this to pre-fill "Add tags" form in Search results page in JavaScript -->
-    <span>{{ item.points_earned }}</span>
-</div>
+
+
 

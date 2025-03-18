@@ -21,10 +21,12 @@ from .views import *
 urlpatterns = [
     # Cannot start URLs with <str:username> because of conflicts if username is "admin"
     path('', homepage, name="homepage"),
-    path('signup-login', signup_login),
+    path('signup-login', signup_login, name="signup_login"),
     path('profile/<str:username>', user_profile, name="user_profile"),
+    path('pinned-items/<str:username>', pinned_items, name="pinned_items"),
+    path('account-settings/<str:username>', account_settings, name="account_settings"),
     path('logout', logout_view),
     path('search/<str:requested_page_number>/', search_results, name="search_results"),
     path('item/<str:item_id>/', item_page, name="item_page"),
-    path('about', about)
+    path('about', about, name="about"),
 ]

@@ -1,12 +1,14 @@
 html {
     height: 100%;
     width: 100%;
+    overflow-x: hidden;
+    scrollbar-gutter: stable; /* Keeps layout stable whenever a sidebar is opened */
 }
 
 body {
     display: flex;
     flex-direction: column; /* Main axis = Vertical */
-    height: 100vh;
+    min-height: 100vh;
     background-color: #F7F7F7;
     margin: 0px;
 }
@@ -16,6 +18,9 @@ body {
     font-weight: 300; /* Regular roboto = 400 */
     font-style: normal;
     color: black;
+    max-width: 100vw;
+    box-sizing: border-box;
+    /* TODO: Delete all "box-sizing: border-box" in rest of project and add it here --> CHECK IF IT BREAKS ANYTHING THO */
 }
 
 main {
@@ -26,18 +31,321 @@ b, strong {
     font-weight: 500;
 }
 
-.invisible {
+em {
+    font-style: italic;
+}
+
+.invisible { /* Overwritten in account_settings.css */
+    display: none !important;
+}
+
+.content-box {
+    position: relative; /* So can absolute position the elements inside it, if necessary */
+    background-color: white;
+    padding: 20px 30px;
+    border-radius: 20px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+/**********************************************************************************************************************/
+/* ANIMATIONS */
+@keyframes bobbing-up {
+    0%   {transform: translate(0, 0);}
+    50%  {transform: translate(0, -3px);}
+    100% {transform: translate(0, 0);}
+}
+
+@keyframes bobbing-down {
+    0%   {transform: translate(0, 0);}
+    50%  {transform: translate(0, 3px);}
+    100% {transform: translate(0, 0);}
+}
+
+@keyframes bobbing-left {
+    0%   {transform: translate(0, 0);}
+    50%  {transform: translate(-5px, 0);}
+    100% {transform: translate(0, 0);}
+}
+
+@keyframes bobbing-right {
+    0%   {transform: translate(0, 0);}
+    50%  {transform: translate(5px, 0);}
+    100% {transform: translate(0, 0);}
+}
+
+/**********************************************************************************************************************/
+/* DROPDOWN MENUS (GENERAL - CAN BE OVERWRITTEN FOR SPECIFIC MENUS) */
+/* MUST BE PLACED BEFORE CSS FOR EDIT BUTTONS (FOR user_profile PAGE) */
+.dropdown-button {
+    height: 100%;
+    width: 100%;
+    padding: 0px 15px;
+    background-color: #537A00;
+    border: solid #3B6000 1px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+
+    & > * {
+        color: white;
+    }
+
+    & > span {
+        flex-grow: 1;
+    }
+}
+
+.dropdown-button:hover, .dropdown-button:focus {
+    background-color: #3B6000;
+}
+
+/* Applies to the dropdown-button only when "show" class is added to dropdown-options */
+.dropdown-button:has(~.show) {
+    border-radius: 10px 10px 0px 0px;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Hidden by Default */
+.dropdown-options {
     display: none;
+    position: absolute;
+    z-index: 2000; /* Ensure they're above any tooltips */
+    box-sizing: border-box; /* Sizing includes padding & border */
+    width: 100%;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    border: solid 1px #3B6000;
+    border-radius: 0px 0px 10px 10px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.dropdown-options > * {
+    display: block;
+    margin: 0px;
+    padding: 12px 16px;
+    background-color: white;
+    border-bottom: solid 1px #3B6000;
+    color: black;
+    text-decoration: none;
+    font-size: 1.1em;
+}
+
+.dropdown-options > *:last-of-type {
+    border-radius: 0px 0px 10px 10px;
+    border-bottom: none;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-options > *:hover {
+    background-color: #E0EEAC;
+}
+
+/* Show the dropdown menu ("show" class added to .dropdown-options using JavaScript */
+.show {
+    display:block;
+}
+
+/**********************************************************************************************************************/
+/* INPUTS (CUSTOM) */
+input[type="text"], input[type="password"], input[type="email"] {  /* Overwritten in some pages */
+    box-sizing: border-box;
+    width: 100%;
+    padding: 8px 10px;
+    border: solid 1px black;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+input[type="checkbox"] {
+    -webkit-appearance: none; /* Remove default browser styling */
+    -moz-appearance: none; /* Remove default browser styling */
+    appearance: none; /* Remove default browser styling */
+    height: 35px;
+    width: 35px;
+    flex-shrink: 0; /* Cannot shrink if checkbox is inside a flex container */
+    font-size: 1.3rem;
+    position: relative;
+    border: solid 3px #595959; /* Dark Grey */
+    border-radius: 5px;
+    display: inline-flex;  /* Need this to get center x/checkmark inside the checkbox */
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+
+    color: #959595; /* Medium Grey --> Only applicable to certain binary-state checkboxes (e.g., report_modal.css) */
+    background-color: #FDFDFD;
+    transition: all 0.2s ease;
+
+    &::before {
+        content: "✖";
+        position: absolute;
+        opacity: 0;
+        transform: scale(1);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    &::after {
+        content: "✔";
+        position: absolute;
+        opacity: 0;
+        transform: scale(0.5);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+}
+
+input[type='checkbox']:checked {
+    border-color: #3B6000; /* Dark Green */
+    background-color: #537A00; /* Green */
+    color: white;
+
+    &::before {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    &::after {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+input[type='checkbox']:indeterminate { /* Only applies to tri-state checkboxes */
+    border-color: #952101; /* Dark Red */
+    background-color: #B52801; /* Red */
+    color: white;
+
+    &::before {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    &::after {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+}
+
+.tri-state-checkbox-container {
+    cursor: pointer;
+    padding: 0px 5px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 7px;
+
+    & * {
+        cursor: pointer;
+    }
+
+    & select {
+        display: none;
+    }
+
+    & label {
+        -webkit-user-select: none; /* Safari */
+        -ms-user-select: none; /* Internet Explorer */
+        user-select: none;
+        word-break: break-word;
+        font-size: 1.5rem;
+    }
+
+    /* Styling for "Remove filter" buttons in pinned_items.css */
+}
+
+.tri-state-checkbox-container:has(input:disabled) {
+    cursor: initial;
+
+    & *:not(button) {
+        cursor: initial;
+    }
 }
 
 /**********************************************************************************************************************/
 /* MISC. BUTTONS */
+.see-more-container {
+    display: flex;
+    flex-direction: column;
+    height: fit-content;
+}
 
-.pin-item-button { /* Partially overwritten in search_results.css */
+.see-more-content {
+    padding-bottom: 0px !important;
+    overflow: hidden;
+    -webkit-mask-image: none;
+    mask-image: none;
+
+    &.collapsed { /* "See More" button is visible + currently saying "See More" */
+        -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+        mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+    }
+}
+
+.see-more-button {
     width: 100%;
-    min-width: 210px;
-    padding: 12px 0;
-    margin: 2vh 0;
+    height: 35px;
+    padding: 5px 20px;
+    margin-top: 5px;
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: #537A00;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    display: none; /* Hidden by default */
+    & i {
+        font-size: 1.4rem;
+        color: #537A00;
+    }
+}
+
+.see-more-button:hover {
+    color: #3B6000;
+    & i.fa-angle-down {
+        color: #3B6000;
+        animation-name: bobbing-down;
+        animation-duration: 1.1s;
+        animation-iteration-count: infinite;
+    }
+
+    & i.fa-angle-up {
+        color: #3B6000;
+        animation-name: bobbing-up;
+        animation-duration: 1.1s;
+        animation-iteration-count: infinite;
+    }
+}
+
+.pin-item-button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+
+    & .date-pinned {
+        width: 100%;
+        font-size: 0.9rem;
+        text-align: center;
+        font-weight: 400;
+        color: #595959;
+    }
+}
+
+.pin-item-button {
+    width: 100%;
+    min-width: 225px;
+    height: 50px;
+    padding: 0px 30px;
     border: solid 1px #B52801;
     border-radius: 15px;
     display: flex;
@@ -48,14 +356,14 @@ b, strong {
     cursor: pointer;
 
     & i {
-        font-size: 2.2em;
+        font-size: 1.7rem; /* TODO: Check size in item page */
         transform: rotate(45deg);
     }
 
     & span {
         text-align: center;
         font-weight: 400;
-        font-size: 1.8em;
+        font-size: 1.5rem; /* TODO: Check size in item page */
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
@@ -92,12 +400,17 @@ b, strong {
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 50px;
+    gap: 15px;
     padding-bottom: 15px;
     margin-bottom: 15px;
     border-bottom: solid 1px #8A8A8A;
     & h1 {
         flex-grow: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
     }
 }
 
@@ -113,9 +426,39 @@ b, strong {
     color: #537A00;
 }
 
+.edit-button {
+    width: auto; /* Override CSS of .dropdown-button */
+    height: auto;
+    padding: 0px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+
+    & i {
+        color: #8A8A8A;
+        font-size: 2rem;
+    }
+
+    & span {
+        color: #8A8A8A;
+        font-size: 1rem;
+    }
+}
+
+.edit-button:hover, .edit-button:focus {
+    background: none; /* Override CSS of .dropdown-button */
+    & i, span {
+        color: black;
+    }
+}
+
 /**********************************************************************************************************************/
-/* MODALS */
-.modal-overlay {
+/* SIDEBARS */
+.sidebar-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -123,13 +466,38 @@ b, strong {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.75);
-    display: none;
+    opacity: 0;
+    visibility: hidden; /* Like display: none, but transitionable */
+    transition: opacity 0.3s ease-in-out, visibility 0s linear 0.5s;
+}
+
+.sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease-in-out, visibility 0s linear 0s;
+    pointer-events: auto; /* Make visible overlay section clickable */
+}
+
+/**********************************************************************************************************************/
+/* MODALS */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -100; /* Ensures it doesn't block interaction with rest of website when inactive */
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    visibility: hidden; /* Makes fade-out less weird */
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .modal-overlay.active {
-    display: block;
+    z-index: 999;
+    visibility: visible;
+    opacity: 1;
 }
-
 
 .modal {
     background-color: #F7F7F7;
@@ -142,6 +510,15 @@ b, strong {
     }
 }
 
+.modal[open] {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.modal[open].visible {
+    opacity: 1;
+}
+
 dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
     & i {
         font-size: 1.5em;
@@ -149,61 +526,70 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
     }
 
     & .bubble-tail-outline {
-        z-index: 1000;
-    }
-
-    & .bubble-content {
         z-index: 1001;
     }
 
-    & .bubble-tail {
+    & .bubble-content {
         z-index: 1002;
+    }
+
+    & .bubble-tail {
+        z-index: 1003;
     }
 }
 
 .modal-footer {
+    width: 100%;
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    gap: 10%;
+    gap: 15px;
     padding-top: 15px;
 }
 
+/* See RESPONSIVE STYLING section (end of this file) for .modal-footer.responsive-grid styling */
+
 .modal-footer-button {
-    width: 30%;
-    min-width: 120px;
-    padding: 10px 0px;
-    font-size: 1.3em;
-    font-weight: 400;
+    /* --initial-min-width necessary for responsive styling (see tag_modal.js, etc.).
+    CAN BE OVERWRITTEN (see new_reward_modal.css) */
+    width: fit-content;
+    padding: 10px 30px;
     border-radius: 10px;
     cursor: pointer;
+
+    & span {
+        color: white;
+        font-size: 1.3em;
+        font-weight: 400;
+        white-space: nowrap;
+    }
 }
 
 /**********************************************************************************************************************/
 /* REWARD TITLES */
 .reward-title {
-    height: 30px;
-    min-width: fit-content;
+    box-sizing: border-box;
+    height: 40px;
+    width: 100%;
     padding: 5px 20px 5px 10px;
     border-radius: 10px;
     position: relative;
     overflow: hidden;
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid: auto / min-content auto;
     align-items: center;
-    justify-content: start;
-    gap: 10px;
+    grid-gap: 10px;
     cursor: default;
 
     & img {
-        height: 80%;
+        height: 25px;
     }
 
     & span {
         color: white;
         font-weight: 400;
-        font-size: 1.1em;
+        font-size: 1.2rem;
         text-wrap: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -229,15 +615,26 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
 
 /**********************************************************************************************************************/
 /* TAGS */
+
 .tag {
+    text-decoration: none;
     width: fit-content;
-    height: fit-content;
-    max-width: 100%;
-    display: flex; /* May be overwritten to display:none in other CSS files & by JavaScript */
-    flex-direction: row;
-    align-items: stretch;
+
     position: relative; /* So can position the shine animation */
     overflow: hidden; /* Hide animated ::before .tag:hover */
+    display: grid;
+    grid: auto / minmax(min-content, 1fr) min-content;
+    align-items: center;
+
+    & > img:first-child {
+        position: absolute;
+        height: 100%;
+    }
+
+    & img.tag-tip {
+        max-width: 20px;
+        height: 100%;
+    }
 
     &::before { /* Shine effect on hover */
         content: "";
@@ -257,39 +654,20 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
     }
 
     &:hover {
-        transform: scale(1.02);
-    }
-
-    & > img { /* The triangle shape at the end */
-        min-width: 20px;
-        aspect-ratio: 50 / 25;
+        transform: scale(1.03);
     }
 }
 
 .tag-content {
-    flex-grow: 1;
-    flex-shrink: 1;
-    padding: 10px;
+    padding: 10px 5px 10px 10px;
+    height: 100%;
     background-color: #3B6000;
-    position: relative; /* So img max-width works correctly */
-    overflow: hidden; /* Hide img if overflows */
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 5px;
-    height: fit-content;
-    min-width: fit-content;
 
-    & img { /* The light green trapeze svg */
-        position:absolute; /* Positioned relative to grandparent .tag, not parent .tag-text */
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 40px;
-        max-width: 100%;
-    }
-
-    & a {
+    & .tag-value {
         white-space: normal;
         overflow-wrap: break-word; /* Allow text wrapping */
         word-break: break-word; /* Break long words if necessary */
@@ -302,7 +680,7 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
     }
 }
 
-.deletable-tag > .tag-content {
+.deletable-tag .tag-content {
     padding-right: 0px; /* Remove right padding if tag is deletable */
 
     & a {
@@ -333,56 +711,89 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
     cursor: pointer;
     display: flex;
     align-items: center;
+    justify-content: center;
+    z-index: 1001;
+}
+
+.tooltip-bubble {
+    display: contents;
+    visibility: hidden;
+}
+
+/* TOOLTIP BEHAVIOUR */
+.tooltip i:focus {  /* Whichever icon is used as the tooltip icon */
+    outline: auto 1px rgb(181, 40, 1); /* Apply (Firefox's) default :focus-visible styling to :focus */
+}
+
+.tooltip i:hover+.tooltip-bubble,
+.tooltip i:focus+.tooltip-bubble {
+    visibility: visible;
 }
 
 /********************************************/
 /* TOOLTIP (INITIAL) STYLE */
-.tooltip-bubble.red-bubble {
-    background-color: #FEEBE8;
-    border-color: #B52801;
+.bubble-on-top .bubble-tail-outline, .bubble-on-top .bubble-tail {
+    border-top: 14px solid;
+    border-left: 7px solid transparent !important;  /* Ensure transparent borders */
+    border-right: 7px solid transparent !important; /* Ensure transparent borders */
+}
 
-    &.bubble-on-right .bubble-tail-outline {
-        border-right: 26px solid #B52801;
-    }
-    &.bubble-on-right .bubble-tail {
-        border-right: 26px solid #FEEBE8;
+.bubble-on-bottom .bubble-tail-outline, .bubble-on-bottom .bubble-tail {
+    border-bottom: 14px solid;
+    border-left: 7px solid transparent !important;  /* Ensure transparent borders */
+    border-right: 7px solid transparent !important; /* Ensure transparent borders */
+}
+
+.bubble-on-right .bubble-tail-outline, .bubble-on-right .bubble-tail {
+    border-right: 14px solid;
+    border-top: 7px solid transparent !important;  /* Ensure transparent borders */
+    border-bottom: 7px solid transparent !important; /* Ensure transparent borders */
+}
+
+.bubble-on-left .bubble-tail-outline, .bubble-on-left .bubble-tail {
+    border-left: 14px solid;
+    border-top: 7px solid transparent !important;  /* Ensure transparent borders */
+    border-bottom: 7px solid transparent !important; /* Ensure transparent borders */
+}
+
+.red-bubble {
+    & .bubble-content {
+        background-color: #FEEBE8;
+        border-color: #B52801;
     }
 
-    &.bubble-on-left .bubble-tail-outline {
-        border-left: 26px solid #B52801;
+    & .bubble-tail-outline {
+        border-color: #B52801;
     }
-    &.bubble-on-left .bubble-tail {
-        border-left: 26px solid #FEEBE8;
+
+    & .bubble-tail {
+        border-color: #FEEBE8;
     }
 }
 
-.tooltip-bubble.yellow-bubble {
-    background-color: #FFF1CD;
-    border-color: #C67A2A;
-
-    &.bubble-on-right .bubble-tail-outline {
-        border-right: 26px solid #C67A2A;
-    }
-    &.bubble-on-right .bubble-tail {
-        border-right: 26px solid #FFF1CD;
+.yellow-bubble {
+    & .bubble-content {
+        background-color: #FFF1CD;
+        border-color: #C67A2A;
     }
 
-    &.bubble-on-left .bubble-tail-outline {
-        border-left: 26px solid #C67A2A;
+    & .bubble-tail-outline {
+         border-color: #C67A2A;
     }
-    &.bubble-on-left .bubble-tail {
-        border-left: 26px solid #FFF1CD;
+
+    & .bubble-tail {
+        border-color: #FFF1CD;
     }
 }
 
 .bubble-content {
+    box-sizing: border-box;
     padding: 10px;
-    position: relative; /* So z-index has an effect */
-    margin: 0;
-    width: 15vw;
-    background-color: inherit;
+    position: absolute;
+    margin: 0px;
+    width: max-content;
+    min-width: fit-content;
     border: solid 1px;
-    border-color: inherit;
     border-radius: 5px;
     z-index: 0; /* Default */
 
@@ -393,8 +804,6 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
     & > p:last-child {
         margin-bottom: 0;
     }
-
-
 }
 
 .bubble-tail-outline { /* Triangle BORDER part of speech bubble shape */
@@ -402,9 +811,6 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
     position: absolute;
     width: 0;
     height: 0;
-    border-top: 13px solid transparent;
-    border-bottom: 13px solid transparent;
-    margin: auto 0px auto -15px;
     z-index: -1;
 }
 
@@ -413,205 +819,258 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
     position: absolute;
     width: 0;
     height: 0;
-    border-top: 13px solid transparent;
-    border-bottom: 13px solid transparent;
-    margin: auto 0px auto -15px;
     z-index: 1;
 }
 
 /********************************************/
 /* TOOLTIP POSITIONING */
-.tooltip-bubble {
-    position: absolute;
-    display: none;
-    z-index: 1001;
-    border-radius: 5px; /* Match radius of .bubble-content */
-}
-
-.tooltip-bubble.bubble-on-right {
-    right: calc(-15vw - 45px);
-    & .bubble-tail-outline {
-        left: -2px;
-    }
-    & .bubble-tail {
-        left: 0px;
-    }
-}
-
-.tooltip-bubble.bubble-on-left {
-    left: calc(-15vw - 45px);
-    & .bubble-tail-outline {
-        right: -17px;
-    }
-    & .bubble-tail {
-        right: -15px;
-    }
-}
-
-/********************************************/
-/* TOOLTIP BEHAVIOUR */
-.tooltip i:focus, .tooltip i:focus-visible {  /* Whichever icon is used as the tooltip icon */
-    border: solid 5px -webkit-focus-ring-color;
-} /* TODO: Add JavaScript to make icon focus on click */
-
-.tooltip i:hover+.tooltip-bubble,
-.tooltip i:focus+.tooltip-bubble {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-/**********************************************************************************************************************/
-/* DROPDOWN MENUS (GENERAL - CAN BE OVERWRITTEN FOR SPECIFIC MENUS) */
-.dropdown-button {
-    height: 100%;
-    width: 100%;
-    padding: 0px 15px;
-    background-color: #537A00;
-    border: solid #3B6000 1px;
-    border-radius: 10px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-
+.bubble-on-top {
     & > * {
-        color: white;
+        left: 50%;
+        transform: translateX(-50%); /* Horizontally align with tooltip icon */
     }
 
-    & > span {
-        flex-grow: 1;
+    & .bubble-content {
+        bottom: calc(100% + 14px + 6px); /* Above tooltip icon + height of bubble-tail (14px) + 6px gap */
+    }
+
+    & .bubble-tail-outline {
+        bottom: calc(100% + 6px); /* Above tooltip icon + 6px gap */
+    }
+
+    & .bubble-tail {
+        bottom: calc(100% + 6px + 2px); /* Above tooltip icon + 6px gap + 2px (width of bubble-tail-outline) */
     }
 }
 
-.dropdown-button:hover, .dropdown-button:focus {
-    background-color: #3B6000;
+.bubble-on-bottom {
+    & .bubble-content {
+        top: calc(100% + 14px + 6px); /* Below tooltip icon + height of bubble-tail (14px) + 6px gap */
+        left: 50%;
+        transform: translateX(-50%); /* Horizontally align with tooltip icon */
+    }
+
+    & .bubble-tail-outline {
+        top: calc(100% + 6px); /* Below tooltip icon + 6px gap */
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    & .bubble-tail {
+        top: calc(100% + 6px + 2px); /* Below tooltip icon + 6px gap + 2px (width of bubble-tail-outline) */
+        left: 50%;
+        transform: translateX(-50%);
+    }
 }
 
-/* Applies to the dropdown-button only when "show" class is added to dropdown-options */
-.dropdown-button:has(~.show) {
-    border-radius: 10px 10px 0px 0px;
+.bubble-on-right {
+    & .bubble-content {
+        left: calc(100% + 14px + 6px); /* To the right of the tooltip icon + width of bubble-tail (14px) + 6px gap */
+    }
+
+    & .bubble-tail-outline {
+        left: calc(100% + 6px);
+    }
+
+    & .bubble-tail {
+        left: calc(100% + 6px + 2px); /* To the right of the tooltip icon + 6px gap + 2px (width of bubble-tail-outline) */
+    }
 }
 
-.dropdown {
+.bubble-on-left {
+    & .bubble-content {
+        right: calc(100% + 14px + 6px); /* To the left of the tooltip icon + width of bubble-tail (14px) + 6px gap */
+    }
+
+    & .bubble-tail-outline {
+        right: calc(100% + 6px);
+    }
+
+    & .bubble-tail {
+        right: calc(100% + 6px + 2px); /*  To the left of the tooltip icon + 6px gap + 2px (width of bubble-tail-outline) */
+    }
+}
+/**********************************************************************************************************************/
+/* CAROUSELS / SLIDESHOWS */
+.carousel .carousel-strip { /* Only applies once .carousel is activated */
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: normal !important;
+    align-items: center !important;
+    /* gap set via JavaScript, based on its padding (if any set by other CSS rules) (see global.js) */
+    transition: transform 0.5s ease-in-out;
+}
+
+.carousel .slide-card { /* Only applies once .carousel is activated */
     position: relative;
-    display: inline-block;
+    flex-shrink: 0;
+    visibility: hidden;
+    &.active {
+        visibility: visible;
+    }
 }
 
-/* Hidden by Default */
-.dropdown-options {
-    display: none;
+.slide-controls {
+    display: none; /* Changed to flex via JavaScript (see global.js, carousel/slideshow section) */
     position: absolute;
-    z-index: 1;
-    box-sizing: border-box; /* Sizing includes padding & border */
-    width: 100%;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    border: solid 1px #3B6000;
-    border-radius: 0px 0px 10px 10px;
-    overflow: hidden;
+    top: 50%;
+    transform: translateY(-50%); /* Vertically center controls */
+    z-index: 1; /* Ensures .slide-controls always above contents of .slide-card (but below tooltips) */
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 0, 0, 0.2); /* Semi-transparent background, but opaque icon */
+    border: none;
+    border-radius: 50%;
+
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+
+    & i {
+        font-size: 2.4rem;
+        color: #F7F7F7;
+    }
 }
 
-.dropdown-options > * {
-    display: block;
-    margin: 0px;
-    padding: 12px 16px;
-    background-color: white;
-    border-bottom: solid 1px #3B6000;
-    color: black;
-    text-decoration: none;
-    font-size: 1.1em;
+.prev-slide-button {
+    left: 10px;
+
+    & i {
+        transform: translateX(-2px); /* Better centers icon inside button */
+    }
+
+    &:hover i {
+        animation-name: bobbing-left;
+        animation-duration: 1.2s;
+        animation-iteration-count: infinite;
+    }
 }
 
-.dropdown-options > *:last-of-type {
-    border-radius: 0px 0px 10px 10px;
-    border-bottom: none;
-}
+.next-slide-button {
+    right: 10px;
 
-/* Change color of dropdown links on hover */
-.dropdown-options > *:hover {
-    background-color: #E0EEAC;
-}
+    & i {
+        transform: translateX(2px); /* Better centers icon inside button */
+    }
 
-/* Show the dropdown menu ("show" class added to .dropdown-options using JavaScript */
-.show {
-    display:block;
+    &:hover i {
+        animation-name: bobbing-right;
+        animation-duration: 1.2s;
+        animation-iteration-count: infinite;
+    }
 }
 
 /**********************************************************************************************************************/
 /* TOP BAR */
 #top-bar {
-    height: 80px;
+    box-sizing: border-box;
+    position: relative; /* So can absolute-position child elements based on it */
+    height: 100px;
+    padding: 10px;
     display: flex;
-    flex-wrap: nowrap;
-    flex-direction: row; /* Main axis = Horizontal */
-    justify-content: space-between; /* Alignment on horizontal (main) axis */
-    align-items: center; /* Alignment on vertical (cross) axis */
-    padding: 1vh 1vw;
+    flex-direction: row;
+    align-items: center;
     gap: 3%;
+    transition: height 0.2s ease-out;
 }
 
 /********************************************/
 /* TOP BAR - LOGO */
 #return-to-homepage {
-    height: 100%;
+    display: contents;
 }
 
 #top-bar-logo {
     height: 90%;
+    max-height: 72px;
+    padding-left: 10px;
 }
 
 /********************************************/
 /* TOP BAR - SEARCH BAR */
 /* Some attributes overwritten in homepage.css */
 #search-bar {
+    box-sizing: border-box;
     height: 40px;
+    width: 50%;
     display: flex;
     flex-direction: row; /* Main axis = Horizontal */
     justify-content: start; /* Alignment on horizontal (main) axis */
-    align-items: stretch; /* Alignment on vertical (cross) axis */
-    column-gap: 10px;
-    width: 100%;
+    align-items: center; /* Alignment on vertical (cross) axis */
+    gap: 10px;
+
+    & > * {
+        height: 40px;
+    }
+
+    & #search-dropdown {
+        width: 170px;
+        min-width: 170px;
+    }
+
+    & #search-dropdown-button {
+        font-size: 1.1rem;
+    }
+
+    & #search-dropdown-item {
+        font-size: 1rem;
+    }
+
+    & div:has(> #search-type-select) {
+        display: none;
+    }
+
+    & div:has(>#search-input) { /* Because Django puts every field in its own div... */
+        display: contents;
+    }
+
+    & #search-input {  /* Override input[type="text"] styling (see above) */
+        flex-grow: 1;
+        border-radius: 10px;
+        font-size: 1.1rem;
+    }
+
+    & #search-button {
+        flex-shrink: 0;
+        height: 40px;
+        width: 40px;
+        font-size: 1.3rem;
+        border-radius: 10px;
+        border: solid black 1px;
+    }
 }
 
-#search-dropdown {
-    width: 150px;
-}
-
-#search-dropdown-button {
-    font-size: 1.1em;
-}
-
-.search-dropdown-item {
-    font-size: 1em;
-}
-
-#search-type-select {
-    display: none;
-}
-
-div:has(>#search-input) { /* Because Django puts every field in its own div... */
-    width: 40%;
-    display: flex;
-}
-
-#search-input {  /* Text input field */
-    width: 100%;
-    border: solid black 1px;
-    border-radius: 10px;
-    font-size: 1.1em;
-    padding: 10px;
-}
-
-#search-button {
+#open-search-bar-button, #close-search-bar-button {
+    flex-shrink: 0;
+    height: 40px;
     width: 40px;
-    font-size: 1.3em;
-    border-radius: 10px;
-    border: solid black 1px;
+    margin-left: auto; /* Positions search-bar-button as much towards the right as possible */
+    font-size: 2.4rem;
+    background: none;
+    border: none;
+    display: none; /* Changed to flex via media query (see end of this file) */
+    align-items: center;
+    justify-content: center;
+    color: #537A00;
+    cursor: pointer;
+
+    &:hover {
+        color: #3B6000;
+    }
+
+    & i {
+        color: #537A00;
+    }
+
+    &:hover i {
+        color: #3B6000;
+    }
 }
 
 /********************************************/
 /* TOP BAR - SIGNUP/LOGIN LINKS || ACCOUNT DROPDOWN */
 #signup-login-block, #account-dropdown {
+    grid-column: 3; /* ALWAYS in column 3 */
     margin-right: 25px;
     margin-left: auto; /* Aligns to far right of top-bar */
     font-size: 1.5em;
@@ -628,11 +1087,27 @@ div:has(>#search-input) { /* Because Django puts every field in its own div... *
     text-decoration: underline;
 }
 
+#account-dropdown-button-icon-only {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: none; /* Changes to inline via media queries (see end of this file) */
+    padding: 0px;
+
+    & i {
+        margin: 0px 20px;
+        width: fit-content;
+        grid-column: 3; /* Ensure is always in last (right-most) column */
+    }
+}
+
 #account-dropdown-button {
     background-color: transparent;
     border-color: transparent;
     font-size: 1em;
-    width: 215px;
+    min-width: 215px;
+    width: fit-content;
+    max-width: 20vw;
     padding: 5px 30px 5px 20px;
     display: flex;
     flex-direction: row; /* Main axis = Horizontal */
@@ -663,7 +1138,7 @@ div:has(>#search-input) { /* Because Django puts every field in its own div... *
     background-color: white;
     border: solid 1px #F7F7F7;
     border-radius: 50%;
-    font-size: 1.7em;
+    font-size: 2.6rem;
 }
 
 #account-dropdown-options a {
@@ -682,37 +1157,6 @@ div:has(>#search-input) { /* Because Django puts every field in its own div... *
 #account-dropdown-options i {
     color: #537A00;
     font-size: 1.2em;
-}
-
-/**********************************************************************************************************************/
-/* SIDE BAR (USER PROFILE / SAVED ITEMS / ACCOUNT SETTIGNS) */
-#user-account-sidebar {
-    height: 100%;
-    width: 15%;
-    border-right: solid 1px #537A00;
-    overflow: hidden; /* TODO: Figure out how to adapt this when browser width is small */
-    display: flex;
-    flex-direction: column; /* Main axis = Vertical */
-}
-
-#user-account-sidebar a {
-    padding: 15px 20px;
-    font-size: 1.4rem;
-    font-weight: 300;
-    text-decoration: none;
-    border-bottom: solid 1px #537A00;
-    display: flex;
-    flex-direction: row; /* Main axis = horizontal */
-    align-items: center;
-    gap: 10px;
-
-    & i {
-        color: #537A00;
-    }
-
-    &:hover {
-        background-color: #E0EEAC;
-    }
 }
 
 /**********************************************************************************************************************/
@@ -737,6 +1181,126 @@ div:has(>#search-input) { /* Because Django puts every field in its own div... *
     text-decoration: underline;
 }
 
+/**********************************************************************************************************************/
+/* RESPONSIVE STYLING */
+.modal-footer.responsive-grid {
+    display: grid;
+    justify-content: normal;
+    gap: 15px; /* Default row-gap & column-gap regardless of row count */
+    /* Specific grid layout determined via JavaScript (see global.js) */
 
+    & .modal-footer-button {
+        width: 100% !important;
+    }
 
+    /* Position of each button inside grid to be specified in relevant .css file(s) */
+}
 
+@media (width < 1000px) {
+    #search-bar {
+        width: 100%;
+    }
+
+    #account-dropdown-button-icon-only {
+        display: inline;
+    }
+
+    #account-dropdown {
+        margin: 0px;
+
+        & #account-dropdown-button {
+            display: none;
+        }
+
+        & #account-dropdown-options {
+            width: 215px;
+            position: absolute;
+            right: 0px;
+            top: 120%;
+
+            border-radius: 10px;
+        }
+    }
+}
+
+/* See homepage.css for responsive styling of homepage's search bar */
+
+@media (width < 750px) and (width > 500px) {
+    /* Only applies to search bar in top-bar (not homepage search bar) */
+    #top-bar #search-bar {
+        width: 0px;
+        height: 100px;
+        padding: 20px;
+        position: absolute;
+        left: 0px;
+        z-index: 1;
+        background: #F7F7F7;
+        display: none;
+        overflow-x: clip;
+        transition: width 0.2s ease-out;
+
+        &.open {
+            display: flex !important;
+            width: 100%;
+        }
+    }
+
+    /* Only applies to buttons in top-bar (not homepage search bar) */
+    #top-bar #open-search-bar-button, #top-bar #close-search-bar-button {
+        display: flex;
+    }
+}
+
+@media (width > 500px) {
+    #top-bar {
+        height: 100px !important;
+    }
+}
+
+@media (width <= 500px) {
+    #top-bar {
+        display: grid;
+        grid: 80px auto / 0px auto minmax(43.5px, min-content); /* 80px == 100px - 20px (padding-top) - 20px (padding-bottom) */
+    }
+
+    /* Only applies to search bar in top-bar (not homepage search bar) */
+    #top-bar #search-bar {
+        width: 100%;
+        height: fit-content;
+        padding: 10px 20px 20px 20px;
+        position: relative;
+        top: 0px;
+        z-index: 1;
+        background: #F7F7F7;
+
+        grid-row: 2;
+        grid-column: 1 / 4;
+
+        display: none;
+        grid: auto / calc(100% - 40px - 10px) min-content; /* -40px (padding) - 10px (gap) */
+
+        &.open {
+            display: grid !important;
+        }
+
+        & div:has( #search-input) {
+            grid-row: 2;
+            grid-column: 1;
+        }
+
+        & #search-button {
+            grid-row: 2;
+            grid-column: 2;
+        }
+
+        & #close-search-bar-button {
+            grid-row: 1;
+            grid-column: 2;
+        }
+    }
+
+    /* Only applies to buttons in top-bar (not homepage search bar) */
+    #top-bar #open-search-bar-button, #top-bar #close-search-bar-button {
+        display: flex;
+    }
+}

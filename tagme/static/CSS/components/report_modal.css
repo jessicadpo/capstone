@@ -1,0 +1,105 @@
+#report-tag-overlay {
+    z-index: 1000;
+}
+
+#report-tag-dialog {
+    height: fit-content;
+    max-height: 100vh;
+    width: 500px;
+    overflow-y: auto;
+
+    margin: 0px;
+    padding: 20px 25px;
+    position: absolute;
+    z-index: 1001;
+    top: 50%;
+    transform: translate(-50%, -50%); /* Vertical * Horizontal centering */
+
+    background-color: #F7F7F7;
+    border: none;
+    border-radius: 20px;
+
+    & h1 {
+        font-weight: 400;
+        margin: 0px;
+    }
+
+    & h2 {
+        font-weight: 400;
+    }
+
+    & form {
+        height: 100%; /* So can size divs containing checkboxes using percentage */
+    }
+
+    & label {
+        font-size: 1.4em;
+    }
+
+    & .tag {
+        pointer-events: none; /* Disable clicking on link */
+        margin-top: 20px;
+    }
+}
+
+#reported-tag-input {
+    display: none;
+}
+
+#report-tag-dialog div:has(>input[type='checkbox']) {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0px;
+    padding: 0px 20px;
+}
+
+input[type='checkbox'] { /* Override global.css */
+    border-color: #3B6000; /* Dark Green */
+
+    &::before {
+        opacity: 1; /* Show "x" instead of blank when unchecked */
+    }
+}
+
+#other-input {  /* Override input[type="text"] of global.css */
+    font-size: 1.3em;
+    margin-left: 70px; /* (20px padding + 35px width + 10px gap) - 5px (looks off without it) */
+    width: calc(100% - 70px - 20px - 22px); /* -70px margin-left - 20px padding - 25px padding */
+}
+
+#other-required-error {
+    color: #B52801;
+    margin-left: 70px;
+    margin-top: 5px;
+    display: none; /* Changed to block via JavaScript (report_modal.js) */
+}
+
+.modal-footer-button {
+    font-size: 1.3em;
+    font-weight: 400;
+}
+
+#cancel-tag-report-button {
+    border: solid 2px #537A00;
+    color: #537A00;
+    background-color: transparent;
+
+    &:hover {
+        border-color: #3B6000;
+        color: white;
+        background-color: #3B6000;
+    }
+}
+
+#submit-tag-report-button {
+    border: solid 2px #537A00;
+    color: white;
+    background-color: #537A00;
+
+    &:hover {
+        border-color: #3B6000;
+        background-color: #3B6000;
+    }
+}

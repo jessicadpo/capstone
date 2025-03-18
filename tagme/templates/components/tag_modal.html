@@ -5,20 +5,20 @@
 <div id="add-tags-overlay" class="modal-overlay"></div> <!-- id so overlay behaves differently from report-tag-overlay -->
 
 <dialog id="add-tags-modal" class="modal">
+
     <div class="header-with-x-button">
         <h1>Your tags for: <b id="saving-item-title">[Item Title]</b></h1>
         <button id="close-tag-modal-button" class="close-x-button" aria-label="Close tag panel">✖</button>
     </div>
 
     <div id="tagging-section">
-
         <div id="public-tags-section">
             <div class="tag-section-header">
                 <h2>Public Tags</h2>
 
                 <div class="tooltip">
                     <i id="public-tags-tooltip" class="fa fa-question-circle" aria-label="Tooltip for public tags" tabindex="0"></i>
-                    <div class="tooltip-bubble yellow-bubble bubble-on-right">
+                    <div class="tooltip-bubble yellow-bubble bubble-on-top">
                         <div class="bubble-tail-outline"></div>
                         <div class="bubble-tail"></div>
                         <div class="bubble-content">
@@ -39,7 +39,7 @@
                 <span id="animated-tag-score"></span> <!-- Set to +[Score] in JavaScript -->
             </div>
 
-            <div id="public-tags-list-container" class="tag-list-container">
+            <div id="public-tags-list-container" class="tag-list-container" >
                 <!-- Filled using JavaScript -->
             </div>
         </div>
@@ -50,7 +50,7 @@
 
                 <div class="tooltip">
                     <i id="private-tags-tooltip" class="fa fa-question-circle" aria-label="Tooltip for private tags" tabindex="0"></i>
-                    <div class="tooltip-bubble yellow-bubble bubble-on-right">
+                    <div class="tooltip-bubble yellow-bubble bubble-on-top">
                         <div class="bubble-tail-outline"></div>
                         <div class="bubble-tail"></div>
                         <div class="bubble-content">
@@ -72,14 +72,15 @@
         </div>
     </div>
 
-    <div id="add-tags-modal-footer" class="modal-footer"> <!-- Need id for border-top (CSS) -->
-        <button id="cancel-tags-modal-button" class="modal-footer-button">Cancel</button>
-        <button id="save-tags-button" class="modal-footer-button">Save</button> <!-- Submits the form via JavaScript -->
-        <button id="unpin-item-button" class="modal-footer-button">Unpin</button> <!-- Submits the form via JavaScript -->
+    <div id="add-tags-modal-footer" class="modal-footer responsive-grid"> <!-- Need id for border-top (CSS) -->
+        <!-- Text inside <span> to make sure text is considered content for width: fit-content -->
+        <button id="cancel-tags-modal-button" class="modal-footer-button"><span>Cancel</span></button>
+        <button id="save-tags-button" class="modal-footer-button"><span>Save</span></button> <!-- Submits the form via JavaScript -->
+        <button id="unpin-item-button" class="modal-footer-button"><span>Unpin</span></button> <!-- Submits the form via JavaScript -->
     </div>
 
     <!-- NOT VISIBLE -->
-    <form id="user-tags-form" class="invisible" method="POST">
+    <form id="user-tags-form" class="invisible" method="POST" name="TagsForm">
         {% csrf_token %}
         {{ forms.tags_form }}
     </form>

@@ -1,53 +1,101 @@
 main {
     display: flex;
-    flex-direction: column; /* Main axis = Vertical */
-    padding: 10vh 0px;
+    flex-direction: column;
 }
 
-#logo {
-    width: 60vw;
-    max-width: 400px;
-    align-self: center;
+#account-dropdown {
+    margin-left: auto; /* Ensures is always at the right of the homepage */
 }
 
-#slogan {
-    text-align: center;
-    font-size: 2em;
-    margin: 20px 20px 5vh 20px;
+#logo-section {
+    max-height: 50vh;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    align-items: center;
+    gap: 15px;
+
+    & #logo {
+        height: 100%;
+        min-height: 100px;
+        max-height: 230px;
+        padding: 0px 30px;
+    }
+
+    & .slogan {
+        text-align: center;
+        font-size: 2rem;
+        margin: 0px;
+        font-weight: 400;
+    }
 }
 
-#search-bar {
+#homepage-search-bar-container {
     height: 50px;
+    width: 100%;
+    padding: 0px 10%;
+    margin-bottom: 30px;
+    display: flex;
     justify-content: center;
 }
 
-#search-dropdown {
-    width: 165px;
+#search-bar {
+    height: 100%;
+    width: 100%;
+    max-width: 1100px;
+
+    > * {
+        height: 100%;
+    }
+
+    & #search-dropdown-button {
+        font-size: 1.3em;
+    }
+
+    & .search-dropdown-item {
+        font-size: 1.1em;
+    }
+
+    & #search-input {
+        font-size: 1.3em;
+        height: 100%;
+    }
+
+    & #search-button {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5em;
+    }
 }
 
-#search-dropdown-button {
-    font-size: 1.3em;
+/**********************************************************************************************************************/
+/* RESPONSIVE STYLING */
+
+@media (width <= 700px) {
+    #homepage-search-bar-container {
+        height: fit-content;
+    }
+
+    /* Applies to search bar of homepage only */
+    #homepage-search-bar-container #search-bar {
+        display: grid;
+        grid: auto / calc(100% - 40px - 10px) min-content; /* -40px (padding) - 10px (gap) */
+
+        & div:has( #search-input) {
+            grid-row: 1;
+            grid-column: 1;
+        }
+
+        & #search-button {
+            grid-row: 1;
+            grid-column: 2;
+        }
+
+        & #search-dropdown {
+            height: 50px;
+            grid-row: 2;
+            grid-column: 1;
+        }
+    }
 }
-
-.search-dropdown-item {
-    font-size: 1.1em;
-}
-
-#search-input {
-    font-size: 1.3em;
-}
-
-#search-button {
-    width: 50px;
-    font-size: 1.5em;
-}
-
-
-
-
-
-
-
-
-
-

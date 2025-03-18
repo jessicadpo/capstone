@@ -1,0 +1,164 @@
+main {
+    border-top: solid 1px #8A8A8A;
+    padding: 3vh 2vw;
+
+    & h1 {
+        padding-bottom: 15px;
+        border-bottom: solid 1px #8A8A8A;
+        font-weight: 400;
+        font-size: 1.8em;
+    }
+
+    & > h1 {
+        padding-top: 15px;
+    }
+}
+
+main a {
+    font-size: 0.8rem;
+
+    &:hover {
+        color: #3B6000;
+    }
+
+}
+
+.content-box {
+    & h1, h2 {
+        margin: 0;
+        font-weight: 400;
+        font-size: 1.8em;
+    }
+
+    & p, li {
+        font-size: 1.2rem;
+    }
+
+    & li {
+        margin-bottom: 10px;
+    }
+}
+
+/* -------------------------------------------------------------------------------------------------------------------*/
+/* WEBSITE INFO SECTION */
+#website-info-section {
+    display: flex;
+    flex-direction: row;
+    gap: 2vw;
+
+    & > * {
+        width: 50%;
+    }
+}
+
+/* -------------------------------------------------------------------------------------------------------------------*/
+/* TEAM INFO SECTION */
+#team-info-section {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 30px;
+}
+
+#team-info-section .content-box {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+
+    & img {
+        max-height: 150px;
+        border-radius: 50%;
+        aspect-ratio: 1 / 1;
+    }
+
+    & > div {
+        min-width: calc(100% - 150px - 30px); /* 150px == width of img. 30px == padding of content-box */
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    & h2 {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
+    & p {
+        margin: 5px 0px;
+        font-weight: 500;
+        color: #3B6000;
+        font-size: 1rem;
+        white-space: normal;
+        word-wrap: break-all;
+    }
+}
+
+
+/* -------------------------------------------------------------------------------------------------------------------*/
+/* REFERENCES SECTION */
+#references-section li {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+/**********************************************************************************************************************/
+/* RESPONSIVE STYLING */
+@media (orientation:portrait) {
+    #website-info-section {
+        flex-direction: column;
+        gap: 2vh;
+
+        & > * {
+            width: 100%;
+        }
+    }
+}
+
+@media (width < 1615px) {
+    #team-info-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+
+        & img {
+            max-height: 125px !important;
+        }
+
+        & .content-box {
+            width: calc(50% - 20px); /* 20px == gap between content-boxes */
+        }
+    }
+}
+
+@media (width < 1050px) {
+    #team-info-section {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: 15px;
+
+        & .content-box {
+            width: auto;
+        }
+    }
+}
+
+@media (width < 550px) {
+    #team-info-section .content-box {
+        flex-direction: column;
+        align-items: center;
+
+        & img {
+            max-height: 100px;
+            max-width: 100px;
+        }
+
+        & h2, p {
+            text-align: center;
+
+        }
+    }
+}
+
+
+

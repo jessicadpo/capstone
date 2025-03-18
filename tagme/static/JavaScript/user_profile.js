@@ -7,8 +7,8 @@ const dropzones = document.querySelectorAll('.dropzone');
 
 const equippedSlot1 = document.getElementById("equipped-title-1");
 const equippedSlot2 = document.getElementById("equipped-title-2");
-const dropdownItemsSlot1 = document.querySelectorAll("#equipped-title-1 + .dropdown-options > *");
-const dropdownItemsSlot2 = document.querySelectorAll("#equipped-title-2 + .dropdown-options > *");
+const dropdownItemsSlot1 = document.querySelectorAll("#equipped-title-1 ~ .dropdown-options > *");
+const dropdownItemsSlot2 = document.querySelectorAll("#equipped-title-2 ~ .dropdown-options > *");
 
 const equipForm = document.getElementById("equip-form");
 const titleToEquipFormField = document.getElementById('title-to-equip-input');
@@ -46,11 +46,6 @@ function preventTickmarkOverlap() {
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* EQUIPPED TITLES SECTION */
-
-// When the user clicks on the button, toggle between hiding and showing the dropdown content
-function openEquipDropdown(editButton) {
-    editButton.parentElement.querySelector(".dropdown-options").classList.toggle("show");
-}
 
 function updateEquippedTitle(toEquip, equipSlotNumber) {
     if (equipSlotNumber === 1) {
@@ -121,8 +116,11 @@ function makeEarnedTitlesDraggable() {
 
 // Triggers after DOM content is finished loading
 document.addEventListener("DOMContentLoaded", function() {
-    setCurrentProgressBarWidth();
-    preventTickmarkOverlap();
+    if (currentProgressBar != null) {
+        setCurrentProgressBarWidth();
+        preventTickmarkOverlap();
+    }
+
     makeEarnedTitlesDraggable();
 
     // Update the text inside the (relevant) equip slot to the selected dropdown option
@@ -131,6 +129,7 @@ document.addEventListener("DOMContentLoaded", function() {
             event.preventDefault(); // Prevent page from jumping
             const selectedTitleClone = item.cloneNode(true);
             updateEquippedTitle(selectedTitleClone, 1);  // Change the equipped div with the clicked div
+            item.parentElement.classList.remove('show');
         });
     });
 
@@ -139,6 +138,7 @@ document.addEventListener("DOMContentLoaded", function() {
             event.preventDefault(); // Prevent page from jumping
             const selectedTitleClone = item.cloneNode(true);
             updateEquippedTitle(selectedTitleClone, 2);  // Change the equipped div with the clicked div
+            item.parentElement.classList.remove('show');
         });
     });
 

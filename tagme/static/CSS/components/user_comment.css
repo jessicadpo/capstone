@@ -1,0 +1,205 @@
+/* -------------------------------------------------------------------------------------------------------------------*/
+/* COMMENT FORM */
+#comment-form {
+    width: 100%;
+    height: fit-content;
+    padding-top: 20px;
+    display: none; /* Set to 'flex' via JavaScript (user_comment.js) */
+    flex-direction: column;
+    gap: 10px;
+}
+
+#comment-form textarea {
+    box-sizing: border-box;
+    resize: vertical;
+    min-height: 100px;
+    width: 100%;
+    border: solid 1px black;
+    border-radius: 10px;
+    padding: 20px;
+    font-size: 1.1rem;
+}
+
+div:has(>#id_request_delete_comment) {
+    display: none;
+}
+
+#comment-buttons-row {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: end;
+    align-items: center;
+    gap: 10px;
+
+    & > button {
+        width: 120px;
+        padding: 8px 0px;
+        border: none;
+        border-radius: 10px;
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 400;
+    }
+}
+
+#cancel-comment-button, #post-comment-button {
+    background-color: #537A00;
+
+    &:hover {
+        background-color: #3B6000;
+        cursor: pointer;
+    }
+
+    &:focus {
+        background-color: #3B6000;
+        cursor: pointer;
+    }
+}
+
+#delete-comment-button {
+    background-color: #B52801;
+
+    &:hover {
+        background-color: #952101;
+    }
+
+    &:focus {
+        background-color: #952101;
+    }
+}
+
+#cancel-comment-button, #delete-comment-button {
+    display: none; /* Changed to 'block' via JavaScript (user_comment.js) if user already posted a comment previously*/
+}
+
+/* -------------------------------------------------------------------------------------------------------------------*/
+/* ACTUAL COMMENTS */
+.comment {
+    max-height: fit-content;
+    height: fit-content;
+    padding: 30px 20px;
+    border-bottom: solid 1px #8A8A8A;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+
+.comment-header {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px;
+
+    & *:not(h2) {
+        white-space: nowrap;
+    }
+
+    & > h2 { /* Username */
+        margin: 0;
+        margin-right: 30px;
+        font-size: 2rem;
+        font-weight: 600;
+        word-break: break-word;
+    }
+
+    & .comment-equipped-titles {
+        display: grid;
+        grid: auto / max-content max-content;
+        gap: 15px;
+    }
+
+    & .reward-title {
+        min-width: fit-content;
+        max-width: fit-content;
+    }
+
+    & .comment-date {
+        flex-grow: 1;
+        text-align: right;
+        color: #8A8A8A;
+        font-size: 1rem;
+        font-weight: 400;
+    }
+}
+
+#edit-comment-button {
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+
+    & span {
+        font-size: 1.2rem;
+        font-weight: 400;
+        color: #537A00;
+    }
+
+    & i {
+        font-size: 1.6rem;
+        color: #3B6000;
+    }
+}
+
+#edit-comment-button:hover,  #edit-comment-button:focus{
+    cursor: pointer;
+
+    & span {
+        color: #3B6000;
+        text-decoration: underline;
+    }
+
+    & i {
+        color: #3B6000;
+        text-decoration: none;
+    }
+}
+
+.see-more-container {
+    max-height: 125px;
+    width: 100%;
+}
+
+.comment-text {
+    & * {
+        font-size: 1.2rem;
+    }
+
+    & p:last-of-type {
+        margin-bottom: 0px;
+    }
+}
+
+.comment-read-more {
+    width: fit-content;
+    align-self: end;
+}
+
+/**********************************************************************************************************************/
+/* RESPONSIVE STYLING */
+/* See user_comment.js */
+
+.comment-header.compact {
+    flex-direction: column;
+    align-items: start;
+    gap: 5px;
+
+    & h2 {
+        margin-right: 0px;
+    }
+
+    & .comment-equipped-titles {
+        grid: min-content min-content / auto;
+        gap: 5px;
+        margin-bottom: 10px;
+    }
+
+    & .comment-date {
+        margin-bottom: 5px;
+    }
+}
+

@@ -1,0 +1,296 @@
+main {
+    display: flex;
+    flex-direction: row; /* Main axis = Horizontal */
+    border-top: solid 1px #8A8A8A;
+}
+
+/* -------------------------------------------------------------------------------------------------------------------*/
+/* ACCOUNT SETTINGS SECTION (MAIN CONTENT) */
+#main-content {
+    container-type: inline-size;
+    container-name: main-content;
+    flex-grow: 1;
+    padding: 30px;
+}
+
+#account-settings-section {
+    container-type: inline-size;
+    container-name: account-settings;
+    min-width: 750px; /* Set to 0 once main-content hits 750px in width (see end of this file) */
+    width: 50%;
+    padding: 20px 30px;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column; /* Main axis = Vertical */
+
+    & h1 {
+        margin: 0px;
+        font-weight: 400;
+    }
+}
+
+form.invisible {
+    display: contents !important; /* OVERRIDE global.css STYLING */
+
+    & > * { /* Direct children only */
+        display: flex; /* NOT "none" because need to keep width even if an element should be hidden/invisible */
+    }
+}
+
+form.invisible * { /* All descendants (indirect children included) */
+    height: 0px !important;
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    visibility: hidden !important;
+}
+
+.grid-content > *:not(form),
+.grid-content form:not(.invisible) > *:not(.form-errors) {
+    margin: 7.5px 0px;
+}
+
+.grid-content {
+    margin: 7.5px 0px;
+    display: grid;
+    grid: min-content / auto 1fr min-content;
+    align-content: center;
+    align-items: center;
+    column-gap: 10px;
+    /* Don't use row-gap so that hidden rows are properly hidden. Use 7.5px margins instead */
+
+    & h2 {
+        font-weight: 400;
+        font-size: 1.2rem;
+    }
+
+    & span {
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
+    & label {
+        font-weight: 400;
+        font-size: 1.1rem;
+        color: #595959;
+    }
+
+    & .edit-button {
+        justify-content: center;
+    }
+
+    & .edit-button i {
+        font-size: 1.5rem;
+    }
+
+    & form {
+        /* Treat the elements inside forms as if they're children (not grandchildren) of grid-content */
+        display: contents;
+    }
+
+    & hr {
+        grid-column: 1 / span 3;
+        width: 100%;
+        border: none; /* Override default <hr> styling */
+        border-bottom: solid 1px #8A8A8A;
+    }
+
+    & input {
+        border-radius: 10px;
+    }
+
+    /*--------Inputs that are NOT submit buttons--------*/
+    & input:not([type="submit"]) {
+        grid-column: 2;
+    }
+
+    & input:not([type="submit"]):has(+.form-errors) {
+        border-color: red;
+    }
+
+    /*------------------Submit buttons------------------*/
+    & input[type="submit"]  {
+        max-width: 140px;
+        padding: 8px 15px; /* Same top/bottom padding as default input style (see global.css) */
+        font-size: 1rem;
+        grid-column: 3;
+        cursor: pointer;
+        border: solid 1px #537A00;
+        background-color: #537A00;
+        color: white;
+    }
+
+    & input[type="submit"]:hover {
+        border-color: #3B6000;
+        background-color: #3B6000;
+    }
+}
+
+#username-change-form {
+    & .form-errors ~ input[type="submit"] {
+        grid-row: 2;
+    }
+}
+
+#email-change-form {
+    & .form-errors ~ input[type="submit"] {
+        grid-row: 5;
+    }
+}
+
+#password-change-form {
+    & input:not([type="submit"]) {
+        grid-column: 2 / span 2;
+    }
+
+    & input[type="submit"] {
+        margin-top: 0px;
+    }
+}
+
+.grid-content *:has( > .tooltip) {
+    display: flex;
+    flex-direction: row;
+    align-items: center; /* Make sure all text are vertically-centered/aligned regardless of font-size */
+    gap: 5px;
+}
+
+.form-errors {  /* Form error lists */
+    grid-column: 2 / span 2;
+    margin: 0px;
+    position: relative;
+    top: -8px;
+
+    & ul {
+        list-style-type: "* ";
+        padding: 5px;
+        margin: 0px 0px 0px 5px; /* Override default <ul> styling */
+    }
+
+    & li {
+        color: red;
+    }
+}
+
+#settings-footer {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-items: end;
+
+    & input[type="submit"] {
+        cursor: pointer;
+        padding: 10px 20px;
+        border: solid 1px #B52801;
+        border-radius: 10px;
+        background-color: #B52801;
+        color: white;
+        font-size: 1rem;
+    }
+
+    & input:hover[type="submit"]:hover {
+        border-color: #952101;
+        background-color: #952101;
+    }
+}
+
+.tooltip { /* Overrides global.css */
+    & i {
+        color: #595959;
+    }
+
+    & .tooltip-bubble.bubble-on-right {
+        /*
+        - Width of .bubble-content (25vw) (includes padding & border due to box-sizing)
+        - Left margin of bubble-tail (15px)
+        - Position of bubble-tail-outline (2px)
+        - 6px of spacing (arbitrarily-decided)
+        - Total = -25vw - 15px - 6px = -25vw - 23px
+        */
+        right: calc(-25vw - 23px);
+    }
+
+    & .bubble-content {
+        min-width: 25vw;
+        list-style-type: disc;
+        padding: 10px 5px 10px 30px;
+    }
+
+    & .bubble-content ul { /* The default <ul> for help text added by Django (has no class name) */
+        display: contents; /* Treat <li> inside it as if they're direct children (not grandchildren) of .bubble-content */
+        list-style-type: disc;
+    }
+
+    & li {
+        margin-bottom: 10px;
+        padding-left: 5px; /* Space between bullet point and text */
+    }
+
+    & li:last-child {
+        margin: 10px 0px 0px 0px;
+    }
+
+    & li:only-child {
+        margin: 0;
+    }
+}
+
+/**********************************************************************************************************************/
+/* RESPONSIVE STYLING */
+@media (width < 750px) or (orientation:portrait) { /* When viewport width < viewport height (e.g., mobile) */
+    main {
+        flex-direction: column; /* Main axis = Vertical */
+    }
+}
+
+@container main-content (width < 750px) {
+    #account-settings-section {
+        width: 100%;
+        min-width: 0px;
+        margin: 0px;
+    }
+}
+
+@container account-settings (width < 500px) {
+    input[type="submit"] {
+        grid-column: 2 / span 2 !important;
+        margin-top: 0px !important;
+        margin-left: auto !important;
+    }
+
+    input:not([type="submit"]) {
+        grid-column: 2 / span 2 !important;
+    }
+
+    .edit-button {
+        padding: 0px 10px;
+    }
+
+    #username-change-form, #email-change-form {
+        & .form-errors ~ input[type="submit"] {
+            grid-row: auto;
+        }
+    }
+}
+
+@container account-settings (width < 400px) {
+    .grid-content {
+        grid: min-content / auto min-content;
+    }
+
+    label, div:has(label) {
+        margin-bottom: 0px !important;
+    }
+
+    h2, label, div:has(label), hr, input:not([type="submit"]), .form-errors {
+        grid-column: 1 / span 2 !important;
+    }
+
+    input[type="submit"] {
+        grid-column: 2 !important;
+    }
+}

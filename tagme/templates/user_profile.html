@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ request.user.username }} - TagMe Profile</title>
+    <meta name="page-name" content="{{ request.resolver_match.url_name }}">
+    <title>TagMe | {{ request.user.username }}</title>
+    <link rel="icon" type="image/x-icon" href="../static/icons/favicon.png">
 
     <!-- Roboto font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,6 +16,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <link rel="stylesheet" href="../../static/CSS/global.css">
+    <link rel="stylesheet" href="../../static/CSS/components/user_sidenav.css">
     <link rel="stylesheet" href="../../static/CSS/user_profile.css">
 </head>
 
@@ -21,144 +24,133 @@
     {% include "components/top_bar.html" %}
 
     <main>
-        <nav id="user-account-sidebar">
-            <a id="my-profile-sidebar-link" href="/profile/{{ request.user.username }}"><i class="fa fa-user-o" aria-hidden="true"></i>My Profile</a>
-            <a id="pinned-items-sidebar-link" href="/pinned-items/{{ request.user.username }}"><i class="fa fa-thumb-tack" aria-hidden="true"></i>Pinned Items</a>
-            <a id="account-settings-sidebar-link" href="/settings/{{ request.user.username }}"><i class="fa fa-cog" aria-hidden="true"></i>Account Settings</a>
-            <a id="logout-sidebar-link" href="/logout"><i class="fa fa-sign-out" aria-hidden="true"></i>Log Out</a>
-        </nav>
+        {% include "components/user_sidenav.html" %}
 
-        <div id="profile-section">
-            <div id="profile-header">
-                <i class="fa fa-user-circle" aria-hidden="true"></i>
-                <span>{{ request.user.username }}</span>
-            </div>
+        <div id="profile-content">
 
-            <div id="profile-content">
-                <div id="progress-equip-row">
-                    <div class="content-box" id="progress-section">
-                        <h1>Progress</h1>
+            <div class="content-box" id="progress-section">
+                <h1>Progress</h1>
 
-                        <div id="progress-bar">
-                            {% if score_data.points_since_last_reward > 0 %}
-                                <div id="current-progress-bar">
-                                    <div class="tickmark" id="middle-tickmark">
-                                        <span>{{ score_data.points_since_last_reward }}</span>
-                                    </div>
-                                </div>
-                            {% endif %}
-
-                            <div class="tickmark" id="start-tickmark">
-                                <span>0</span>
-                            </div>
-
-                            <div class="tickmark" id="end-tickmark">
-                                <i class="fa fa-gift" aria-hidden="true"></i>
-                                {% if earned_titles %} <!-- If earned_titles is NOT empty (at least 1 title earned already -->
-                                    <span>50</span>
-                                {% else %}
-                                    <span>10</span>
-                                {% endif %}
+                <div id="progress-bar">
+                    {% if score_data.points_since_last_reward > 0 %}
+                        <div id="current-progress-bar">
+                            <div class="tickmark" id="middle-tickmark">
+                                <span>{{ score_data.points_since_last_reward }}</span>
                             </div>
                         </div>
+                    {% endif %}
 
-                        <div id="progress-info-line">
-                            <div>
-                                <h2>Total:</h2>
-                                <span id="total-points">{{ score_data.user_points }} pts</span>
-                            </div>
-
-                            <div>
-                                <h2>Next reward:</h2>
-                                <!-- Need for loop because next_reward is formatted as an array (for consistency) -->
-                                {% for reward in next_reward %}
-                                    {% include 'components/reward_title.html' %}
-                                {% endfor %}
-                            </div>
-                        </div>
+                    <div class="tickmark" id="start-tickmark">
+                        <span>0</span>
                     </div>
 
-                    <div class="content-box" id="equipped-titles-section">
-                        <div id="equipped-titles-header">
-                            <h1>Equipped Titles</h1>
-                            <div class="tooltip">
-                                <i id="equip-tooltip" class="fa fa-question-circle" aria-label="Tooltip for equipping titles" tabindex="0"></i>
-                                <div class="tooltip-bubble yellow-bubble bubble-on-right">
-                                    <div class="bubble-tail-outline"></div>
-                                    <div class="bubble-tail"></div>
-                                    <div class="bubble-content">
-                                        <p><b>Equipped titles</b> are displayed next to your username on any comment you leave.</p>
-                                        <p>Click the pencil icons or drag-and-drop earned titles to equip them!</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="equipped-titles-content">
-                            <!-- Equipped Title #1 -->
-                            <div class="equipped-title-widget">
-                                <div class="dropdown">
-                                    <div class="dropzone" id="equipped-title-1">
-                                        {% if equipped_title_1 != null %}
-                                            {% with equipped_title_1 as reward %}
-                                                {% include 'components/reward_title.html' %}
-                                            {% endwith %}
-                                        {% else %}
-                                            <div class="empty-equip"><span>Empty</span></div>
-                                        {% endif %}
-                                    </div>
-                                    <div class="dropdown-options">
-                                        {% for reward in earned_titles %}
-                                            {% include 'components/reward_title.html' %}
-                                        {% endfor %}
-                                        <div class="empty-equip"><span>Empty</span></div>
-                                    </div>
-                                </div>
-                                <button class="edit-button dropdown-button" onclick="openEquipDropdown(this)" aria-label="Change title">
-                                    <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
-                                </button>
-                            </div>
-
-                            <!-- Equipped Title #2 -->
-                            <div class="equipped-title-widget">
-                                <div class="dropdown">
-                                    <div class="dropzone" id="equipped-title-2">
-                                        {% if equipped_title_2 != null %}
-                                            {% with equipped_title_2 as reward %}
-                                                {% include 'components/reward_title.html' %}
-                                            {% endwith %}
-                                        {% else %}
-                                            <div class="empty-equip"><span>Empty</span></div>
-                                        {% endif %}
-                                    </div>
-                                    <div class="dropdown-options">
-                                        {% for reward in earned_titles %}
-                                            {% include 'components/reward_title.html' %}
-                                        {% endfor %}
-                                        <div class="empty-equip"><span>Empty</span></div>
-                                    </div>
-                                </div>
-                                <button class="edit-button dropdown-button" onclick="openEquipDropdown(this)" aria-label="Change title">
-                                    <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- NOT VISIBLE -->
-                        <form id="equip-form" class="invisible" method="POST">
-                            {% csrf_token %}
-                            {{ forms.equip_form }}
-                        </form>
+                    <div class="tickmark" id="end-tickmark">
+                        <i class="fa fa-gift" aria-hidden="true"></i>
+                        {% if earned_titles %} <!-- If earned_titles is NOT empty (at least 1 title earned already) -->
+                            <span>60</span>
+                        {% else %}
+                            <span>10</span>
+                        {% endif %}
                     </div>
                 </div>
 
-                <div class="content-box" id="earned-titles-section">
-                    <h1>Earned Titles</h1>
-                    <div id="earned-titles-content">
-                        {% for reward in earned_titles %}
+                <div id="progress-info-line">
+                    <span><b>Total: </b>{{ score_data.user_points }} pts</span>
+                    <span>
+                        <b>Next reward:</b>
+                        <!-- Need for loop because next_reward is formatted as an array (for consistency) -->
+                        {% for reward in next_reward %}
                             {% include 'components/reward_title.html' %}
                         {% endfor %}
+                    </span>
+                </div>
+            </div>
+
+            <div class="content-box" id="equipped-titles-section">
+                <div id="equipped-titles-header">
+                    <h1>Equipped Titles</h1>
+                    <div class="tooltip">
+                        <i id="equip-tooltip" class="fa fa-question-circle" aria-label="Tooltip for equipping titles" tabindex="0"></i>
+                        <div class="tooltip-bubble yellow-bubble bubble-on-top">
+                            <div class="bubble-tail-outline"></div>
+                            <div class="bubble-tail"></div>
+                            <div class="bubble-content">
+                                <p><b>Equipped titles</b> are displayed next to your username on any comment you leave.</p>
+                                <p>Click the pencil icons or drag-and-drop earned titles to equip them!</p>
+                            </div>
+                        </div>
                     </div>
+                </div>
+
+                <div id="equipped-titles-content">
+                    <!-- Equipped Title #1 -->
+                    <div class="equipped-title-widget">
+                        <div class="dropdown">
+                            <div class="dropzone" id="equipped-title-1">
+                                {% if equipped_title_1 != null %}
+                                    {% with equipped_title_1 as reward %}
+                                        {% include 'components/reward_title.html' %}
+                                    {% endwith %}
+                                {% else %}
+                                    <div class="empty-equip"><span>Empty</span></div>
+                                {% endif %}
+                            </div>
+
+                            <button class="edit-button dropdown-button" aria-label="Change title">
+                                <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                            </button>
+
+                            <div class="dropdown-options">
+                                {% for reward in earned_titles %}
+                                    {% include 'components/reward_title.html' %}
+                                {% endfor %}
+                                <div class="empty-equip"><span>Empty</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Equipped Title #2 -->
+                    <div class="equipped-title-widget">
+                        <div class="dropdown">
+                            <div class="dropzone" id="equipped-title-2">
+                                {% if equipped_title_2 != null %}
+                                    {% with equipped_title_2 as reward %}
+                                        {% include 'components/reward_title.html' %}
+                                    {% endwith %}
+                                {% else %}
+                                    <div class="empty-equip"><span>Empty</span></div>
+                                {% endif %}
+                            </div>
+
+                            <button class="edit-button dropdown-button" aria-label="Change title">
+                                <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                            </button>
+
+                            <div class="dropdown-options">
+                                {% for reward in earned_titles %}
+                                    {% include 'components/reward_title.html' %}
+                                {% endfor %}
+                                <div class="empty-equip"><span>Empty</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NOT VISIBLE -->
+                <form id="equip-form" class="invisible" method="POST">
+                    {% csrf_token %}
+                    {{ forms.equip_form }}
+                </form>
+            </div>
+
+            <div class="content-box" id="earned-titles-section">
+                <h1>Earned Titles</h1>
+                <div id="earned-titles-content">
+                    {% for reward in earned_titles %}
+                        <div> <!-- Putting inside a div so that reward_title width behaves as if fit-content (instead of 100%) -->
+                            {% include 'components/reward_title.html' %}
+                        </div>
+                  {% endfor %}
                 </div>
             </div>
         </div>
@@ -169,5 +161,6 @@
     <!-- JavaScript -->
     <script type="text/javascript" src="../../static/JavaScript/global.js"></script>
     <script type="text/javascript" src="../../static/JavaScript/user_profile.js"></script>
+    <script type="text/javascript" src="../../static/JavaScript/components/user_sidenav.js"></script>
 </body>
 </html>
