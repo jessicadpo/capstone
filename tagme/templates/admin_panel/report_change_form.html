@@ -2,13 +2,5 @@
 {% load static %}
 {% block extrahead %}
     {{ block.super }}
-    <script>
-        /*
-        window.reportedTag = {{ reported_tag|safe }};
-        {% if other_tag_reports %}
-            window.otherTagReports = {{ other_tag_reports|safe }};
-        {% endif %}
-        */
-    </script>
     <script type="text/javascript" src="{% static 'JavaScript/admin_panel/validate_report_save.js' %}"></script>
 {% endblock %}

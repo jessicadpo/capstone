@@ -361,33 +361,33 @@ def get_new_rewards(prev_score, new_score):
 
 
 def get_synonymous_tags(search_string):
-    """Function for getting tags that are synonyms of a list of given words"""
-
+    """Function for getting (non-blacklisted) tags that are synonyms of a list of given words"""
     synonyms = query_datamuse_synonyms(search_string)
     synonymous_tags = []
     for synonym in synonyms:
-        synonym_tag = Tag.objects.filter(tag=synonym)
+        synonym_tag = Tag.objects.filter(tag=synonym, global_blacklist=False)
         if synonym_tag.exists():
             # Need to format it as a dict to stay consistent with return format of get_all_tags_for_item()
             synonymous_tags.append({"tag": synonym_tag[0].tag})
-
-    # TODO: Need a way to determine which tags more relevant (so can list the most relevant ones first)
-
     return synonymous_tags
 
 
-def get_related_tags(search_string):
-    """Function for getting tags that are related to a list of given words"""
+def get_related_tags(search_string, results_on_page):
+    """
+    Function for getting (non-blacklisted) tags that are related to a list of given words.
+    This includes:
+    - TODO: Public tags that have been applied to the returned search results
+      AND (if haven't reached 20-tag limit yet)
+    - Any words returned by Datamuse API that also exist as tags in database
+    """
     related_words = query_datamuse_related_words(search_string)
     related_tags = []
     for related_word in related_words:
-        related_tag = Tag.objects.filter(tag=related_word)
+        related_tag = Tag.objects.filter(tag=related_word, global_blacklist=False)
         if related_tag.exists():
             # Need to format it as a dict to stay consistent with return format of get_all_tags_for_item()
             related_tags.append({"tag": related_tag[0].tag})
-
     # TODO: Need a way to determine which tags more relevant (so can list the most relevant ones first)
-
     return related_tags
 
 
@@ -753,20 +753,20 @@ def update_pin_datetime(sender, instance, **kwargs):
 # DATAMUSE API QUERIES
 
 def query_datamuse_synonyms(word):
-    url = f"https://api.datamuse.com/words?rel_syn={word}&max=20"
+    """Function for retrieving synonyms from Datamuse API"""
+    url = f"https://api.datamuse.com/words?ml={word}"
     response = requests.get(url)
-
     if response.status_code == 200:
         words = response.json()
         sorted_words = sorted(words, key=lambda x: x.get('score', 0), reverse=True)
         return [entry['word'] for entry in sorted_words]
-
     print(f"Synonyms API failed for '{word}', status code:", response.status_code)
     return []
 
 
 def query_datamuse_related_words(word):
-    url = f"https://api.datamuse.com/words?ml={word}"
+    """Function for retrieving related words from Datamuse API"""
+    url = f"https://api.datamuse.com/words?rel_trg={word}"
     response = requests.get(url)
     if response.status_code == 200:
         words = response.json()
@@ -774,6 +774,12 @@ def query_datamuse_related_words(word):
         return [entry['word'] for entry in sorted_words]
     print(f"Related API failed for '{word}', status code:", response.status_code)
     return []
+
+
+def query_datamuse_plural_singular_form(word):
+    """Function for retrieve the plural/singular form of a word from Datamuse API"""
+    url = f"https://api.datamuse.com/words?md"
+    return ""
 
 
 ########################################################################################################################

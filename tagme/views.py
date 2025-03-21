@@ -212,7 +212,7 @@ def search_results(request, requested_page_number):
 
     # Get lists of synonymous & related tags
     synonymous_tags = get_synonymous_tags(request.GET.get('search_string'))
-    related_tags = get_related_tags(request.GET.get('search_string'))
+    related_tags = get_related_tags(request.GET.get('search_string'), results_on_page)
 
     # Store results in session
     request.session['results_from_referrer'] = {item['item_id']: item for item in results_on_page}

@@ -39,6 +39,8 @@
             <div class="tag-container">
                 {% for tag in synonymous_tags %}
                     {% include 'components/tag.html' %}
+                {% empty %}
+                    <p>No synonymous tags found.</p>
                 {% endfor %}
             </div>
 
@@ -46,6 +48,8 @@
             <div class="tag-container">
                 {% for tag in related_tags %}
                     {% include 'components/tag.html' %}
+                {% empty %}
+                    <p>No related tags found.</p>
                 {% endfor %}
             </div>
         </div>
