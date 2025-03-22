@@ -5,6 +5,7 @@
 #report-tag-dialog {
     height: fit-content;
     max-height: 100vh;
+    min-height: 600px;
     width: 500px;
     overflow-y: auto;
 
