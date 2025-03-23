@@ -114,8 +114,8 @@ class TagAdmin(admin.ModelAdmin):
     """Customized Admin panel for Tags"""
     list_display = ('tag', 'global_blacklist', 'global_whitelist', 'item_blacklist_count', 'item_whitelist_count')
     list_filter = ('global_blacklist', 'global_whitelist', BlacklistedForItemsFilter, WhitelistedForItemsFilter)
-    search_fields = ('tag', 'item_blacklist__item_id', 'item_blacklist__title', 'item_blacklist__authors',
-                     'item_whitelist__item_id', 'item_whitelist__title', 'item_whitelist__authors')
+    search_fields = ('tag', 'public_tags__item__item_id', 'public_tags__item__title', 'public_tags__item__authors',
+                     'private_tags__item__item_id', 'private_tags__item__title', 'private_tags__item__authors')
 
     def item_blacklist_count(self, obj):
         """Custom display field for showing how many items a tag has in its item_blacklist"""
