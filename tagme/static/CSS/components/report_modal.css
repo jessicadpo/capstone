@@ -28,11 +28,6 @@
         font-weight: 400;
     }
 
-    & form {
-        height: 100%; /* So can size divs containing checkboxes using percentage */
-        min-height: 600px;
-    }
-
     & label {
         font-size: 1.4em;
     }
