@@ -224,7 +224,7 @@ main {
         font-size: 1.2rem;
     }
 
-    & .remove-open-filter-menu-button {
+    & .remove-filter-button {
         background: none;
         border: none;
         color: #006996; /* Blue */
@@ -232,7 +232,7 @@ main {
         white-space: nowrap;
     }
 
-    & .remove-open-filter-menu-button:hover {
+    & .remove-filter-button:hover {
         text-decoration: underline;
         color: #004868; /* Dark Blue */
     }
