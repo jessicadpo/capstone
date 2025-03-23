@@ -619,7 +619,8 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
 .tag {
     text-decoration: none;
     width: fit-content;
-
+    transform-origin: center; /* For chromium browsers */
+    will-change: transform; /* For chromium browsers */
     position: relative; /* So can position the shine animation */
     overflow: hidden; /* Hide animated ::before .tag:hover */
     display: grid;
@@ -629,11 +630,13 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
     & > img:first-child {
         position: absolute;
         height: 100%;
+        aspect-ratio: 25 / 42; /* For Chromium browsers */
     }
 
     & img.tag-tip {
         max-width: 20px;
         height: 100%;
+        aspect-ratio: 20 / 42; /* For Chromium browsers */
     }
 
     &::before { /* Shine effect on hover */
