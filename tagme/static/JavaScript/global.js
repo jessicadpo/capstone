@@ -665,6 +665,12 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             });
         });
+
+        document.addEventListener("mousedown", function(event) {
+            if (!dropdown.contains(event.target)) {
+                dropdown.querySelector('.dropdown-options').classList.remove('show');
+            }
+        });
     });
 
     // Set custom behaviour for search dropdown:
