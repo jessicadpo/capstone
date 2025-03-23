@@ -654,8 +654,8 @@ document.addEventListener("DOMContentLoaded", function() {
             // Closing behaviour
             dropdownButton.addEventListener("blur", function(event) {
                 // Do not close if clicked inside .dropdown-options
-                var clickedTarget = event.explicitOriginalTarget;
-                if (clickedTarget.nodeType != 1) { /* If clickedTarget is an attribute or text node (for example) */
+                var clickedTarget = event.relatedTarget;
+                if (clickedTarget && clickedTarget.nodeType != 1) { /* If clickedTarget is an attribute or text node (for example) */
                     clickedTarget = clickedTarget.parentElement;
                 }
 
