@@ -5,7 +5,6 @@
 #report-tag-dialog {
     height: fit-content;
     max-height: 100vh;
-    min-height: 600px;
     width: 500px;
     overflow-y: auto;
 
@@ -27,10 +26,6 @@
 
     & h2 {
         font-weight: 400;
-    }
-
-    & form {
-        height: 100%; /* So can size divs containing checkboxes using percentage */
     }
 
     & label {
