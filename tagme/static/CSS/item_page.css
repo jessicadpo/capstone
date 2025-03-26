@@ -102,6 +102,9 @@ main {
         height: 100%;
         width: 100%;
         color: #8A8A8A; /* Text color if no cover found */
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 }
 
