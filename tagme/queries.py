@@ -9,6 +9,7 @@ from collections import Counter
 from urllib.parse import quote
 import requests
 
+from textblob import Word
 from django.utils.timezone import localtime
 from django.db import transaction
 from django.db.models import Count
@@ -26,6 +27,12 @@ from .constants import *
 
 #######################################################
 # GETTERS
+
+def get_singular_plural_forms(word):
+    """Function for getting the singular & plural forms of a given word"""
+    w = Word(word)
+    return w.singularize(), w.pluralize()
+
 
 def get_is_item_pinned(user, item_id):
     """Function for checking whether the user currently has a given item_id in their pins"""
@@ -754,7 +761,8 @@ def update_pin_datetime(sender, instance, **kwargs):
 
 def query_datamuse_synonyms(word):
     """Function for retrieving synonyms from Datamuse API"""
-    url = f"https://api.datamuse.com/words?ml={word}"
+    #url = f"https://api.datamuse.com/words?ml={word}"
+    url = f"https://api.datamuse.com/words?rel_sing={word}"
     response = requests.get(url)
     if response.status_code == 200:
         words = response.json()
@@ -774,12 +782,6 @@ def query_datamuse_related_words(word):
         return [entry['word'] for entry in sorted_words]
     print(f"Related API failed for '{word}', status code:", response.status_code)
     return []
-
-
-def query_datamuse_plural_singular_form(word):
-    """Function for retrieve the plural/singular form of a word from Datamuse API"""
-    url = f"https://api.datamuse.com/words?md"
-    return ""
 
 
 ########################################################################################################################

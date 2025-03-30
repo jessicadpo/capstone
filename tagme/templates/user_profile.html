@@ -102,9 +102,11 @@
 
                             <div class="dropdown-options">
                                 {% for reward in earned_titles %}
-                                    {% include 'components/reward_title.html' %}
+                                    {% with "true" as focusable %}
+                                        {% include 'components/reward_title.html' %}
+                                    {% endwith %}
                                 {% endfor %}
-                                <div class="empty-equip"><span>Empty</span></div>
+                                <div class="empty-equip" tabindex="0"><span>Empty</span></div>
                             </div>
                         </div>
                     </div>
@@ -128,9 +130,11 @@
 
                             <div class="dropdown-options">
                                 {% for reward in earned_titles %}
-                                    {% include 'components/reward_title.html' %}
+                                    {% with "true" as focusable %}
+                                        {% include 'components/reward_title.html' %}
+                                    {% endwith %}
                                 {% endfor %}
-                                <div class="empty-equip"><span>Empty</span></div>
+                                <div class="empty-equip" tabindex="0"><span>Empty</span></div>
                             </div>
                         </div>
                     </div>

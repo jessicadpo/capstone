@@ -127,9 +127,16 @@ document.addEventListener("DOMContentLoaded", function() {
     dropdownItemsSlot1.forEach(item => {
         item.addEventListener("click", function(event) {
             event.preventDefault(); // Prevent page from jumping
-            const selectedTitleClone = item.cloneNode(true);
+            const selectedTitleClone = this.cloneNode(true);
+            selectedTitleClone.setAttribute('tabindex', '-1');
             updateEquippedTitle(selectedTitleClone, 1);  // Change the equipped div with the clicked div
-            item.parentElement.classList.remove('show');
+            this.parentElement.classList.remove('show');
+        });
+
+        item.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                item.click();
+            }
         });
     });
 
@@ -137,8 +144,15 @@ document.addEventListener("DOMContentLoaded", function() {
         item.addEventListener("click", function(event) {
             event.preventDefault(); // Prevent page from jumping
             const selectedTitleClone = item.cloneNode(true);
+            selectedTitleClone.setAttribute('tabindex', '-1');
             updateEquippedTitle(selectedTitleClone, 2);  // Change the equipped div with the clicked div
             item.parentElement.classList.remove('show');
+        });
+
+        item.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                item.click();
+            }
         });
     });
 

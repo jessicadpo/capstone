@@ -185,11 +185,15 @@ def search_results(request, requested_page_number):
     match request.GET.get('search_type'):
         case "Keyword":
             results_on_page, pagination = query_loc_keyword(search_string, requested_page_number)
+
             clean_search_string = remove_globally_banned_tags_from_tag_search(search_string)  # pylint: disable=unused-variable
             # Disable pylint ignore once finish this
             # TODO: Need to also search our UserContribution model
         case "Tag":
+
+            singular_form, plural_form = get_singular_plural_forms(search_string)
             clean_search_string = remove_globally_banned_tags_from_tag_search(search_string)  # pylint: disable=unused-variable
+
             print("placeholder code")  # Replace with Django queries
         case "Title":
             print("placeholder code")  # Replace with API call

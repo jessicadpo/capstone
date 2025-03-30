@@ -109,7 +109,6 @@ function preventTooltipViewportOverflow() {
             }
 
             // Adjust position as close to original position as possible if no longer overflowing
-            // FIXME: (??) Not working if spamming resize too fast
             const originalCenterCoordinate = bubbleTailOutline.getBoundingClientRect().x + (bubbleTailOutline.getBoundingClientRect().width / 2);
             const maxLeftCoordinate = originalCenterCoordinate - (bubbleContent.getBoundingClientRect().width / 2);
             const minRightCoordinate = originalCenterCoordinate + (bubbleContent.getBoundingClientRect().width / 2);
@@ -438,8 +437,6 @@ function checkNeedSeeMoreButtons() {
 /* CAROUSELS / SLIDESHOWS */
 
 function activateCarouselBehaviour(carousel) {
-    // TODO: Looping carousels (?? need?)
-
     // Ensure carousel element has class "carousel"
     carousel.classList.add('carousel');
 
@@ -596,6 +593,28 @@ function undoTransitionPrep(carousel) {
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
+/* DROPDOWN MENUS */
+function openDropdown(dropdown) {
+    dropdownOptions = dropdown.querySelector('.dropdown-options');
+    dropdownOptions.classList.toggle('show');
+    preventDropdownPageOverflow(dropdownOptions);
+}
+
+function closeDropdown(dropdown, event) {
+    // Do not close if clicked inside .dropdown-options
+    var clickedTarget = event.relatedTarget;
+    if (clickedTarget && clickedTarget.nodeType != 1) { /* If clickedTarget is an attribute or text node (for example) */
+        clickedTarget = clickedTarget.parentElement;
+    }
+
+    if (clickedTarget == null || clickedTarget.closest('.dropdown-options') == null) {
+        dropdownOptions = dropdown.querySelector('.dropdown-options');
+        dropdownOptions.classList.remove('show');
+    }
+
+}
+
+/*--------------------------------------------------------------------------------------------------------------------*/
 // Triggers after window has finished loading (i.e., all CSS and JavaScript has already been applied)
 preventTooltipViewportOverflow(); // Need to call function twice like this for best results
 window.addEventListener("load", preventTooltipViewportOverflow);
@@ -646,23 +665,12 @@ document.addEventListener("DOMContentLoaded", function() {
         dropdownButtons.forEach(dropdownButton => {
             // Opening behaviour
             dropdownButton.addEventListener("click", function() {
-                dropdownOptions = dropdown.querySelector('.dropdown-options');
-                dropdownOptions.classList.toggle('show');
-                preventDropdownPageOverflow(dropdownOptions);
+                openDropdown(dropdown);
             });
 
             // Closing behaviour
             dropdownButton.addEventListener("blur", function(event) {
-                // Do not close if clicked inside .dropdown-options
-                var clickedTarget = event.relatedTarget;
-                if (clickedTarget && clickedTarget.nodeType != 1) { /* If clickedTarget is an attribute or text node (for example) */
-                    clickedTarget = clickedTarget.parentElement;
-                }
-
-                if (clickedTarget == null || clickedTarget.closest('.dropdown-options') == null) {
-                    dropdownOptions = dropdown.querySelector('.dropdown-options');
-                    dropdownOptions.classList.remove('show');
-                }
+                closeDropdown(dropdown, event);
             });
         });
 
