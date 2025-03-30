@@ -31,7 +31,7 @@ function validateDecision(event) {
             showWarning = true;
             warningMessage += "- \"" + data.reported_tag + "\" will be removed from the global blacklist.\n"
             if (data.new_tag.gw) {
-                warningMessage += "- \"" + data.reported_tag + "\" will be moved to the global whitelist.\n";
+                warningMessage += "- \"" + data.reported_tag + "\" will be moved from the global blacklist to the global whitelist.\n";
             }
         }
 
@@ -40,7 +40,7 @@ function validateDecision(event) {
             showWarning = true;
             warningMessage += "- \"" + data.reported_tag + "\" will be removed from the global whitelist.\n";
             if (data.new_tag.gb) {
-                warningMessage += "- \"" + data.reported_tag + "\" will be moved to the global blacklist.\n";
+                warningMessage += "- \"" + data.reported_tag + "\" will be moved from the global whitelist to the global blacklist.\n";
             }
         }
 
@@ -48,7 +48,7 @@ function validateDecision(event) {
         if (data.tag_changes.ib_changed && !data.new_tag.ib) {
             showWarning = true;
             if (data.new_tag.iw) {
-                warningMessage += "- \"" + data.reported_tag + "\" will be moved to this item's whitelisted tags.\n";
+                warningMessage += "- \"" + data.reported_tag + "\" will be moved from this item's blacklisted tags to its whitelisted tags.\n";
             } else {
                 warningMessage += "- \"" + data.reported_tag + "\" will be removed from this item's blacklisted tags.\n";
             }
@@ -58,7 +58,7 @@ function validateDecision(event) {
         if (data.tag_changes.iw_changed && !data.new_tag.iw) {
             showWarning = true;
             if (data.new_tag.ib) {
-                warningMessage += "- \"" + data.reported_tag + "\" will be moved to this item's blacklisted tags.\n";
+                warningMessage += "- \"" + data.reported_tag + "\" will be moved from this item's whitelisted tags to its blacklisted tags.\n";
             } else {
                 warningMessage += "- \"" + data.reported_tag + "\" will be removed from this item's whitelisted tags.\n";
             }

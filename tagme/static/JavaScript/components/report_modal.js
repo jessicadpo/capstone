@@ -70,7 +70,14 @@ document.addEventListener("DOMContentLoaded", function () {
     // (Server-side check would reload the page and make it look like there were no form errors)
     submitReportButton.addEventListener("click", (event) => {
         event.preventDefault();
-        if (otherCheckbox.checked && (otherTextInput.value).trim().length === 0) {
+
+        checkboxes = reportTagForm.querySelectorAll('input[type="checkbox"');
+        var reasonGiven = Array.from(checkboxes).some(checkbox => checkbox.checked);
+
+        if (!reasonGiven) {
+            alert("At least one reason must be given.")
+        }
+        else if (otherCheckbox.checked && (otherTextInput.value).trim().length === 0) {
             otherTextInput.style.borderColor = "#B52801";
             otherRequiredError.style.display = "block";
         } else {

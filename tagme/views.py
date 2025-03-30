@@ -181,7 +181,7 @@ def search_results(request, requested_page_number):
 
     search_string = request.GET.get('search_string')
     results_on_page = []
-    pagination: None
+    pagination = None
     match request.GET.get('search_type'):
         case "Keyword":
             results_on_page, pagination = query_loc_keyword(search_string, requested_page_number)

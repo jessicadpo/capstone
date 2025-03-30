@@ -654,8 +654,8 @@ document.addEventListener("DOMContentLoaded", function() {
             // Closing behaviour
             dropdownButton.addEventListener("blur", function(event) {
                 // Do not close if clicked inside .dropdown-options
-                var clickedTarget = event.explicitOriginalTarget;
-                if (clickedTarget.nodeType != 1) { /* If clickedTarget is an attribute or text node (for example) */
+                var clickedTarget = event.relatedTarget;
+                if (clickedTarget && clickedTarget.nodeType != 1) { /* If clickedTarget is an attribute or text node (for example) */
                     clickedTarget = clickedTarget.parentElement;
                 }
 
@@ -664,6 +664,12 @@ document.addEventListener("DOMContentLoaded", function() {
                     dropdownOptions.classList.remove('show');
                 }
             });
+        });
+
+        document.addEventListener("mousedown", function(event) {
+            if (!dropdown.contains(event.target)) {
+                dropdown.querySelector('.dropdown-options').classList.remove('show');
+            }
         });
     });
 
