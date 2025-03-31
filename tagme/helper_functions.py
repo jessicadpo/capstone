@@ -8,7 +8,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.template.loader import render_to_string
 
-
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 
 ########################################################################################################################
 # HELPER FUNCTIONS FOR queries.py
