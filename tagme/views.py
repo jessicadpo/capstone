@@ -273,7 +273,7 @@ def search_results(request, requested_page_number):
                 include_check = all(any(term in subject for subject in lower_subjects) for term in include_terms)
 
                 # Cycle through all subjects for the current item, boolean is true if NO exclude terms show up anywhere
-                exclude_check = all(all(term not in subject for subject in lower_subjects) for term in exclude_terms)
+                exclude_check = all(all(term not in subject for term in exclude_terms) for subject in lower_subjects)
 
                 if include_check and exclude_check:
                     filtered_results.append(item)
