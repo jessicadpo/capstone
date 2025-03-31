@@ -791,7 +791,7 @@ def query_loc_subject(search_string, requested_page_number):
     print(f"TODO (placeholder code)) {search_string} {requested_page_number}")
 '''
 
-def query_loc_gateway(search_string, search_type):
+def query_loc_gateway(search_string):
     """filters requests into the API query"""
     # TODO: Scrub code injection
     # TODO: Properly parsing multiple terms w/integrated whitespaces for author/subject search(?)

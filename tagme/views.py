@@ -196,12 +196,15 @@ def search_results(request, requested_page_number):
     match request.GET.get('search_type'):
         case "Keyword":
             # Query the API to get a list of all the results it returns
-            keyword_results = query_loc_gateway(include_only_string, request.GET.get('search_type'))
+            keyword_results = query_loc_gateway(include_only_string)
 
             # Filter all results without the right terms
             filtered_results = []
             for item in keyword_results:
                 found = False
+                if not isinstance(item, dict):
+                    continue
+
                 for value in item.values():
                     if isinstance(value, str):
                         if any(term.lower() in value.lower() for term in exclude_terms):
@@ -241,7 +244,7 @@ def search_results(request, requested_page_number):
             results_on_page = paginate(request, tag_results, 'search_results.html', page_forms)
         case "Title":
             # Query the API to get a list of all the results it returns
-            title_results = query_loc_gateway(include_only_string, request.GET.get('search_type'))
+            title_results = query_loc_gateway(include_only_string)
 
             # Filter all results to those matching the query
             filtered_results = search_results_filtering(title_results, 'title', include_terms, exclude_terms)
@@ -250,7 +253,7 @@ def search_results(request, requested_page_number):
             results_on_page = paginate(request, filtered_results, 'search_results.html', page_forms)
         case "Author":
             # Query the API to get a list of all the results it returns
-            author_results = query_loc_gateway(include_only_string, request.GET.get('search_type'))
+            author_results = query_loc_gateway(include_only_string)
 
             # Filter all results to those matching the query
             filtered_results = search_results_filtering(author_results, 'authors', include_terms, exclude_terms)
@@ -259,7 +262,7 @@ def search_results(request, requested_page_number):
             results_on_page = paginate(request, filtered_results, 'search_results.html', page_forms)
         case "Subject":
             # Query the API to get a list of all the results it returns
-            subject_results = query_loc_gateway(include_only_string, request.GET.get('search_type'))
+            subject_results = query_loc_gateway(include_only_string)
 
             # Filter that list down to only items that satisfy our include and exclude conditions
             # This is patterned off the search_results_filtering function in helper_functions.py, modified for lists
