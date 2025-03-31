@@ -767,7 +767,7 @@ def query_datamuse_related_words(word):
 
 ########################################################################################################################
 # LOC API QUERIES
-
+'''
 def query_loc_keyword(search_string, requested_page_number):
     """Keyword search to LOC API"""
     params = {
@@ -789,14 +789,28 @@ def query_loc_author(search_string, requested_page_number):
 def query_loc_subject(search_string, requested_page_number):
     """Subject search to LOC API"""
     print(f"TODO (placeholder code)) {search_string} {requested_page_number}")
+'''
+
+def query_loc_gateway(search_string, search_type):
+    """filters requests into the API query"""
+    # TODO: Scrub code injection
+    # TODO: Properly parsing multiple terms w/integrated whitespaces for author/subject search(?)
+    # note: API parses multiple keywords as ANDs for keyword search
+
+    params = {
+        "q": search_string,  # All API calls need a search string at base
+    }
+    print("QLC:", params["q"])
 
 
-def _query_loc_api(params, requested_page_number):
+    return _query_loc_api(params)
+
+def _query_loc_api(params):
     """Actual query to LOC API (PRIVATE FUNCTION)"""
     params["fa"] = "partof:catalog"
     params["fo"] = "json"
-    params["c"] = 15  # Return max. 15 items per query (makes results load faster)
-    params["sp"] = requested_page_number
+    params["c"] = 100  # TODO: CHANGE TO 300 or 500 WHEN DONE ALL TESTING!!!!
+    params["sp"] = 1
 
     query = "?"
     for param_key in params.keys():
@@ -805,6 +819,8 @@ def _query_loc_api(params, requested_page_number):
     query_url = quote(query, safe=":?=&%")
 
     endpoint = "https://www.loc.gov/books/"  # API rate limit = 20 queries per 10 seconds && 80 queries per 1 minute
+    print("query url is:", endpoint+query_url)
+
     try:
         response = requests.get(endpoint + query_url)
         response.raise_for_status()  # Raise an error if the request fails
@@ -837,8 +853,9 @@ def _query_loc_api(params, requested_page_number):
                 'subjects': subjects,
                 'cover': cover,
             })
+            print("Item ID Added:", item_id)
 
-        return results_on_page, data.get("pagination")
+        return results_on_page
 
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")

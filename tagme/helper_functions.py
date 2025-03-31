@@ -9,6 +9,7 @@ from django.db.models import Q
 from django.template.loader import render_to_string
 
 
+
 ########################################################################################################################
 # HELPER FUNCTIONS FOR queries.py
 
@@ -192,3 +193,46 @@ def extract_paginated_html(full_page_html):
     html_parser = BeautifulSoup(full_page_html, 'html.parser')
     paginated_content_html = html_parser.find_all('div', class_="paginated-content")
     return str(paginated_content_html[0])
+
+
+def parse_search_string(search_string):
+    """Function for dividing a search string into different kinds of terms"""
+    terms = search_string.split()
+    include_terms = [term.lower() for term in terms if not term.startswith("-") and term != "-"]
+    exclude_terms = [term.lstrip("-").lower() for term in terms if term.startswith("-") and term != "-"]
+
+    return include_terms, exclude_terms
+
+def search_results_filtering(unfiltered_results, target_category, include_terms, exclude_terms):
+    """
+    Function for filtering a list of search results items to those which include and exclude certain terms
+    unfiltered_results must be a list of items (see results_on_page in _query_loc_api in queries.py)
+    target_category must correspond to one of the keys for a results_on_page items' string-based values
+    include_terms and exclude_terms must be lists of strings that do not contain whitespace characters
+    """
+    filtered_results = []
+    for item in unfiltered_results:
+        print('checking: ', item.get('item_id'))
+        print(target_category, ': ', item.get(target_category))
+        lower_category = item.get(target_category).lower()  # Lowercase the title so that matching is easy
+        print('lowered to: ', lower_category)
+
+        # Boolean, true if the title has all include terms
+        include_check = all(term.lower() in lower_category for term in include_terms)
+        if include_check:
+            print('item: ', item.get('item_id'), ' passed include check')
+        if not include_check:
+            print('item: ', item.get('item_id'), ' failed include check')
+
+        # Boolean, true if the title has none of the exclude terms
+        exclude_check = not any(term.lower() in lower_category for term in exclude_terms)
+        if exclude_check:
+            print('item: ', item.get('item_id'), ' passed exclude check')
+        if not exclude_check:
+            print('item: ', item.get('item_id'), ' failed exclude check')
+
+        if include_check and exclude_check:
+            filtered_results.append(item)
+            print('item added to filtered_results')
+
+    return filtered_results

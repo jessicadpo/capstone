@@ -1,4 +1,5 @@
 """Module for TagMe views"""
+from operator import truediv
 from urllib.parse import urlparse
 
 from django.shortcuts import render, redirect
@@ -8,7 +9,7 @@ from django.urls import is_valid_path, reverse
 from django.http import Http404, HttpResponse, JsonResponse
 from .forms import *
 from .queries import *
-
+from django.db.models.functions import Lower
 
 def homepage(request):
     """View for index page (AKA homepage)"""
@@ -180,23 +181,108 @@ def search_results(request, requested_page_number):
     # TODO: Code for parsing AND/OR/NOT/*/? --> Investigate pyparsing & Shunting Yard algorithm
 
     search_string = request.GET.get('search_string')
+
+    # Purge search string of blacklisted terms
+    clean_search_string = remove_globally_banned_tags_from_tag_search(search_string)
+    print("CST:", clean_search_string)
+
+    # Separate out the two types of terms for API calls
+    include_terms, exclude_terms = parse_search_string(clean_search_string)
+    # recreate the string with just included terms for the API
+    include_only_string = ' '.join(include_terms)
+
+    # TODO: Regiment lowercaseization of things, make it so it's done as few times as possible
+
     results_on_page = []
     pagination = None
     match request.GET.get('search_type'):
         case "Keyword":
-            results_on_page, pagination = query_loc_keyword(search_string, requested_page_number)
-            clean_search_string = remove_globally_banned_tags_from_tag_search(search_string)  # pylint: disable=unused-variable
-            # Disable pylint ignore once finish this
-            # TODO: Need to also search our UserContribution model
+            # Query the API to get a list of all the results it returns
+            keyword_results = query_loc_gateway(include_only_string, request.GET.get('search_type'))
+
+            # Filter all results without the right terms
+            filtered_results = []
+            for item in keyword_results:
+                found = False
+                for value in item.values():
+                    if isinstance(value, str):
+                        if any(term.lower() in value.lower() for term in exclude_terms):
+                            found = True
+                            break
+                if not found:
+                    filtered_results.append(item)
+
+            results_on_page = paginate(request, filtered_results, 'search_results.html', page_forms)
         case "Tag":
-            clean_search_string = remove_globally_banned_tags_from_tag_search(search_string)  # pylint: disable=unused-variable
-            print("placeholder code")  # Replace with Django queries
+            clean_search_string = remove_globally_banned_tags_from_tag_search(search_string)  # strip blacklisted terms
+
+            include_tags, exclude_tags = parse_search_string(clean_search_string)
+
+            # Fetch everything with the include tags
+            if include_tags:
+                matching_tags = Tag.objects.annotate(tag_lower=Lower('tag')).filter(tag_lower__in=include_tags)
+                # Bridge through UserContributions via the tag name, create a queryset of items it's applied to
+                user_contributions = UserContribution.objects.filter(Q(public_tags__tag__in=matching_tags)).distinct()
+                items = Item.objects.filter(item_id__in=user_contributions.values_list('item_id', flat=True)).distinct()
+
+            # If not, fetch everything before filtering
+            # TODO: Custom error page telling a user to use positive terms (?)
+            else:
+                items = Item.objects.all()
+
+            # Exclude all items that have names from the exclude tags list
+            if exclude_tags:
+                excluded_tags = Tag.objects.annotate(tag_lower=Lower('tag')).filter(tag_lower__in=exclude_tags)
+                excluded_link = UserContribution.objects.filter(Q(public_tags__tag__in=excluded_tags)).distinct()
+                excluded_items = Item.objects.filter(item_id__in=excluded_link.values_list('item_id', flat=True)).distinct()
+
+                items = items.exclude(item_id__in=excluded_items.values_list('item_id', flat=True))
+
+            # turn the queryset into a list, then paginate it
+            tag_results = list(items.values())
+            results_on_page = paginate(request, tag_results, 'search_results.html', page_forms)
         case "Title":
-            print("placeholder code")  # Replace with API call
+            # Query the API to get a list of all the results it returns
+            title_results = query_loc_gateway(include_only_string, request.GET.get('search_type'))
+
+            # Filter all results to those matching the query
+            filtered_results = search_results_filtering(title_results, 'title', include_terms, exclude_terms)
+
+            # Paginate the resulting filtered list
+            results_on_page = paginate(request, filtered_results, 'search_results.html', page_forms)
         case "Author":
-            print("placeholder code")  # Replace with API call
+            # Query the API to get a list of all the results it returns
+            author_results = query_loc_gateway(include_only_string, request.GET.get('search_type'))
+
+            # Filter all results to those matching the query
+            filtered_results = search_results_filtering(author_results, 'authors', include_terms, exclude_terms)
+
+            # Paginate the resulting filtered list
+            results_on_page = paginate(request, filtered_results, 'search_results.html', page_forms)
         case "Subject":
-            print("placeholder code")  # Replace with API call
+            # Query the API to get a list of all the results it returns
+            subject_results = query_loc_gateway(include_only_string, request.GET.get('search_type'))
+
+            # Filter that list down to only items that satisfy our include and exclude conditions
+            # This is patterned off the search_results_filtering function in helper_functions.py, modified for lists
+            filtered_results = []
+            for item in subject_results:
+                subject_list = item.get('subjects')
+
+                lower_subjects = [subject.lower() for subject in subject_list]
+
+                # Cycle through all subjects for the current item, boolean is true if all include terms show up there
+                include_check = all(any(term in subject for subject in lower_subjects) for term in include_terms)
+
+                # Cycle through all subjects for the current item, boolean is true if NO exclude terms show up anywhere
+                exclude_check = all(all(term not in subject for subject in lower_subjects) for term in exclude_terms)
+
+                if include_check and exclude_check:
+                    filtered_results.append(item)
+
+            # Paginate the resulting filtered list
+            results_on_page = paginate(request, filtered_results, 'search_results.html', page_forms)
+
         case _:
             raise Http404("Invalid search type")
 
@@ -216,6 +302,22 @@ def search_results(request, requested_page_number):
 
     # Store results in session
     request.session['results_from_referrer'] = {item['item_id']: item for item in results_on_page}
+
+    '''
+    if isinstance(results_on_page, str):
+        return HttpResponse(results_on_page)
+    '''
+
+    pagination = results_on_page
+
+    print("pagination =", pagination)
+    print("pagination number =", pagination.number)
+    print("has next page? =", pagination.has_next())
+    print("has previous page? =", pagination.has_previous())
+    print("next page number =", pagination.next_page_number() if pagination.has_next() else "N/A")
+    print("previous page number =", pagination.previous_page_number() if pagination.has_previous() else "N/A")
+    print("total items =", pagination.paginator.count)
+    print("total pages =", pagination.paginator.num_pages)
 
     return render(request, 'search_results.html', {
         'current_page': results_on_page,
