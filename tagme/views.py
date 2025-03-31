@@ -163,7 +163,7 @@ def pinned_items(request, username):
     })
 
 
-def search_results(request, requested_page_number):
+def search_results(request, requested_page_number): # pylint: disable=too-many-branches,too-many-statements
     """View for Search Results pages"""
     page_forms = {"search_form": SearchForm(),
                   "tags_form": TagsForm(),
@@ -268,6 +268,8 @@ def search_results(request, requested_page_number):
             # This is patterned off the search_results_filtering function in helper_functions.py, modified for lists
             filtered_results = []
             for item in subject_results:
+                if not isinstance(item, dict):
+                    continue
                 subject_list = item.get('subjects')
 
                 lower_subjects = [subject.lower() for subject in subject_list]
@@ -303,11 +305,6 @@ def search_results(request, requested_page_number):
 
     # Store results in session
     request.session['results_from_referrer'] = {item['item_id']: item for item in results_on_page}
-
-    '''
-    if isinstance(results_on_page, str):
-        return HttpResponse(results_on_page)
-    '''
 
     pagination = results_on_page
 
