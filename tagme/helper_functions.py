@@ -198,8 +198,8 @@ def extract_paginated_html(full_page_html):
 def parse_search_string(search_string):
     """Function for dividing a search string into different kinds of terms"""
     terms = search_string.split()
-    include_terms = [term.lower() for term in terms if not term.startswith("-") and term != "-"]
-    exclude_terms = [term.lstrip("-").lower() for term in terms if term.startswith("-") and term != "-"]
+    include_terms = [term for term in terms if not term.startswith("-") and term != "-"]
+    exclude_terms = [term.lstrip("-") for term in terms if term.startswith("-") and term != "-"]
 
     return include_terms, exclude_terms
 
