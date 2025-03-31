@@ -193,8 +193,6 @@ def search_results(request, requested_page_number):
 
     # TODO: Regiment lowercaseization of things, make it so it's done as few times as possible
 
-    results_on_page = []
-    pagination = None
     match request.GET.get('search_type'):
         case "Keyword":
             # Query the API to get a list of all the results it returns
