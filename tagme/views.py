@@ -242,7 +242,7 @@ def search_results(request, requested_page_number): # pylint: disable=too-many-b
 
             # turn the queryset into a list, then paginate it
             tag_results = list(items.values())
-            results_on_page = paginate(request, tag_results, 'search_results.html', page_forms)
+            results_on_page = paginate(request, tag_results, 'search_results.html', page_forms, page_number=requested_page_number)
         case "Title":
             # Query the API to get a list of all the results it returns
             title_results = query_loc_gateway(include_only_string)
@@ -251,7 +251,7 @@ def search_results(request, requested_page_number): # pylint: disable=too-many-b
             filtered_results = search_results_filtering(title_results, 'title', include_terms, exclude_terms)
 
             # Paginate the resulting filtered list
-            results_on_page = paginate(request, filtered_results, 'search_results.html', page_forms)
+            results_on_page = paginate(request, filtered_results, 'search_results.html', page_forms, page_number=requested_page_number)
         case "Author":
             # Query the API to get a list of all the results it returns
             author_results = query_loc_gateway(include_only_string)
@@ -260,7 +260,7 @@ def search_results(request, requested_page_number): # pylint: disable=too-many-b
             filtered_results = search_results_filtering(author_results, 'authors', include_terms, exclude_terms)
 
             # Paginate the resulting filtered list
-            results_on_page = paginate(request, filtered_results, 'search_results.html', page_forms)
+            results_on_page = paginate(request, filtered_results, 'search_results.html', page_forms, page_number=requested_page_number)
         case "Subject":
             # Query the API to get a list of all the results it returns
             subject_results = query_loc_gateway(include_only_string)
@@ -285,7 +285,7 @@ def search_results(request, requested_page_number): # pylint: disable=too-many-b
                     filtered_results.append(item)
 
             # Paginate the resulting filtered list
-            results_on_page = paginate(request, filtered_results, 'search_results.html', page_forms)
+            results_on_page = paginate(request, filtered_results, 'search_results.html', page_forms, page_number=requested_page_number)
 
         case _:
             raise Http404("Invalid search type")
