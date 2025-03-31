@@ -10,6 +10,7 @@ from django.http import Http404, HttpResponse, JsonResponse
 from .forms import *
 from .queries import *
 from django.db.models.functions import Lower
+# pylint: disable=no-member
 
 def homepage(request):
     """View for index page (AKA homepage)"""
