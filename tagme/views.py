@@ -213,7 +213,7 @@ def search_results(request, requested_page_number): # pylint: disable=too-many-b
                 if not found:
                     filtered_results.append(item)
 
-            results_on_page = paginate(request, filtered_results, 'search_results.html', page_forms)
+            results_on_page = paginate(request, filtered_results, 'search_results.html', page_forms, page_number=requested_page_number)
         case "Tag":
             clean_search_string = remove_globally_banned_tags_from_tag_search(search_string)  # strip blacklisted terms
 

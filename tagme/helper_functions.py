@@ -166,7 +166,7 @@ def is_default_sort_and_filter(get_request):
     return False
 
 
-def paginate(request, to_paginate, template_name, page_forms, item_data=None):
+def paginate(request, to_paginate, template_name, page_forms, item_data=None, page_number=1):
     """
     Function for paginating content into pages of 15 items/things
     - If AJAX request --> will return the requested page.
@@ -175,7 +175,7 @@ def paginate(request, to_paginate, template_name, page_forms, item_data=None):
     if to_paginate is None:
         to_paginate = []
 
-    current_page = Paginator(to_paginate, 15).get_page(request.GET.get('page', 1))
+    current_page = Paginator(to_paginate, 15).get_page(page_number)
 
     # If AJAX request (i.e., page already loaded)
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
