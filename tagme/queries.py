@@ -767,29 +767,6 @@ def query_datamuse_related_words(word):
 
 ########################################################################################################################
 # LOC API QUERIES
-'''
-def query_loc_keyword(search_string, requested_page_number):
-    """Keyword search to LOC API"""
-    params = {
-        "q": search_string,  # Default parameters set in _query_loc_api() function
-    }
-    return _query_loc_api(params, requested_page_number)
-
-
-def query_loc_title(search_string, requested_page_number):
-    """Title search to LOC API"""
-    print(f"TODO (placeholder code) {search_string} {requested_page_number}")
-
-
-def query_loc_author(search_string, requested_page_number):
-    """Author search to LOC API"""
-    print(f"TODO (placeholder code) {search_string} {requested_page_number}")
-
-
-def query_loc_subject(search_string, requested_page_number):
-    """Subject search to LOC API"""
-    print(f"TODO (placeholder code)) {search_string} {requested_page_number}")
-'''
 
 def query_loc_gateway(search_string):
     """filters requests into the API query"""

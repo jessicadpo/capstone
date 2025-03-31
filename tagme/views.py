@@ -1,5 +1,5 @@
 """Module for TagMe views"""
-from operator import truediv
+from operator import truediv #pylint: disable=unused-import
 from urllib.parse import urlparse
 
 from django.shortcuts import render, redirect
@@ -7,9 +7,9 @@ from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.urls import is_valid_path, reverse
 from django.http import Http404, HttpResponse, JsonResponse
+from django.db.models.functions import Lower
 from .forms import *
 from .queries import *
-from django.db.models.functions import Lower
 # pylint: disable=no-member
 
 def homepage(request):
