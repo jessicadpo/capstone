@@ -64,10 +64,10 @@ def get_filtered_user_pinned_items(user, get_request):
 
         # Apply filters & sorting to user's pins
         filtered_user_contribs = (user_contribs_with_tag_counts
-                         .filter(filter_query)
-                         .exclude(exclude_query)
-                         .distinct()
-                         .order_by(sort_by_filter))
+                                  .filter(filter_query)
+                                  .exclude(exclude_query)
+                                  .distinct()
+                                  .order_by(sort_by_filter))
 
         for tag_filter_query in tag_include_queries:
             filtered_user_contribs = filtered_user_contribs.filter(tag_filter_query)
