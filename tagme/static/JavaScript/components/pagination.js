@@ -81,11 +81,8 @@ function setResponsiveBottomPaginationBehaviour() {
 function fetchPage(pageNumberToFetch) {
     // Send AJAX request to get next page of comments (without reloading the page)
     const currentGetParams = new URLSearchParams(window.location.search);
-    let paginationQuery = "?page=" + pageNumberToFetch;
-    if (currentGetParams.get("page")) {
-        currentGetParams.set("page", pageNumberToFetch);
-        paginationQuery = "?" + currentGetParams.toString();
-    }
+    currentGetParams.set("page", pageNumberToFetch);
+    paginationQuery = "?" + currentGetParams.toString();
 
     fetch(page_url + paginationQuery, {
         method: 'GET',
@@ -111,6 +108,10 @@ function fetchPage(pageNumberToFetch) {
             setResponsiveBottomPaginationBehaviour();
             document.getElementById('open-search-sidebar-button').addEventListener("click", openSearchSidebar);
         }
+
+        // Update URL
+        const newURL = page_url + paginationQuery;
+        history.pushState({ path: newURL}, "", newURL);
     });
 }
 
