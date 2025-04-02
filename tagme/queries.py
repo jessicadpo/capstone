@@ -918,7 +918,7 @@ def _query_loc_api(params):
     """Actual query to LOC API (PRIVATE FUNCTION)"""
     params["fa"] = "partof:catalog"
     params["fo"] = "json"
-    params["c"] = 100  # TODO: CHANGE TO 300 or 500 WHEN DONE ALL TESTING!!!!
+    params["c"] = 300
     params["sp"] = 1
 
     query = "?"
