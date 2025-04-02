@@ -363,36 +363,34 @@ def get_new_rewards(prev_score, new_score):
 
 def get_synonymous_tags(include_terms):
     """Function for getting (non-blacklisted) tags that are synonyms of a list of given words"""
-    # Determine how many synonyms per tag searched (return max 20 synonyms total)
-    max_synonym_per_term = 20 / len(include_terms)
-
     returned_synonymous_tags = []
-    for term in include_terms:
-        count_tags_for_term = 0
-        synonyms = (query_datamuse_synonyms(term))
-
+    if len(include_terms) > 0:
         # Include the other forms of the include_term as synonyms
-        forms_per_synonym = singularize_pluralize_words([term])
+        forms_per_synonym = singularize_pluralize_words(include_terms)
+
+        synonyms = query_datamuse_synonyms(' '.join(include_terms))
         forms_per_synonym.extend(singularize_pluralize_words(synonyms))
+
         all_synonyms = [form for term in forms_per_synonym for form in term.values()]
         all_synonyms = list(dict.fromkeys(all_synonyms))  # Remove duplicates while still preserving their order (i.e., relevancy)
 
         # Remove the searched form of the include_term from the list of synonyms (cannot be its own synonym)
-        all_synonyms.remove(term)
+        all_synonyms = [syn for syn in all_synonyms if syn not in include_terms]
 
         # Get all the Tags that match one of the synonyms in their tag value (case-insensitive)
-        query = Q()
-        for synonym in all_synonyms:
-            query |= Q(tag__iexact=synonym)
-        query &= Q(global_blacklist=False)
-        synonymous_tags = Tag.objects.filter(query)
+        if len(all_synonyms) > 0:
+            query = Q()
+            for synonym in all_synonyms:
+                query |= Q(tag__iexact=synonym)
+            query &= Q(global_blacklist=False)
+            query &= Q(public_tags__isnull=False)  # Must exist as public tags
+            synonymous_tags = Tag.objects.filter(query).distinct()
 
-        if synonymous_tags.exists():
-            for synonymous_tag in synonymous_tags:
-                if count_tags_for_term < max_synonym_per_term:
-                    # Need to format it as a dict to stay consistent with return format of get_all_tags_for_item()
-                    returned_synonymous_tags.append({"tag": synonymous_tag.tag})
-                    count_tags_for_term += 1
+            if synonymous_tags.exists():
+                for synonymous_tag in synonymous_tags:
+                    if len(returned_synonymous_tags) < 20: # Return max. 20 synonyms
+                        # Need to format it as a dict to stay consistent with return format of get_all_tags_for_item()
+                        returned_synonymous_tags.append({"tag": synonymous_tag.tag})
     return returned_synonymous_tags
 
 
@@ -424,34 +422,43 @@ def get_related_tags(include_terms, filtered_results, synonymous_tags):
 
     # Only query datamuse for related terms if still don't have 20 tags in returned_related_tags
     if len(returned_related_tags) < 20:
-        # Determine how many related tags per term searched (return max 20 related tags total)
-        max_related_per_term = (20 - len(returned_related_tags)) / len(include_terms)
-        for term in include_terms:
-            count_tags_for_term = 0
-            related_words = query_datamuse_related_words(term)
+        related_words = query_datamuse_related_words(' '.join(include_terms))
 
-            # Get all the Tags that include at least one of the related_words in their tag value (case-insensitive)
+        # Get all the Tags that include at least one of the related_words in their tag value (case-insensitive)
+        if len(related_words) > 0:
             query = Q()
             for rel_word in related_words:
                 query |= Q(tag__icontains=rel_word)
             query &= Q(global_blacklist=False)
+            query &= Q(public_tags__isnull=False)  # Must exist as public tags
             related_tags = Tag.objects.filter(query)
 
             if related_tags.exists():
                 for related_tag in related_tags:
-                    if count_tags_for_term < max_related_per_term:
+                    if len(returned_related_tags) < 20:
                         # Need to format it as a dict to stay consistent with return format of get_all_tags_for_item()
                         returned_related_tags.append({"tag": related_tag.tag})
-                        count_tags_for_term += 1
 
     # Exclude any related_tag that is an exact match to any of the include_terms
     returned_related_tags = [tag for tag in returned_related_tags if tag['tag'] not in include_terms]
+
+    # Exclude any related_tag that is an exact match to the entire search string
+    include_search_string = ' '.join(include_terms)
+    returned_related_tags = [tag for tag in returned_related_tags if tag['tag'] != include_search_string]
 
     # Exclude any related_tag that is already in synonymous tags
     synonyms = [syn_tag["tag"] for syn_tag in synonymous_tags]
     returned_related_tags = [tag for tag in returned_related_tags if tag['tag'] not in synonyms]
 
-    return returned_related_tags
+    # Remove duplicates while also preserving the order
+    first_occurrences = set()
+    unique_returned_tags = []
+    for tag in returned_related_tags:
+        if tag['tag'] not in first_occurrences:
+            first_occurrences.add(tag['tag'])
+            unique_returned_tags.append(tag)
+
+    return unique_returned_tags
 
 
 def remove_globally_banned_tags_from_tag_search(search_string):
@@ -877,7 +884,7 @@ def update_pin_datetime(sender, instance, **kwargs):
 # DATAMUSE API QUERIES
 
 def query_datamuse_synonyms(word):
-    """Function for retrieving synonyms from Datamuse API"""
+    """Function for retrieving 100 synonyms from Datamuse API"""
     url = f"https://api.datamuse.com/words?ml={word}"
     response = requests.get(url)
     if response.status_code == 200:
@@ -888,7 +895,7 @@ def query_datamuse_synonyms(word):
 
 
 def query_datamuse_related_words(word):
-    """Function for retrieving related words from Datamuse API"""
+    """Function for retrieving 100 related words from Datamuse API"""
     url = f"https://api.datamuse.com/words?rel_trg={word}"
     response = requests.get(url)
     if response.status_code == 200:
