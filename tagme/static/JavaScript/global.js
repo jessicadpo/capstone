@@ -2,6 +2,7 @@ const topBar = document.getElementById('top-bar');
 const searchBar = document.querySelector('#top-bar #search-bar');  // Only applies to the search bar in top bar (not homepage search bar)
 const closeSearchBarButton = document.getElementById('close-search-bar-button');
 const openSearchBarButton = document.getElementById('open-search-bar-button');
+const searchForm = document.getElementById("search-bar"); // Applies to search bar in ALL pages (including homepage)
 
 const mainContent = document.getElementById('main-content');
 const footer = document.getElementById('footer');
@@ -611,7 +612,6 @@ function closeDropdown(dropdown, event) {
         dropdownOptions = dropdown.querySelector('.dropdown-options');
         dropdownOptions.classList.remove('show');
     }
-
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -693,6 +693,22 @@ document.addEventListener("DOMContentLoaded", function() {
             searchFormSelect.value = selectedValue;
             this.parentElement.classList.remove('show');
         });
+    });
+
+    // Clean search terms before submit
+    searchForm.addEventListener("submit", function(event) {
+        const searchInput = searchForm.querySelector("#search-input");
+
+        // Remove any leading and trailing whitespaces from search string
+        searchInput.value = searchInput.value.trim();
+
+        // Require at least 1 non-whitespace character for search
+        if ((searchInput.value).length === 0) {
+            event.preventDefault();
+            searchInput.style.borderColor = "#B52801";
+            searchInput.placeholder = "Cannot search empty text";
+            searchInput.classList.add("invalid-search"); // So placeholder text becomes red (via global.css)
+        }
     });
 
     // Set tri-state checkboxes (for all pages, if they have any)

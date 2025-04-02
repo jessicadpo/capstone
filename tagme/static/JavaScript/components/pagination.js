@@ -80,7 +80,14 @@ function setResponsiveBottomPaginationBehaviour() {
 
 function fetchPage(pageNumberToFetch) {
     // Send AJAX request to get next page of comments (without reloading the page)
-    fetch(page_url + "?page=" + pageNumberToFetch, {
+    const currentGetParams = new URLSearchParams(window.location.search);
+    let paginationQuery = "?page=" + pageNumberToFetch;
+    if (currentGetParams.get("page")) {
+        currentGetParams.set("page", pageNumberToFetch);
+        paginationQuery = "?" + currentGetParams.toString();
+    }
+
+    fetch(page_url + paginationQuery, {
         method: 'GET',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -95,10 +102,14 @@ function fetchPage(pageNumberToFetch) {
 
         if (data.url_name === 'item_page') {
             setCommentsBehaviour(); // defined in user_comment.js
-        } else if (data.url_name === 'pinned_items') { // TODO: Also call if search_results page?
+        } else if (data.url_name === 'pinned_items') {
             setPinItemButtonBehaviour(); // defined in tag_modal.js
             setResponsiveBottomPaginationBehaviour();
             document.getElementById('open-filter-menu-button').addEventListener("click", openFilterMenu);
+        } else if (data.url_name === 'search_results') {
+            setPinItemButtonBehaviour(); // defined in tag_modal.js
+            setResponsiveBottomPaginationBehaviour();
+            document.getElementById('open-search-sidebar-button').addEventListener("click", openSearchSidebar);
         }
     });
 }

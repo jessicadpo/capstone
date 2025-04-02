@@ -1033,6 +1033,10 @@ dialog div.tooltip {  /* Overrides default tooltip styling (global.css) */
         font-size: 1.1rem;
     }
 
+    & #search-input.invalid-search::placeholder {
+        color: red;
+    }
+
     & #search-button {
         flex-shrink: 0;
         height: 40px;

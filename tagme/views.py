@@ -162,7 +162,7 @@ def pinned_items(request, username):
     })
 
 
-def search_results(request, requested_page_number):
+def search_results(request):
     """View for Search Results pages"""
     page_forms = {"search_form": SearchForm(),
                   "tags_form": TagsForm(),
@@ -177,37 +177,51 @@ def search_results(request, requested_page_number):
         elif form_result is True:  # If processed EquipForm && new title equipped successfully
             return HttpResponse(status=204)  # NOT a render() so that page doesn't reload AGAIN
 
-    # TODO: Code for parsing AND/OR/NOT/*/? --> Investigate pyparsing & Shunting Yard algorithm
+    # ----------If AJAX request (i.e., page already loaded)----------
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        results_on_page = list(request.session.get('results_from_referrer').values())
+        current_page = paginate(request, results_on_page, "search_results.html", page_forms)
+        return JsonResponse({'html': current_page, 'url_name': request.resolver_match.url_name})
 
+    requested_page_number = request.GET.get('page')
     search_string = request.GET.get('search_string')
-    results_on_page = []
-    pagination = None
+    include_terms, exclude_terms = parse_search_string(search_string)  # Separate out the two types of terms for API calls
+    include_only_string = ' '.join(include_terms)  # Recreate the string with just included terms for the API
+
     match request.GET.get('search_type'):
         case "Keyword":
-            results_on_page, pagination = query_loc_keyword(search_string, requested_page_number)
-
-            clean_search_string = remove_globally_banned_tags_from_tag_search(search_string)  # pylint: disable=unused-variable
-            # Disable pylint ignore once finish this
-            # TODO: Need to also search our UserContribution model
+            # Query the API to get a list of all the results it returns
+            keyword_results = query_loc_gateway(include_only_string)
+            filtered_results = filter_keyword_search_results(keyword_results, exclude_terms)
         case "Tag":
+            # Prevent blacklisted terms from being searched
+            clean_search_string = remove_globally_banned_tags_from_tag_search(search_string)
+            include_terms, exclude_terms = parse_search_string(clean_search_string)
 
-            singular_form, plural_form = get_singular_plural_forms(search_string)
-            clean_search_string = remove_globally_banned_tags_from_tag_search(search_string)  # pylint: disable=unused-variable
-
-            print("placeholder code")  # Replace with Django queries
+            # If there is an include search string, but no include_terms (e.g., the searched tag is globally-blacklisted)
+            if include_only_string and len(include_terms) == 0:
+                filtered_results = []
+            else:
+                filtered_results = get_tag_search_results(include_terms, exclude_terms)
         case "Title":
-            print("placeholder code")  # Replace with API call
+            # Query the API to get a list of all the results it returns
+            title_results = query_loc_gateway(include_only_string)
+            filtered_results = filter_title_author_search_results(title_results, 'title', include_terms, exclude_terms)
         case "Author":
-            print("placeholder code")  # Replace with API call
+            # Query the API to get a list of all the results it returns
+            author_results = query_loc_gateway(include_only_string)
+            filtered_results = filter_title_author_search_results(author_results, 'authors', include_terms, exclude_terms)
         case "Subject":
-            print("placeholder code")  # Replace with API call
+            # Query the API to get a list of all the results it returns
+            subject_results = query_loc_gateway(include_only_string)
+            filtered_results = filter_subject_search_results(subject_results, include_terms, exclude_terms)
         case _:
             raise Http404("Invalid search type")
 
     # Add "is_pinned" to every item in results_on_page
     # Get user's tags for each pinned item in current results
     if request.user.is_authenticated:
-        for item_data in results_on_page:
+        for item_data in filtered_results:
             user_public_tags, user_private_tags = get_user_tags_for_item(request.user, item_data["item_id"])
             item_data['user_public_tags'] = user_public_tags
             item_data['user_private_tags'] = user_private_tags
@@ -215,15 +229,16 @@ def search_results(request, requested_page_number):
             item_data['points_earned'] = get_user_points_for_item(request.user, item_data["item_id"])
 
     # Get lists of synonymous & related tags
-    synonymous_tags = get_synonymous_tags(request.GET.get('search_string'))
-    related_tags = get_related_tags(request.GET.get('search_string'), results_on_page)
+    synonymous_tags = get_synonymous_tags(include_terms)
+    related_tags = get_related_tags(include_terms, filtered_results, synonymous_tags)
 
-    # Store results in session
-    request.session['results_from_referrer'] = {item['item_id']: item for item in results_on_page}
+    # Store results in session (for item page link)
+    request.session['results_from_referrer'] = {item['item_id']: item for item in filtered_results}
+
+    results_on_page = paginate(request, filtered_results, 'search_results.html', page_forms, requested_page_number=requested_page_number)
 
     return render(request, 'search_results.html', {
         'current_page': results_on_page,
-        'pagination': pagination,
         'forms': page_forms,
         'synonymous_tags': synonymous_tags,
         'related_tags': related_tags,

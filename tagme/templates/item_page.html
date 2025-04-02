@@ -58,7 +58,7 @@
                             <h1>Subject Headings</h1>
                             <div id="item-subject-headings">
                                 {% for subject in item.subjects %}
-                                    <a href="#" class="subject-heading-link">{{ subject }}</a>
+                                    <a href="/search/?search_type=Subject&search_string={{ subject }}&page=1" class="subject-heading-link">{{ subject }}</a>
                                 {% endfor %}
                             </div>
                         {% endif %}

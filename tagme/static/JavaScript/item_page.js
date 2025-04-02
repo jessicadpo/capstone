@@ -13,8 +13,8 @@ const reportButtons = document.querySelectorAll('.report-button');
 
 function setBackLink() {
     // Store link to search results page in sessionStorage
-    // ONLY store links that include "/search/#/?search_type=..." in the URL
-    const search_results_URL_pattern = /\/search\/\d+\/\?search_type=/;
+    // ONLY store links that include "/search/?search_type=..." in the URL
+    const search_results_URL_pattern = /\/search\/\?search_type=/;
 
     if (search_results_URL_pattern.test(document.referrer)) {
         sessionStorage.setItem("search_results_referrer", document.referrer);

@@ -54,85 +54,24 @@
             </div>
         </div>
 
-        <div id="main-content" class="results-section"> <!-- Need main-content id for openSidebar() function (see global.js) -->
-            <div id="results-header">
-                <h1>{{ request.GET.search_type}} results for: <b>"{{ request.GET.search_string }}"</b></h1>
-                <button id="open-search-sidebar-button" aria-label="Browse synonymous & related tags">Browse tags</button>
-                {% include 'components/pagination_top.html' %}
-            </div>
-
-            <div id="results-list">
-                {% for item in current_page %}
-                    {% include "components/item_result.html" %}
-                {% empty %}
-                    <p>No results found.</p>
-                {% endfor %}
-            </div>
-
-            <!-- TODO: Replace with include components/pagination_footer.html once have Search figured out -->
-            <div id="pagination-footer">
-                <p> {{ pagination.from }} to {{ pagination.to }} of {{ pagination.of }} results</p>
-
-                <div id="bottom-page-navigation">
-                    {% if pagination.current == 1 %}
-                        <a class="bottom-prev-page" aria-label="Previous page" href="{% url 'search_results' 1 %}?search_type={{ request.GET.search_type }}&search_string={{ request.GET.search_string }}">
-                            <i class="fa fa-angle-left" aria-hidden="true"></i>
-                        </a>
-                    {% else %}
-                        <a class="bottom-prev-page" aria-label="Previous page" href="{% url 'search_results' pagination.current|subtract:1 %}?search_type={{ request.GET.search_type }}&search_string={{ request.GET.search_string }}">
-                            <i class="fa fa-angle-left" aria-hidden="true"></i>
-                        </a>
-                    {% endif %}
-
-                    {% if pagination.current > 3 %}
-                        <a aria-label="Page 1" href="{% url 'search_results' 1 %}?search_type={{ request.GET.search_type }}&search_string={{ request.GET.search_string }}">1</a>
-                    {% endif %}
-
-                    {% if pagination.current > 4 %}
-                        <form>
-                            <input class="page-number-input" aria-label="Enter the previous page number to go to" type="number" max="{{ pagination.total }}"/>
-                        </form>
-                    {% endif %}
-
-                    {% if pagination.current > 2 %}
-                        <a aria-label="Page {{ pagination.current|subtract:2 }}" href="{% url 'search_results' pagination.current|subtract:2 %}?search_type={{ request.GET.search_type }}&search_string={{ request.GET.search_string }}">{{ pagination.current|subtract:2 }}</a>
-                    {% endif %}
-
-                    {% if pagination.current > 1 %}
-                        <a aria-label="Page {{ pagination.current|subtract:1 }}" href="{% url 'search_results' pagination.current|subtract:1 %}?search_type={{ request.GET.search_type }}&search_string={{ request.GET.search_string }}">{{ pagination.current|subtract:1 }}</a>
-                    {% endif %}
-
-                    <a id="current-page-link" aria-label="Page {{ pagination.current }}, Current page" href="">{{ pagination.current }}</a>
-
-                    {% if pagination.current < pagination.total %}
-                        <a aria-label="Page {{ pagination.current|add:1 }}" href="{% url 'search_results' pagination.current|add:1 %}?search_type={{ request.GET.search_type }}&search_string={{ request.GET.search_string }}">{{ pagination.current|add:1 }}</a>
-                    {% endif %}
-
-                    {% if pagination.current < pagination.total|subtract:1 %}
-                        <a aria-label="Page {{ pagination.current|add:2 }}" href="{% url 'search_results' pagination.current|add:2 %}?search_type={{ request.GET.search_type }}&search_string={{ request.GET.search_string }}">{{ pagination.current|add:2 }}</a>
-                    {% endif %}
-
-                    {% if pagination.current < pagination.total|subtract:3 %}
-                        <form>
-                            <input class="page-number-input" aria-label="Enter the next page number to go to" type="number" max="{{ pagination.total }}"/>
-                        </form>
-                    {% endif %}
-
-                    {% if pagination.current < pagination.total|subtract:2 %}
-                        <a aria-label="Page {{ pagination.total }}, Last page" href="{% url 'search_results' pagination.total %}?search_type={{ request.GET.search_type }}&search_string={{ request.GET.search_string }}">{{ pagination.total }}</a>
-                    {% endif %}
-
-                    {% if pagination.current == pagination.total %}
-                        <a class=bottom-next-page" aria-label="Next page" href="{% url 'search_results' pagination.total %}?search_type={{ request.GET.search_type }}&search_string={{ request.GET.search_string }}">
-                            <i class="fa fa-angle-right" aria-hidden="true"></i>
-                        </a>
-                    {% else %}
-                        <a class="bottom-next-page" aria-label="Next page" href="{% url 'search_results' pagination.current|add:1 %}?search_type={{ request.GET.search_type }}&search_string={{ request.GET.search_string }}">
-                            <i class="fa fa-angle-right" aria-hidden="true"></i>
-                        </a>
-                    {% endif %}
+        <div id="main-content" class="results-section paginated-content"> <!-- Need main-content id for openSidebar() function (see global.js) -->
+            {% with "results" as content_type %}
+                <div id="results-header">
+                    <h1>{{ request.GET.search_type}} results for: <b>"{{ request.GET.search_string }}"</b></h1>
+                    <button id="open-search-sidebar-button" aria-label="Browse synonymous & related tags">Browse tags</button>
+                    {% include 'components/pagination_top.html' %}
                 </div>
-            </div>
+
+                <div id="results-list">
+                    {% for item in current_page %}
+                        {% include "components/item_result.html" %}
+                    {% empty %}
+                        <p>No results found.</p>
+                    {% endfor %}
+                </div>
+
+                {% include 'components/pagination_footer.html' %}
+            {% endwith %}
         </div>
     </main>
 
@@ -144,7 +83,7 @@
     <script type="text/javascript" src="../../static/JavaScript/global.js"></script>
     <script type="text/javascript" src="../../static/JavaScript/components/new_reward_modal.js"></script>
     <script type="text/javascript" src="../../static/JavaScript/components/tag_modal.js"></script>
-    <!--<script type="text/javascript" src="../../static/JavaScript/components/pagination.js"></script> TODO-->
+    <script type="text/javascript" src="../../static/JavaScript/components/pagination.js"></script>
     <script type="text/javascript" src="../../static/JavaScript/search_results.js"></script>
 </body>
 </html>

@@ -18,7 +18,12 @@ class SearchForm(forms.Form):
     search_type = forms.ChoiceField(label=False, choices=SEARCH_TYPES, required=True, widget=forms.Select(
         attrs={'id': 'search-type-select'}))
     search_string = forms.CharField(label=False, min_length=1, max_length=999, widget=forms.TextInput(
-        attrs={'id': 'search-input', 'placeholder': 'Search', 'label': 'Search'}))
+        attrs={'id': 'search-input', 'placeholder': 'Search', 'label': 'Search',
+               'title': 'Use "-" before a search term to exclude items from your search (e.g. "-vampires" in a tag search '
+                        'is equivalent to NOT(vampires) and will exclude all items with the "vampires" tag).\n\n'
+                        '"AND" relationships are implied between all space-separated search terms (e.g., "mount everest" '
+                        'in a tag search will only return items with both "mount" and "everest" in their tags).'}))
+    page = forms.IntegerField(widget=forms.HiddenInput(), initial=1)  # New searches will always request page 1
 
 
 class SortFilterForm(forms.Form):
