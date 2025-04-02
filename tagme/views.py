@@ -372,6 +372,8 @@ def process_login_form(request):
 
 def process_tags_form(request, item_data):
     """Function for processing "Add Tags" form"""
+    if item_data is None:
+        item_data = query_loc_single_item(str(request.POST['tagged_item']))
     tags_form = TagsForm(request.POST)
     if tags_form.is_valid():  # cleans form inputs
         prev_score = get_user_total_points(request.user)

@@ -365,22 +365,15 @@ def get_synonymous_tags(include_terms):
     """Function for getting (non-blacklisted) tags that are synonyms of a list of given words"""
     returned_synonymous_tags = []
     if len(include_terms) > 0:
-        # Include the other forms of the include_term as synonyms
-        forms_per_synonym = singularize_pluralize_words(include_terms)
-
+        # NOTE: Do NOT need to include the different forms of each synonym since
+        # tag search already includes all the forms in the search results
+        # e.g., "boat" and "boats" tags return the exact same search results
         synonyms = query_datamuse_synonyms(' '.join(include_terms))
-        forms_per_synonym.extend(singularize_pluralize_words(synonyms))
-
-        all_synonyms = [form for term in forms_per_synonym for form in term.values()]
-        all_synonyms = list(dict.fromkeys(all_synonyms))  # Remove duplicates while still preserving their order (i.e., relevancy)
-
-        # Remove the searched form of the include_term from the list of synonyms (cannot be its own synonym)
-        all_synonyms = [syn for syn in all_synonyms if syn not in include_terms]
 
         # Get all the Tags that match one of the synonyms in their tag value (case-insensitive)
-        if len(all_synonyms) > 0:
+        if len(synonyms) > 0:
             query = Q()
-            for synonym in all_synonyms:
+            for synonym in synonyms:
                 query |= Q(tag__iexact=synonym)
             query &= Q(global_blacklist=False)
             query &= Q(public_tags__isnull=False)  # Must exist as public tags
@@ -439,15 +432,19 @@ def get_related_tags(include_terms, filtered_results, synonymous_tags):
                         # Need to format it as a dict to stay consistent with return format of get_all_tags_for_item()
                         returned_related_tags.append({"tag": related_tag.tag})
 
-    # Exclude any related_tag that is an exact match to any of the include_terms
-    returned_related_tags = [tag for tag in returned_related_tags if tag['tag'] not in include_terms]
+    # Exclude any related_tag that is an exact match to any of the include_terms & their different forms
+    include_forms_per_term = singularize_pluralize_words(include_terms)
+    include_all_terms = {form for term in include_forms_per_term for form in term.values()}
+    returned_related_tags = [tag for tag in returned_related_tags if tag['tag'] not in include_all_terms]
 
     # Exclude any related_tag that is an exact match to the entire search string
     include_search_string = ' '.join(include_terms)
     returned_related_tags = [tag for tag in returned_related_tags if tag['tag'] != include_search_string]
 
-    # Exclude any related_tag that is already in synonymous tags
+    # Exclude any related_tag that is already in synonymous tags or a different form of a synonymous tag
     synonyms = [syn_tag["tag"] for syn_tag in synonymous_tags]
+    forms_per_synonym = singularize_pluralize_words(synonyms)
+    synonyms = {form for term in forms_per_synonym for form in term.values()}
     returned_related_tags = [tag for tag in returned_related_tags if tag['tag'] not in synonyms]
 
     # Remove duplicates while also preserving the order
@@ -884,8 +881,8 @@ def update_pin_datetime(sender, instance, **kwargs):
 # DATAMUSE API QUERIES
 
 def query_datamuse_synonyms(word):
-    """Function for retrieving 100 synonyms from Datamuse API"""
-    url = f"https://api.datamuse.com/words?ml={word}"
+    """Function for retrieving max. 50 synonyms from Datamuse API"""
+    url = f"https://api.datamuse.com/words?ml={Word(word).singularize()}&max=50"
     response = requests.get(url)
     if response.status_code == 200:
         words = response.json()
@@ -895,8 +892,8 @@ def query_datamuse_synonyms(word):
 
 
 def query_datamuse_related_words(word):
-    """Function for retrieving 100 related words from Datamuse API"""
-    url = f"https://api.datamuse.com/words?rel_trg={word}"
+    """Function for retrieving max. 50 related words from Datamuse API"""
+    url = f"https://api.datamuse.com/words?rel_trg={word}&max=50"
     response = requests.get(url)
     if response.status_code == 200:
         words = response.json()

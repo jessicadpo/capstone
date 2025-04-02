@@ -144,11 +144,12 @@ def get_item_from_session(request, item_id=None):
     - If item_id NOT given NOR in request.POST --> returns None.
     """
     items_in_session = request.session.get('results_from_referrer', {})
+    return_item = None
     if item_id is not None:
-        return items_in_session.get(str(item_id))
+        return_item = items_in_session.get(str(item_id))
     if "tagged_item" in request.POST:
-        return items_in_session.get(str(request.POST['tagged_item']))
-    return None
+        return_item = items_in_session.get(str(request.POST['tagged_item']))
+    return return_item
 
 
 def is_default_sort_and_filter(get_request):
