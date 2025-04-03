@@ -399,6 +399,7 @@ def get_related_tags(include_terms, filtered_results, synonymous_tags):
     """
     # Get the public tags for all the items in the filtered results
     # and count on how many items each tag has been used (within the filtered_results)
+    #TODO: What if more than 20 related tags?
     tags_in_results = {}
     for item in filtered_results:
         item_public_tags = get_all_tags_for_item(item['item_id'])
