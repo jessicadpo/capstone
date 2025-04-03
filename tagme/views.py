@@ -183,7 +183,6 @@ def search_results(request):
         current_page = paginate(request, results_on_page, "search_results.html", page_forms)
         return JsonResponse({'html': current_page, 'url_name': request.resolver_match.url_name})
 
-    requested_page_number = request.GET.get('page')
     search_string = request.GET.get('search_string')
     include_terms, exclude_terms = parse_search_string(search_string)  # Separate out the two types of terms for API calls
     include_only_string = ' '.join(include_terms)  # Recreate the string with just included terms for the API
@@ -235,7 +234,7 @@ def search_results(request):
     # Store results in session (for item page link)
     request.session['results_from_referrer'] = {item['item_id']: item for item in filtered_results}
 
-    results_on_page = paginate(request, filtered_results, 'search_results.html', page_forms, requested_page_number=requested_page_number)
+    results_on_page = paginate(request, filtered_results, 'search_results.html', page_forms)
 
     return render(request, 'search_results.html', {
         'current_page': results_on_page,

@@ -12,7 +12,6 @@ import requests
 from django.utils.timezone import localtime
 from django.db import transaction
 from django.db.models import Count
-from django.db.models.functions import Lower
 from django.db.models.signals import pre_save, post_save, pre_delete, post_delete, post_migrate
 from django.forms.models import model_to_dict
 from django.contrib.auth import PermissionDenied
