@@ -402,7 +402,9 @@ def get_related_tags(include_terms, filtered_results, synonymous_tags):
         item_public_tags = get_all_tags_for_item(item['item_id'])
         if item_public_tags is not None:
             for public_tag in item_public_tags:
-                tag = public_tag['tag']
+                # Only use singularized forms for related tags.
+                # Clicking on the tag will include pluralized in search results anyways
+                tag = Word(public_tag['tag']).singularize()
                 item_count = tags_in_results[tag] + 1 if tag in tags_in_results else 1
                 tags_in_results[tag] = item_count
 
@@ -432,8 +434,10 @@ def get_related_tags(include_terms, filtered_results, synonymous_tags):
             if related_tags.exists():
                 for related_tag in related_tags:
                     if len(returned_related_tags) < 20:
+                        # Only use singularized forms for related tags.
+                        # Clicking on the tag will include pluralized in search results anyways
                         # Need to format it as a dict to stay consistent with return format of get_all_tags_for_item()
-                        returned_related_tags.append({"tag": related_tag.tag})
+                        returned_related_tags.append({"tag": Word(related_tag.tag).singularize()})
 
     # Exclude any related_tag that is an exact match to any of the include_terms & their different forms
     include_forms_per_term = singularize_pluralize_words(include_terms)
