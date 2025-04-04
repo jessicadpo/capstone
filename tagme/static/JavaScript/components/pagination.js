@@ -3,12 +3,11 @@ const nextPageButtons = document.querySelectorAll('.next-page-button');
 
 // If both pagination_top and pagination_bottom used in the same page, page will have duplicate fields
 // for storing this info, thus why we're using classes/querySelectorAll instead of ids/getElementById
-var page_url = null;
 var currentPageNumber = null;
 var lastPageNumber = null;
 
-if (document.querySelectorAll('.page-url').length > 0) {
-    page_url = document.querySelectorAll('.page-url')[0].value; // FIXME: Error on item pages? ([0] is undefined)
+// Only set if page contains a pagination-top or pagination-footer
+if (document.getElementById("pagination-top") || document.getElementById("pagination-footer")) {
     currentPageNumber = parseInt(document.querySelectorAll('.current-page-number')[0].value);
     lastPageNumber = parseInt(document.querySelectorAll('.last-page-number')[0].value);
 }
@@ -84,7 +83,7 @@ function fetchPage(pageNumberToFetch) {
     currentGetParams.set("page", pageNumberToFetch);
     paginationQuery = "?" + currentGetParams.toString();
 
-    fetch(page_url + paginationQuery, {
+    fetch(window.location.pathname + paginationQuery, {
         method: 'GET',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -110,7 +109,7 @@ function fetchPage(pageNumberToFetch) {
         }
 
         // Update URL
-        const newURL = page_url + paginationQuery;
+        const newURL = window.location.pathname + paginationQuery;
         history.pushState({ path: newURL}, "", newURL);
     });
 }

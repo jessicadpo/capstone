@@ -41,9 +41,6 @@ def get_filtered_user_pinned_items(user, get_request):
     that fit the filters selected by the user (i.e., in the GET request).
     - Returned items are organized in the same format used by Search Results page.
     """
-
-    # TODO (?): Design does not allow for filtering a particular tag only if it's public/private
-
     sort_by_filter = get_sort_by_filter(get_request)
     filter_query, exclude_query, tag_include_queries = get_pinned_items_filters(get_request)
 

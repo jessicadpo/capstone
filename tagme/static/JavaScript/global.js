@@ -696,20 +696,22 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // Clean search terms before submit
-    searchForm.addEventListener("submit", function(event) {
-        const searchInput = searchForm.querySelector("#search-input");
+    if (searchForm) { // Only execute code for pages that have a search bar
+        searchForm.addEventListener("submit", function(event) {
+            const searchInput = searchForm.querySelector("#search-input");
 
-        // Remove any leading and trailing whitespaces from search string
-        searchInput.value = searchInput.value.trim();
+            // Remove any leading and trailing whitespaces from search string
+            searchInput.value = searchInput.value.trim();
 
-        // Require at least 1 non-whitespace character for search
-        if ((searchInput.value).length === 0) {
-            event.preventDefault();
-            searchInput.style.borderColor = "#B52801";
-            searchInput.placeholder = "Cannot search empty text";
-            searchInput.classList.add("invalid-search"); // So placeholder text becomes red (via global.css)
-        }
-    });
+            // Require at least 1 non-whitespace character for search
+            if ((searchInput.value).length === 0) {
+                event.preventDefault();
+                searchInput.style.borderColor = "#B52801";
+                searchInput.placeholder = "Cannot search empty text";
+                searchInput.classList.add("invalid-search"); // So placeholder text becomes red (via global.css)
+            }
+        });
+    }
 
     // Set tri-state checkboxes (for all pages, if they have any)
     triStateCheckboxContainer.forEach(container => {

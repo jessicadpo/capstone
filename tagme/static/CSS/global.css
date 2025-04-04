@@ -356,14 +356,14 @@ input[type='checkbox']:indeterminate { /* Only applies to tri-state checkboxes *
     cursor: pointer;
 
     & i {
-        font-size: 1.7rem; /* TODO: Check size in item page */
+        font-size: 1.7rem;
         transform: rotate(45deg);
     }
 
     & span {
         text-align: center;
         font-weight: 400;
-        font-size: 1.5rem; /* TODO: Check size in item page */
+        font-size: 1.5rem;
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;

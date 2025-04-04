@@ -138,7 +138,6 @@ class Report(models.Model):
     decision = models.CharField(max_length=16, blank=True, null=True, choices=ReportDecision)
     decision_datetime = models.DateTimeField(blank=True, null=True)
     # Do NOT use auto_now=True because decision_datetime should not be set when report is first created
-    # TODO: Need to also store ID of decision author? (for traceability?) --> do only if asked about it
 
     def save(self, *args, **kwargs):
         if self.decision:  # If new decision has been made, set decision_datetime to now

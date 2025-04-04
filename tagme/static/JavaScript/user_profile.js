@@ -21,6 +21,9 @@ function setCurrentProgressBarWidth() {
     const pointsGoal = parseInt(endTickNumberSpan.textContent);
 
     let progress_percentage = Math.round((currentProgressPoints / pointsGoal) * 100);
+    if (progress_percentage > 100) {
+        progress_percentage = 100;
+    }
     currentProgressBar.style.width = progress_percentage.toString() + "%";
 }
 
@@ -40,7 +43,7 @@ function preventTickmarkOverlap() {
     if (middleTick.left < endTick.right && middleTick.right > endTick.left) {
         /* Reposition middleTickNumberSpan more towards the left */
         const overlapAmount = middleTick.right - endTick.left;
-        middleTickNumberSpan.style.right = (overlapAmount + 5).toString() + "px";
+        middleTickNumberSpan.style.right = (overlapAmount + 10).toString() + "px";
     }
 }
 

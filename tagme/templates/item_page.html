@@ -126,7 +126,7 @@
         </div>
     </main>
 
-    <div class="sidebar-overlay"></div> <!-- TODO: id so overlay behaves differently from add-tags-overlay -->
+    <div class="sidebar-overlay"></div>
 
     <aside id="tag-sidebar">
         <div class="header-with-x-button">
@@ -135,7 +135,6 @@
         </div>
 
         <div id="sidebar-main-content">
-            <!-- TODO: For loop for ALL item's tags -->
             {% for tag in item.tags %}
                 <div class="tag-entry">
                     {% include "components/tag.html" %}

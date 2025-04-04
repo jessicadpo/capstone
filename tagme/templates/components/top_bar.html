@@ -1,18 +1,18 @@
 <div id="top-bar">
     <!--Do not show logo in top-left if on homepage-->
-    {% if request.get_full_path != "/" %}
+    {% if request.path != "/" %}
         <a href="http://127.0.0.1:8000/" aria-label="Return to homepage" title="Return to homepage" id="return-to-homepage">
             <img src="../../static/icons/logo.png" alt="TagMe logo" id="top-bar-logo">
         </a>
     {% endif %}
 
     <!--Do not show search bar if on homepage or on signup-login page -->
-    {% if request.get_full_path != "/" and request.get_full_path != "/signup-login" %}
+    {% if request.path != "/" and request.path != "/signup-login" %}
         {% include "components/search_bar.html" %}
     {% endif %}
 
     <!--Do not show signup/login/account menu in top-right if on signup-login page-->
-    {% if request.get_full_path != "/signup-login" %}
+    {% if request.path != "/signup-login" %}
         <!--Show account menu if user is logged in-->
         {% if request.user.is_authenticated %}
             <div class="dropdown" id="account-dropdown">
