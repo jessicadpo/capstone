@@ -123,6 +123,7 @@ function addTag(newTagValue, isPublic) {
             privateTagsContainer.appendChild(tagObject);
         }
 
+        setResponsiveTagModalBehaviour();
         return true; // tag was successfully added
     }
     return false;
@@ -133,6 +134,7 @@ function removeTag(removeButton) {
     if (tagDiv) {
         tagDiv.remove();
         setTotalPointsEarned();
+        setResponsiveTagModalBehaviour();
     }
 }
 

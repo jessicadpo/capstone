@@ -4,6 +4,7 @@ import re
 import string
 
 from bs4 import BeautifulSoup
+from textblob import Word
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.template.loader import render_to_string
@@ -143,11 +144,12 @@ def get_item_from_session(request, item_id=None):
     - If item_id NOT given NOR in request.POST --> returns None.
     """
     items_in_session = request.session.get('results_from_referrer', {})
+    return_item = None
     if item_id is not None:
-        return items_in_session.get(str(item_id))
+        return_item = items_in_session.get(str(item_id))
     if "tagged_item" in request.POST:
-        return items_in_session.get(str(request.POST['tagged_item']))
-    return None
+        return_item = items_in_session.get(str(request.POST['tagged_item']))
+    return return_item
 
 
 def is_default_sort_and_filter(get_request):
@@ -192,3 +194,87 @@ def extract_paginated_html(full_page_html):
     html_parser = BeautifulSoup(full_page_html, 'html.parser')
     paginated_content_html = html_parser.find_all('div', class_="paginated-content")
     return str(paginated_content_html[0])
+
+
+def parse_search_string(search_string):
+    """Function for dividing a search string into different kinds of terms"""
+    terms = search_string.lower().split()
+    include_terms = [term for term in terms if not term.startswith("-") and term != "-"]
+    exclude_terms = [term.lstrip("-") for term in terms if term.startswith("-") and term != "-"]
+    return include_terms, exclude_terms
+
+
+def filter_title_author_search_results(unfiltered_results, target_category, include_terms, exclude_terms):
+    """
+    Function for filtering a list of search results items to those which include and exclude certain terms
+    unfiltered_results must be a list of items (see results_on_page in _query_loc_api in queries.py)
+    target_category must correspond to one of the keys for a results_on_page items' string-based values
+    include_terms and exclude_terms must be lists of strings that do not contain whitespace characters
+    """
+    filtered_results = []
+    for item in unfiltered_results:
+        # Lowercase the title so that matching is easy
+        lower_category = item.get(target_category).lower()
+
+        # Boolean, true if the title has all include terms
+        include_check = all(term.lower() in lower_category for term in include_terms)
+
+        # Boolean, true if the title has none of the exclude terms
+        exclude_check = not any(term.lower() in lower_category for term in exclude_terms)
+
+        if include_check and exclude_check:
+            filtered_results.append(item)
+    return filtered_results
+
+
+def filter_keyword_search_results(unfiltered_results, exclude_terms):
+    """Function for filtering out any KEYWORD search results that include excluded terms"""
+    # Filter all results without the right terms
+    filtered_results = []
+    for item in unfiltered_results:
+        found = False
+        if not isinstance(item, dict):
+            continue
+
+        for value in item.values():
+            if isinstance(value, str):
+                if any(term.lower() in value.lower() for term in exclude_terms):
+                    found = True
+                    break
+        if not found:
+            filtered_results.append(item)
+    return filtered_results
+
+
+def filter_subject_search_results(unfiltered_results, include_terms, exclude_terms):
+    """Function for filtering SUBJECT search results"""
+    # Filter that list down to only items that satisfy our include and exclude conditions
+    # This is patterned off the filter_title_author_search_results function, modified for lists
+    filtered_results = []
+    for item in unfiltered_results:
+        if not isinstance(item, dict):
+            continue
+        subject_list = item.get('subjects')
+
+        lower_subjects = [subject.lower() for subject in subject_list]
+
+        # Cycle through all subjects for the current item, boolean is true if all include terms show up there
+        include_check = all(any(term in subject for subject in lower_subjects) for term in include_terms)
+
+        # Cycle through all subjects for the current item, boolean is true if NO exclude terms show up anywhere
+        exclude_check = all(all(term not in subject for term in exclude_terms) for subject in lower_subjects)
+
+        if include_check and exclude_check:
+            filtered_results.append(item)
+    return filtered_results
+
+
+def singularize_pluralize_words(words):
+    """Function for getting the singular & plural forms of all the words in a given list"""
+    unique_words = []
+    for word in words:
+        w = Word(word)
+        # Keep the original word form because pluralization not always correct when the word is already plural
+        word_forms = {'word': word, 'singular': w.singularize(), 'plural': w.pluralize()}
+        unique_words.append(word_forms)
+    return unique_words

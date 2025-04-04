@@ -18,7 +18,7 @@
 
     opacity: 0;
     transition: opacity 1s ease;
-    &[open] { /* TODO (done via JavaScript?) Fade in on open */
+    &[open] { /* Fade in when opened via JavaScript */
         opacity: 1;
     }
 }

@@ -12,9 +12,9 @@ import requests
 from django.utils.timezone import localtime
 from django.db import transaction
 from django.db.models import Count
+from django.db.models.signals import pre_save, post_save, pre_delete, post_delete, post_migrate
 from django.forms.models import model_to_dict
 from django.contrib.auth import PermissionDenied
-from django.db.models.signals import pre_save, post_save, pre_delete, post_delete, post_migrate
 from django.dispatch import receiver
 from .helper_functions import *
 from .models import *
@@ -41,9 +41,6 @@ def get_filtered_user_pinned_items(user, get_request):
     that fit the filters selected by the user (i.e., in the GET request).
     - Returned items are organized in the same format used by Search Results page.
     """
-
-    # TODO (?): Design does not allow for filtering a particular tag only if it's public/private
-
     sort_by_filter = get_sort_by_filter(get_request)
     filter_query, exclude_query, tag_include_queries = get_pinned_items_filters(get_request)
 
@@ -57,10 +54,10 @@ def get_filtered_user_pinned_items(user, get_request):
 
         # Apply filters & sorting to user's pins
         filtered_user_contribs = (user_contribs_with_tag_counts
-                         .filter(filter_query)
-                         .exclude(exclude_query)
-                         .distinct()
-                         .order_by(sort_by_filter))
+                                  .filter(filter_query)
+                                  .exclude(exclude_query)
+                                  .distinct()
+                                  .order_by(sort_by_filter))
 
         for tag_filter_query in tag_include_queries:
             filtered_user_contribs = filtered_user_contribs.filter(tag_filter_query)
@@ -202,7 +199,7 @@ def get_all_tags_for_item(item_id):
         # Exclude globally-blacklisted tags
         item_public_tags_with_counts = (Tag.objects
                                         .filter(public_tags__item_id=item_id, global_blacklist=False)
-                                        .exclude(item_blacklist__item_id=item_id)  # TODO: Test
+                                        .exclude(item_blacklist__item_id=item_id)
                                         .annotate(count=Count('public_tags'))
                                         .order_by('-count'))
         all_tags_for_item = []
@@ -360,38 +357,101 @@ def get_new_rewards(prev_score, new_score):
     return None
 
 
-def get_synonymous_tags(search_string):
-    """Function for getting tags that are synonyms of a list of given words"""
-    # TODO: Parse AND/OR/NOT
+def get_synonymous_tags(include_terms):
+    """Function for getting (non-blacklisted) tags that are synonyms of a list of given words"""
+    returned_synonymous_tags = []
+    if len(include_terms) > 0:
+        # NOTE: Do NOT need to include the different forms of each synonym since
+        # tag search already includes all the forms in the search results
+        # e.g., "boat" and "boats" tags return the exact same search results
+        synonyms = query_datamuse_synonyms(' '.join(include_terms))
 
-    synonyms = query_datamuse_synonyms(search_string)
-    synonymous_tags = []
-    for synonym in synonyms:
-        synonym_tag = Tag.objects.filter(tag=synonym)
-        if synonym_tag.exists():
-            # Need to format it as a dict to stay consistent with return format of get_all_tags_for_item()
-            synonymous_tags.append({"tag": synonym_tag[0].tag})
+        # Get all the Tags that match one of the synonyms in their tag value (case-insensitive)
+        if len(synonyms) > 0:
+            query = Q()
+            for synonym in synonyms:
+                query |= Q(tag__iexact=synonym)
+            query &= Q(global_blacklist=False)
+            query &= Q(public_tags__isnull=False)  # Must exist as public tags
+            synonymous_tags = Tag.objects.filter(query).distinct()
 
-    # TODO: Need a way to determine which tags more relevant (so can list the most relevant ones first)
+            if synonymous_tags.exists():
+                for synonymous_tag in synonymous_tags:
+                    if len(returned_synonymous_tags) < 20: # Return max. 20 synonyms
+                        # Need to format it as a dict to stay consistent with return format of get_all_tags_for_item()
+                        returned_synonymous_tags.append({"tag": synonymous_tag.tag})
+    return returned_synonymous_tags
 
-    return synonymous_tags
 
+def get_related_tags(include_terms, filtered_results, synonymous_tags):
+    """
+    Function for getting (non-blacklisted) tags that are related to a list of given words.
+    This includes:
+    - Public tags that have been applied to the returned search results
+      AND (if haven't reached 20-tag limit yet)
+    - Any words returned by Datamuse API that also exist as tags in database
+    It EXCLUDES:
+    - Tags that are already in the Synonymous Tags list
+    """
+    # Get the public tags for all the items in the filtered results
+    # and count on how many items each tag has been used (within the filtered_results)
+    tags_in_results = {}
+    for item in filtered_results:
+        item_public_tags = get_all_tags_for_item(item['item_id'])
+        if item_public_tags is not None:
+            for public_tag in item_public_tags:
+                tag = public_tag['tag']
+                item_count = tags_in_results[tag] + 1 if tag in tags_in_results else 1
+                tags_in_results[tag] = item_count
 
-def get_related_tags(search_string):
-    """Function for getting tags that are related to a list of given words"""
-    # TODO: Parse AND/OR/NOT
+    # Sort tags from biggest item_count to smallest item_count
+    # and only keep the first 20
+    sorted_tags = (sorted(tags_in_results.items(), key=lambda sorted_tag: sorted_tag[1], reverse=True))[:20]
+    returned_related_tags = [{"tag": key, "item_count": value} for key, value in sorted_tags]
 
-    related_words = query_datamuse_related_words(search_string)
-    related_tags = []
-    for related_word in related_words:
-        related_tag = Tag.objects.filter(tag=related_word)
-        if related_tag.exists():
-            # Need to format it as a dict to stay consistent with return format of get_all_tags_for_item()
-            related_tags.append({"tag": related_tag[0].tag})
+    # Only query datamuse for related terms if still don't have 20 tags in returned_related_tags
+    if len(returned_related_tags) < 20:
+        related_words = query_datamuse_related_words(' '.join(include_terms))
 
-    # TODO: Need a way to determine which tags more relevant (so can list the most relevant ones first)
+        # Get all the Tags that include at least one of the related_words in their tag value (case-insensitive)
+        if len(related_words) > 0:
+            query = Q()
+            for rel_word in related_words:
+                query |= Q(tag__icontains=rel_word)
+            query &= Q(global_blacklist=False)
+            query &= Q(public_tags__isnull=False)  # Must exist as public tags
+            related_tags = Tag.objects.filter(query)
 
-    return related_tags
+            if related_tags.exists():
+                for related_tag in related_tags:
+                    if len(returned_related_tags) < 20:
+                        # Need to format it as a dict to stay consistent with return format of get_all_tags_for_item()
+                        returned_related_tags.append({"tag": related_tag.tag})
+
+    # Exclude any related_tag that is an exact match to any of the include_terms & their different forms
+    include_forms_per_term = singularize_pluralize_words(include_terms)
+    include_all_terms = {form for term in include_forms_per_term for form in term.values()}
+    returned_related_tags = [tag for tag in returned_related_tags if tag['tag'] not in include_all_terms]
+
+    # Exclude any related_tag that is an exact match to the entire search string
+    include_search_string = ' '.join(include_terms)
+    returned_related_tags = [tag for tag in returned_related_tags if tag['tag'] != include_search_string]
+
+    # Exclude any related_tag that is already in synonymous tags or a different form of a synonymous tag
+    synonyms = [syn_tag["tag"] for syn_tag in synonymous_tags]
+    forms_per_synonym = singularize_pluralize_words(synonyms)
+    synonyms = {form for term in forms_per_synonym for form in term.values()}
+    returned_related_tags = [tag for tag in returned_related_tags if tag['tag'] not in synonyms]
+
+    # Remove duplicates while also preserving the order
+    first_occurrences = set()
+    unique_returned_tags = []
+    for tag in returned_related_tags:
+        if tag['tag'] not in first_occurrences:
+            first_occurrences.add(tag['tag'])
+            unique_returned_tags.append(tag)
+
+    return unique_returned_tags
 
 
 def remove_globally_banned_tags_from_tag_search(search_string):
@@ -403,6 +463,69 @@ def remove_globally_banned_tags_from_tag_search(search_string):
     regex_pattern = r"|".join(map(re.escape, banned_tags))
     cleaned_search_string = re.sub(regex_pattern, "", search_string)  # Replace all banned terms with an empty string
     return cleaned_search_string
+
+
+def get_tag_search_results(include_terms=None, exclude_terms=None):
+    """Get the items that match the include and exclude search terms for a Tag search"""
+    filtered_items = []
+    if include_terms:
+        # Plurality control (all tags regardless of plural or singular form)
+        # NOT pluralizing/singularizing exclude_tags to allow users to include one form, but exclude another
+        # (e.g., can search "vampire -vampires" if they so wish, for some reason)
+        include_forms_per_term = singularize_pluralize_words(include_terms)
+        include_all_terms = {form for term in include_forms_per_term for form in term.values()}
+
+        # Get all the Tags that include at least one of the include_terms in their tag value (case-insensitive)
+        query = Q()
+        for include_term in include_all_terms:
+            query |= Q(tag__icontains=include_term)
+        include_tags = Tag.objects.filter(query)
+
+        # Get all the items that have at least one of the include_terms in their public_tags
+        user_contributions = UserContribution.objects.filter(Q(public_tags__tag__in=include_tags)).distinct()
+        items = Item.objects.filter(item_id__in=user_contributions.values_list('item_id', flat=True)).distinct()
+
+        # Make sure only items whose public_tags that contain ALL of the include_terms are returned
+        # (since ' ' == AND operator)
+        for item in items:
+            # NOTE: get_all_tags_for_item does NOT return tags that have been item_blacklisted for the item,
+            # so if an item is missing one of the include_terms due to item_blacklist, it will be excluded from
+            # the search results
+            item_public_tags = [dictionary["tag"] for dictionary in get_all_tags_for_item(item.item_id)]
+
+            # Convert all tags to lowercase for case-insensitive comparison
+            item_public_tags = [tag.lower() for tag in item_public_tags]
+
+            # Check if ALL include_terms (in at least one of their singular/plural forms)
+            # are found in the item's public tags
+            if all(any(any(form.lower() in tag for tag in item_public_tags) for form in term.values()) for term in include_forms_per_term):
+                filtered_items.append(item)
+
+        # Convert filtered_items into a queryset
+        item_ids = [item.item_id for item in filtered_items]
+        filtered_items = Item.objects.filter(item_id__in=item_ids)
+    else:
+        filtered_items = Item.objects.all()
+
+    # Multiple "NOT" relationships are treated as OR relationships (not AND), even if space is supposed to be AND operator
+    # (e.g., "-vampires -werewolves" excludes items tagged "vampires" only, "werewolves" only,
+    # AND items tagged both "vampires" and "werewolves", not just the items that have both tags)
+    if exclude_terms:
+        # Get all the Tags that include at least one of the exclude_terms in their tag value (case-insensitive)
+        query = Q()
+        for exclude_term in exclude_terms:
+            query |= Q(tag__icontains=exclude_term)
+        excluded_tags = Tag.objects.filter(query)
+        excluded_link = UserContribution.objects.filter(Q(public_tags__tag__in=excluded_tags)).distinct()
+        excluded_items = Item.objects.filter(item_id__in=excluded_link.values_list('item_id', flat=True)).distinct()
+        filtered_items = filtered_items.exclude(item_id__in=excluded_items.values_list('item_id', flat=True))
+
+    # If filtered_items is still a list --> Convert filtered_items into a queryset
+    if isinstance(filtered_items, list):
+        item_ids = [item.item_id for item in filtered_items]
+        filtered_items = Item.objects.filter(item_id__in=item_ids)
+
+    return list(filtered_items.values())
 
 
 #######################################################
@@ -756,47 +879,45 @@ def update_pin_datetime(sender, instance, **kwargs):
 # DATAMUSE API QUERIES
 
 def query_datamuse_synonyms(word):
-    """Function for synonyms of a given word (may or may NOT exist as tags in our database)"""
-    return list(f"placeholder code {word}")
+    """Function for retrieving max. 50 synonyms from Datamuse API"""
+    url = f"https://api.datamuse.com/words?ml={Word(word).singularize()}&max=50"
+    response = requests.get(url)
+    if response.status_code == 200:
+        words = response.json()
+        sorted_words = sorted(words, key=lambda x: x.get('score', 0), reverse=True)
+        return [entry['word'] for entry in sorted_words]
+    return []
 
 
 def query_datamuse_related_words(word):
-    """Function for words related to a given word (may or may NOT exist as tags in our database)"""
-    return list(f"placeholder code {word}")
+    """Function for retrieving max. 50 related words from Datamuse API"""
+    url = f"https://api.datamuse.com/words?rel_trg={word}&max=50"
+    response = requests.get(url)
+    if response.status_code == 200:
+        words = response.json()
+        sorted_words = sorted(words, key=lambda x: x.get('score', 0), reverse=True)
+        return [entry['word'] for entry in sorted_words]
+    return []
 
 
 ########################################################################################################################
 # LOC API QUERIES
 
-def query_loc_keyword(search_string, requested_page_number):
-    """Keyword search to LOC API"""
+def query_loc_gateway(search_string):
+    """Filters requests into the API query"""
+    # Note: API parses multiple keywords as ANDs for keyword search
     params = {
-        "q": search_string,  # Default parameters set in _query_loc_api() function
+        "q": search_string,  # All API calls need a search string at base
     }
-    return _query_loc_api(params, requested_page_number)
+    return _query_loc_api(params)
 
 
-def query_loc_title(search_string, requested_page_number):
-    """Title search to LOC API"""
-    print(f"TODO (placeholder code) {search_string} {requested_page_number}")
-
-
-def query_loc_author(search_string, requested_page_number):
-    """Author search to LOC API"""
-    print(f"TODO (placeholder code) {search_string} {requested_page_number}")
-
-
-def query_loc_subject(search_string, requested_page_number):
-    """Subject search to LOC API"""
-    print(f"TODO (placeholder code)) {search_string} {requested_page_number}")
-
-
-def _query_loc_api(params, requested_page_number):
+def _query_loc_api(params):
     """Actual query to LOC API (PRIVATE FUNCTION)"""
     params["fa"] = "partof:catalog"
     params["fo"] = "json"
-    params["c"] = 15  # Return max. 15 items per query (makes results load faster)
-    params["sp"] = requested_page_number
+    params["c"] = 300
+    params["sp"] = 1
 
     query = "?"
     for param_key in params.keys():
@@ -837,8 +958,7 @@ def _query_loc_api(params, requested_page_number):
                 'subjects': subjects,
                 'cover': cover,
             })
-
-        return results_on_page, data.get("pagination")
+        return results_on_page
 
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")

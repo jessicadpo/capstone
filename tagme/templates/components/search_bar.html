@@ -1,4 +1,4 @@
-<form id="search-bar" method="GET" action="{% url 'search_results' 1 %}">
+<form id="search-bar" method="GET" action="{% url 'search_results' %}">
     <div id="search-dropdown" class="dropdown">
         <button type="button" id="search-dropdown-button" class="dropdown-button">
             <span id="search-dropdown-button-text">Keyword</span>
@@ -12,7 +12,9 @@
             <a href="#" class="search-dropdown-item" data-value="Subject">Subject</a>
         </div>
     </div>
-    {{ forms.search_form }}
+
+    {{ forms.search_form}}
+
     <button type="submit" id="search-button"><i class="fa fa-search"></i></button>
     <button type="button" id="close-search-bar-button">✖</button>
 </form>

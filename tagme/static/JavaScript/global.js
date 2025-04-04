@@ -2,6 +2,7 @@ const topBar = document.getElementById('top-bar');
 const searchBar = document.querySelector('#top-bar #search-bar');  // Only applies to the search bar in top bar (not homepage search bar)
 const closeSearchBarButton = document.getElementById('close-search-bar-button');
 const openSearchBarButton = document.getElementById('open-search-bar-button');
+const searchForm = document.getElementById("search-bar"); // Applies to search bar in ALL pages (including homepage)
 
 const mainContent = document.getElementById('main-content');
 const footer = document.getElementById('footer');
@@ -109,7 +110,6 @@ function preventTooltipViewportOverflow() {
             }
 
             // Adjust position as close to original position as possible if no longer overflowing
-            // FIXME: (??) Not working if spamming resize too fast
             const originalCenterCoordinate = bubbleTailOutline.getBoundingClientRect().x + (bubbleTailOutline.getBoundingClientRect().width / 2);
             const maxLeftCoordinate = originalCenterCoordinate - (bubbleContent.getBoundingClientRect().width / 2);
             const minRightCoordinate = originalCenterCoordinate + (bubbleContent.getBoundingClientRect().width / 2);
@@ -438,8 +438,6 @@ function checkNeedSeeMoreButtons() {
 /* CAROUSELS / SLIDESHOWS */
 
 function activateCarouselBehaviour(carousel) {
-    // TODO: Looping carousels (?? need?)
-
     // Ensure carousel element has class "carousel"
     carousel.classList.add('carousel');
 
@@ -596,6 +594,27 @@ function undoTransitionPrep(carousel) {
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
+/* DROPDOWN MENUS */
+function openDropdown(dropdown) {
+    dropdownOptions = dropdown.querySelector('.dropdown-options');
+    dropdownOptions.classList.toggle('show');
+    preventDropdownPageOverflow(dropdownOptions);
+}
+
+function closeDropdown(dropdown, event) {
+    // Do not close if clicked inside .dropdown-options
+    var clickedTarget = event.relatedTarget;
+    if (clickedTarget && clickedTarget.nodeType != 1) { /* If clickedTarget is an attribute or text node (for example) */
+        clickedTarget = clickedTarget.parentElement;
+    }
+
+    if (clickedTarget == null || clickedTarget.closest('.dropdown-options') == null) {
+        dropdownOptions = dropdown.querySelector('.dropdown-options');
+        dropdownOptions.classList.remove('show');
+    }
+}
+
+/*--------------------------------------------------------------------------------------------------------------------*/
 // Triggers after window has finished loading (i.e., all CSS and JavaScript has already been applied)
 preventTooltipViewportOverflow(); // Need to call function twice like this for best results
 window.addEventListener("load", preventTooltipViewportOverflow);
@@ -646,23 +665,12 @@ document.addEventListener("DOMContentLoaded", function() {
         dropdownButtons.forEach(dropdownButton => {
             // Opening behaviour
             dropdownButton.addEventListener("click", function() {
-                dropdownOptions = dropdown.querySelector('.dropdown-options');
-                dropdownOptions.classList.toggle('show');
-                preventDropdownPageOverflow(dropdownOptions);
+                openDropdown(dropdown);
             });
 
             // Closing behaviour
             dropdownButton.addEventListener("blur", function(event) {
-                // Do not close if clicked inside .dropdown-options
-                var clickedTarget = event.relatedTarget;
-                if (clickedTarget && clickedTarget.nodeType != 1) { /* If clickedTarget is an attribute or text node (for example) */
-                    clickedTarget = clickedTarget.parentElement;
-                }
-
-                if (clickedTarget == null || clickedTarget.closest('.dropdown-options') == null) {
-                    dropdownOptions = dropdown.querySelector('.dropdown-options');
-                    dropdownOptions.classList.remove('show');
-                }
+                closeDropdown(dropdown, event);
             });
         });
 
@@ -686,6 +694,24 @@ document.addEventListener("DOMContentLoaded", function() {
             this.parentElement.classList.remove('show');
         });
     });
+
+    // Clean search terms before submit
+    if (searchForm) { // Only execute code for pages that have a search bar
+        searchForm.addEventListener("submit", function(event) {
+            const searchInput = searchForm.querySelector("#search-input");
+
+            // Remove any leading and trailing whitespaces from search string
+            searchInput.value = searchInput.value.trim();
+
+            // Require at least 1 non-whitespace character for search
+            if ((searchInput.value).length === 0) {
+                event.preventDefault();
+                searchInput.style.borderColor = "#B52801";
+                searchInput.placeholder = "Cannot search empty text";
+                searchInput.classList.add("invalid-search"); // So placeholder text becomes red (via global.css)
+            }
+        });
+    }
 
     // Set tri-state checkboxes (for all pages, if they have any)
     triStateCheckboxContainer.forEach(container => {

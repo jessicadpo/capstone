@@ -1,4 +1,6 @@
-<div class="reward-title" title="{{ reward.title }}" style="background-color: {{ reward.colour }};"> <!-- In HTML because can't do Django tags in CSS -->
+<div class="reward-title" title="{{ reward.title }}"
+     tabindex="{% if focusable %}0{% else %}-1{% endif %}"
+     style="background-color: {{ reward.colour }};"> <!-- In HTML because can't do Django tags in CSS -->
     <img draggable="false" src="../../static/icons/star.svg"/>
     <span>{{ reward.title }}</span>
 </div>

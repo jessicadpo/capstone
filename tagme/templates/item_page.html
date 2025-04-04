@@ -58,7 +58,7 @@
                             <h1>Subject Headings</h1>
                             <div id="item-subject-headings">
                                 {% for subject in item.subjects %}
-                                    <a href="#" class="subject-heading-link">{{ subject }}</a>
+                                    <a href="/search/?search_type=Subject&search_string={{ subject }}&page=1" class="subject-heading-link">{{ subject }}</a>
                                 {% endfor %}
                             </div>
                         {% endif %}
@@ -126,7 +126,7 @@
         </div>
     </main>
 
-    <div class="sidebar-overlay"></div> <!-- TODO: id so overlay behaves differently from add-tags-overlay -->
+    <div class="sidebar-overlay"></div>
 
     <aside id="tag-sidebar">
         <div class="header-with-x-button">
@@ -135,7 +135,6 @@
         </div>
 
         <div id="sidebar-main-content">
-            <!-- TODO: For loop for ALL item's tags -->
             {% for tag in item.tags %}
                 <div class="tag-entry">
                     {% include "components/tag.html" %}

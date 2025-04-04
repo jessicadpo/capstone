@@ -3,12 +3,11 @@ const nextPageButtons = document.querySelectorAll('.next-page-button');
 
 // If both pagination_top and pagination_bottom used in the same page, page will have duplicate fields
 // for storing this info, thus why we're using classes/querySelectorAll instead of ids/getElementById
-var page_url = null;
 var currentPageNumber = null;
 var lastPageNumber = null;
 
-if (document.querySelectorAll('.page-url').length > 0) {
-    page_url = document.querySelectorAll('.page-url')[0].value; // FIXME: Error on item pages? ([0] is undefined)
+// Only set if page contains a pagination-top or pagination-footer
+if (document.getElementById("pagination-top") || document.getElementById("pagination-footer")) {
     currentPageNumber = parseInt(document.querySelectorAll('.current-page-number')[0].value);
     lastPageNumber = parseInt(document.querySelectorAll('.last-page-number')[0].value);
 }
@@ -80,7 +79,11 @@ function setResponsiveBottomPaginationBehaviour() {
 
 function fetchPage(pageNumberToFetch) {
     // Send AJAX request to get next page of comments (without reloading the page)
-    fetch(page_url + "?page=" + pageNumberToFetch, {
+    const currentGetParams = new URLSearchParams(window.location.search);
+    currentGetParams.set("page", pageNumberToFetch);
+    paginationQuery = "?" + currentGetParams.toString();
+
+    fetch(window.location.pathname + paginationQuery, {
         method: 'GET',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -95,11 +98,19 @@ function fetchPage(pageNumberToFetch) {
 
         if (data.url_name === 'item_page') {
             setCommentsBehaviour(); // defined in user_comment.js
-        } else if (data.url_name === 'pinned_items') { // TODO: Also call if search_results page?
+        } else if (data.url_name === 'pinned_items') {
             setPinItemButtonBehaviour(); // defined in tag_modal.js
             setResponsiveBottomPaginationBehaviour();
             document.getElementById('open-filter-menu-button').addEventListener("click", openFilterMenu);
+        } else if (data.url_name === 'search_results') {
+            setPinItemButtonBehaviour(); // defined in tag_modal.js
+            setResponsiveBottomPaginationBehaviour();
+            document.getElementById('open-search-sidebar-button').addEventListener("click", openSearchSidebar);
         }
+
+        // Update URL
+        const newURL = window.location.pathname + paginationQuery;
+        history.pushState({ path: newURL}, "", newURL);
     });
 }
 

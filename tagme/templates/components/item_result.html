@@ -3,10 +3,9 @@
         {% load html_functions %}
 
         <div> <!-- Show Date Pinned in pinned-items page (responsive) (requires loading of html_functions) -->
-            <!-- TODO: Create default cover -->
             <div class="cover-container"> <!-- Div container necessary for consistent sizing -->
                 <!-- Invalid src= URLs causes pages to be requested twice, so only include src= attribute if item.cover is not None -->
-                <img class="result-cover" {% if item.cover %} src="{{ item.cover }}" {% endif %} alt="{% if item.cover != None %} {{ item.title }} cover {% else %} Cover not found {% endif %}">
+                <img class="result-cover" src="{% if item.cover %} {{ item.cover }} {% endif %}" alt="{% if item.cover != None %} {{ item.title }} cover {% else %} Cover not found {% endif %}">
             </div>
 
             {% if request|url_contains_pinned_items %}

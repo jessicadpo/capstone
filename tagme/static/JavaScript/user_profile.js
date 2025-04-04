@@ -21,6 +21,9 @@ function setCurrentProgressBarWidth() {
     const pointsGoal = parseInt(endTickNumberSpan.textContent);
 
     let progress_percentage = Math.round((currentProgressPoints / pointsGoal) * 100);
+    if (progress_percentage > 100) {
+        progress_percentage = 100;
+    }
     currentProgressBar.style.width = progress_percentage.toString() + "%";
 }
 
@@ -40,7 +43,7 @@ function preventTickmarkOverlap() {
     if (middleTick.left < endTick.right && middleTick.right > endTick.left) {
         /* Reposition middleTickNumberSpan more towards the left */
         const overlapAmount = middleTick.right - endTick.left;
-        middleTickNumberSpan.style.right = (overlapAmount + 5).toString() + "px";
+        middleTickNumberSpan.style.right = (overlapAmount + 10).toString() + "px";
     }
 }
 
@@ -127,9 +130,16 @@ document.addEventListener("DOMContentLoaded", function() {
     dropdownItemsSlot1.forEach(item => {
         item.addEventListener("click", function(event) {
             event.preventDefault(); // Prevent page from jumping
-            const selectedTitleClone = item.cloneNode(true);
+            const selectedTitleClone = this.cloneNode(true);
+            selectedTitleClone.setAttribute('tabindex', '-1');
             updateEquippedTitle(selectedTitleClone, 1);  // Change the equipped div with the clicked div
-            item.parentElement.classList.remove('show');
+            this.parentElement.classList.remove('show');
+        });
+
+        item.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                item.click();
+            }
         });
     });
 
@@ -137,8 +147,15 @@ document.addEventListener("DOMContentLoaded", function() {
         item.addEventListener("click", function(event) {
             event.preventDefault(); // Prevent page from jumping
             const selectedTitleClone = item.cloneNode(true);
+            selectedTitleClone.setAttribute('tabindex', '-1');
             updateEquippedTitle(selectedTitleClone, 2);  // Change the equipped div with the clicked div
             item.parentElement.classList.remove('show');
+        });
+
+        item.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                item.click();
+            }
         });
     });
 
