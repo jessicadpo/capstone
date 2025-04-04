@@ -481,17 +481,19 @@ def get_tag_search_results(include_terms=None, exclude_terms=None):
             query |= Q(tag__icontains=include_term)
         include_tags = Tag.objects.filter(query)
 
-        # Get all the items that have at least one of the include_terms in its public_tags
+        # Get all the items that have at least one of the include_terms in their public_tags
         user_contributions = UserContribution.objects.filter(Q(public_tags__tag__in=include_tags)).distinct()
         items = Item.objects.filter(item_id__in=user_contributions.values_list('item_id', flat=True)).distinct()
 
         # Make sure only items whose public_tags that contain ALL of the include_terms are returned
         # (since ' ' == AND operator)
         for item in items:
+            # NOTE: get_all_tags_for_item does NOT return tags that have been item_blacklisted for the item,
+            # so if an item is missing one of the include_terms due to item_blacklist, it will be excluded from
+            # the search results
             item_public_tags = [dictionary["tag"] for dictionary in get_all_tags_for_item(item.item_id)]
 
             # Convert all tags to lowercase for case-insensitive comparison
-            # Use set for efficiency
             item_public_tags = [tag.lower() for tag in item_public_tags]
 
             # Check if ALL include_terms (in at least one of their singular/plural forms)
@@ -518,7 +520,7 @@ def get_tag_search_results(include_terms=None, exclude_terms=None):
         excluded_items = Item.objects.filter(item_id__in=excluded_link.values_list('item_id', flat=True)).distinct()
         filtered_items = filtered_items.exclude(item_id__in=excluded_items.values_list('item_id', flat=True))
 
-    # If filtered_items is still a list --> Convert filtered_items into a queryset
+    # If filtered_items is still a list  --> Convert filtered_items into a queryset
     if isinstance(filtered_items, list):
         item_ids = [item.item_id for item in filtered_items]
         filtered_items = Item.objects.filter(item_id__in=item_ids)
