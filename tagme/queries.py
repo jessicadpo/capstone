@@ -8,6 +8,7 @@ from datetime import datetime
 from collections import Counter
 from urllib.parse import quote
 import requests
+import re
 
 from django.utils.timezone import localtime
 from django.db import transaction
@@ -363,7 +364,8 @@ def get_synonymous_tags(include_terms):
     if len(include_terms) > 0:
         # NOTE: Do NOT need to include the different forms of each synonym since
         # tag search already includes all the forms in the search results
-        # e.g., "boat" and "boats" tags return the exact same search results
+        # e.g., "boat" and "boats" tags return the exact same search results, so listing
+        # "boat" and "boats" as different synonyms --> unnecessary
         synonyms = query_datamuse_synonyms(' '.join(include_terms))
 
         # Get all the Tags that match one of the synonyms in their tag value (case-insensitive)
@@ -414,10 +416,15 @@ def get_related_tags(include_terms, filtered_results, synonymous_tags):
         related_words = query_datamuse_related_words(' '.join(include_terms))
 
         # Get all the Tags that include at least one of the related_words in their tag value (case-insensitive)
+        # Use iregex to only return tags that contain rel_word as the start or end of a word
+        # (e.g., searching "cat" includes tags "cat", "catnip", "bobcat", "pet cats", "cat (animal)", and "a cat meowing",
+        # but not "education")
         if len(related_words) > 0:
             query = Q()
             for rel_word in related_words:
-                query |= Q(tag__icontains=rel_word)
+                rel_word = re.escape(rel_word)  # Handle words with special regex characters
+                query |= Q(tag__iregex=rf"\b(?:{rel_word}|{rel_word}\w+|\w+{rel_word})\b")
+
             query &= Q(global_blacklist=False)
             query &= Q(public_tags__isnull=False)  # Must exist as public tags
             related_tags = Tag.objects.filter(query)
@@ -476,9 +483,13 @@ def get_tag_search_results(include_terms=None, exclude_terms=None):
         include_all_terms = {form for term in include_forms_per_term for form in term.values()}
 
         # Get all the Tags that include at least one of the include_terms in their tag value (case-insensitive)
+        # Use iregex to only return tags that contain include_term as the start or end of a word
+        # (e.g., searching "cat" includes tags "cat", "catnip", "bobcat", "pet cats", "cat (animal)", and "a cat meowing",
+        # but not "education")
         query = Q()
         for include_term in include_all_terms:
-            query |= Q(tag__icontains=include_term)
+            include_term = re.escape(include_term)  # Handle words with special regex characters
+            query |= Q(tag__iregex=rf"\b(?:{include_term}|{include_term}\w+|\w+{include_term})\b")
         include_tags = Tag.objects.filter(query)
 
         # Get all the items that have at least one of the include_terms in their public_tags
@@ -879,18 +890,36 @@ def update_pin_datetime(sender, instance, **kwargs):
 # DATAMUSE API QUERIES
 
 def query_datamuse_synonyms(word):
-    """Function for retrieving max. 50 synonyms from Datamuse API"""
-    url = f"https://api.datamuse.com/words?ml={Word(word).singularize()}&max=50"
-    response = requests.get(url)
-    if response.status_code == 200:
-        words = response.json()
-        sorted_words = sorted(words, key=lambda x: x.get('score', 0), reverse=True)
-        return [entry['word'] for entry in sorted_words]
-    return []
+    """
+    Function for retrieving synonyms from Datamuse API.
+    Synonyms include hypernyms and hyponyms returned by Datamuse.
+    REMINDER: Limit of 100,000 datamuse queries per day (1 search = 4 queries), so max. 25,000 searches per day)
+    """
+    word = Word(word).singularize()
+    endpoint = "https://api.datamuse.com/words?"
+    queries = [f"rel_syn={word}", f"rel_spc={word}", f"rel_gen={word}"]
+
+    synonyms = dict()  # Use dict to ensure no duplicates
+
+    for query in queries:
+        response = requests.get(endpoint + query)
+        if response.status_code == 200:
+            words = response.json()
+            for w in words:
+                # If same word returned by more than 1 query --> Keep the highest score
+                synonyms[w["word"]] = max(w.get("score", 0), synonyms.get(w["word"], 0))
+        else:
+            return []  # End function early if bad response
+
+    synonyms = sorted(synonyms.items(), key=lambda syn: syn[1], reverse=True)
+    return [synonym[0] for synonym in synonyms]
 
 
 def query_datamuse_related_words(word):
-    """Function for retrieving max. 50 related words from Datamuse API"""
+    """
+    Function for retrieving max. 50 related words (i.e., statistically-related words) from Datamuse API
+    REMINDER: Limit of 100,000 datamuse queries per day (1 search = 4 queries), so max. 25,000 searches per day)
+    """
     url = f"https://api.datamuse.com/words?rel_trg={word}&max=50"
     response = requests.get(url)
     if response.status_code == 200:
