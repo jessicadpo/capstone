@@ -7,8 +7,8 @@ RATE LIMIT FOR LIBRARY OF CONGRESS API: 20 queries per 10 seconds && 80 queries 
 from datetime import datetime
 from collections import Counter
 from urllib.parse import quote
-import requests
 import re
+import requests
 
 from django.utils.timezone import localtime
 from django.db import transaction
@@ -899,7 +899,7 @@ def query_datamuse_synonyms(word):
     endpoint = "https://api.datamuse.com/words?"
     queries = [f"rel_syn={word}", f"rel_spc={word}", f"rel_gen={word}"]
 
-    synonyms = dict()  # Use dict to ensure no duplicates
+    synonyms = {}  # Use dict to ensure no duplicates
 
     for query in queries:
         response = requests.get(endpoint + query)
