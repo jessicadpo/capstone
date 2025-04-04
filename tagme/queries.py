@@ -395,7 +395,6 @@ def get_related_tags(include_terms, filtered_results, synonymous_tags):
     """
     # Get the public tags for all the items in the filtered results
     # and count on how many items each tag has been used (within the filtered_results)
-    #TODO: What if more than 20 related tags?
     tags_in_results = {}
     for item in filtered_results:
         item_public_tags = get_all_tags_for_item(item['item_id'])
@@ -407,7 +406,7 @@ def get_related_tags(include_terms, filtered_results, synonymous_tags):
 
     # Sort tags from biggest item_count to smallest item_count
     # and only keep the first 20
-    sorted_tags = (sorted(tags_in_results.items(), key=lambda tag: tag[1], reverse=True))[:20]
+    sorted_tags = (sorted(tags_in_results.items(), key=lambda sorted_tag: sorted_tag[1], reverse=True))[:20]
     returned_related_tags = [{"tag": key, "item_count": value} for key, value in sorted_tags]
 
     # Only query datamuse for related terms if still don't have 20 tags in returned_related_tags

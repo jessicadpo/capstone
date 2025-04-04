@@ -130,9 +130,9 @@ class Report(models.Model):
         # ReportDecision.GLOBAL_BLACKLIST.label --> returns "Global Blacklist"
 
     report_id = models.BigAutoField(primary_key=True, blank=False, null=False)
-    item_id = models.ForeignKey(Item, on_delete=models.CASCADE)  # null=False && blank=False by default #TODO: Change to item
+    item_id = models.ForeignKey(Item, on_delete=models.CASCADE)  # null=False && blank=False by default
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)  #TODO: Change to user
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     reason = models.TextField(blank=False, null=False)
     creation_datetime = models.DateTimeField(auto_now_add=True)  # Datetime cannot be overwritten / manually set
     decision = models.CharField(max_length=16, blank=True, null=True, choices=ReportDecision)
