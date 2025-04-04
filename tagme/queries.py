@@ -520,7 +520,7 @@ def get_tag_search_results(include_terms=None, exclude_terms=None):
         excluded_items = Item.objects.filter(item_id__in=excluded_link.values_list('item_id', flat=True)).distinct()
         filtered_items = filtered_items.exclude(item_id__in=excluded_items.values_list('item_id', flat=True))
 
-    # If filtered_items is still a list  --> Convert filtered_items into a queryset
+    # If filtered_items is still a list --> Convert filtered_items into a queryset
     if isinstance(filtered_items, list):
         item_ids = [item.item_id for item in filtered_items]
         filtered_items = Item.objects.filter(item_id__in=item_ids)

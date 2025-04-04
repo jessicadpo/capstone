@@ -44,7 +44,7 @@ def logout_view(request):
     return redirect("homepage")
 
 
-@login_required(login_url="/signup-login") 
+@login_required(login_url="/signup-login")
 def user_profile(request, username):
     """View for a user's "My Profile" page"""
     page_forms = {"search_form": SearchForm(),
