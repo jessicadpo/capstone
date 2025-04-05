@@ -362,17 +362,15 @@ def get_synonymous_tags(include_terms):
     """Function for getting (non-blacklisted) tags that are synonyms of a list of given words"""
     returned_synonymous_tags = []
     if len(include_terms) > 0:
-        # NOTE: Do NOT need to include the different forms of each synonym since
-        # tag search already includes all the forms in the search results
-        # e.g., "boat" and "boats" tags return the exact same search results, so listing
-        # "boat" and "boats" as different synonyms --> unnecessary
-        synonyms = query_datamuse_synonyms(' '.join(include_terms))
+        synonyms = singularize_pluralize_words(query_datamuse_synonyms(' '.join(include_terms)))
 
         # Get all the Tags that match one of the synonyms in their tag value (case-insensitive)
         if len(synonyms) > 0:
             query = Q()
             for synonym in synonyms:
-                query |= Q(tag__iexact=synonym)
+                query |= Q(tag__iexact=synonym['word'])
+                query |= Q(tag__iexact=synonym['singular'])
+                query |= Q(tag__iexact=synonym['plural'])
             query &= Q(global_blacklist=False)
             query &= Q(public_tags__isnull=False)  # Must exist as public tags
             synonymous_tags = Tag.objects.filter(query).distinct()
@@ -380,9 +378,20 @@ def get_synonymous_tags(include_terms):
             if synonymous_tags.exists():
                 for synonymous_tag in synonymous_tags:
                     if len(returned_synonymous_tags) < 20: # Return max. 20 synonyms
+                        # Only use singularized forms for synonymous tags.
+                        # Clicking on the tag will include pluralized in search results anyways
                         # Need to format it as a dict to stay consistent with return format of get_all_tags_for_item()
-                        returned_synonymous_tags.append({"tag": synonymous_tag.tag})
-    return returned_synonymous_tags
+                        returned_synonymous_tags.append({"tag": Word(synonymous_tag.tag).singularize()})
+
+    # Remove duplicates while also preserving the order
+    first_occurrences = set()
+    unique_returned_tags = []
+    for tag in returned_synonymous_tags:
+        if tag['tag'] not in first_occurrences:
+            first_occurrences.add(tag['tag'])
+            unique_returned_tags.append(tag)
+
+    return unique_returned_tags
 
 
 def get_related_tags(include_terms, filtered_results, synonymous_tags):
@@ -426,7 +435,6 @@ def get_related_tags(include_terms, filtered_results, synonymous_tags):
             for rel_word in related_words:
                 rel_word = re.escape(rel_word)  # Handle words with special regex characters
                 query |= Q(tag__iregex=rf"\b(?:{rel_word}|{rel_word}\w+|\w+{rel_word})\b")
-
             query &= Q(global_blacklist=False)
             query &= Q(public_tags__isnull=False)  # Must exist as public tags
             related_tags = Tag.objects.filter(query)

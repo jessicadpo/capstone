@@ -32,6 +32,10 @@ function preventTickmarkOverlap() {
     const middleTick = middleTickNumberSpan.getBoundingClientRect();
     const endTick = endTickNumberSpan.getBoundingClientRect();
 
+    // Reset to original before check for overlap
+    middleTickNumberSpan.style.left = "";
+    middleTickNumberSpan.style.right = "";
+
     /* Check if start & middle tickmark numbers overlap */
     if (startTick.left < middleTick.right && startTick.right > middleTick.left) {
         /* Reposition middleTickNumberSpan more towards the right */
@@ -116,6 +120,8 @@ function makeEarnedTitlesDraggable() {
     });
 }
 
+// Triggers when window is resized
+window.addEventListener("resize", preventTickmarkOverlap);
 
 // Triggers after DOM content is finished loading
 document.addEventListener("DOMContentLoaded", function() {
