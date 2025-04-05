@@ -39,13 +39,6 @@ def is_roman_numeral(word):
 
 def to_title_case(text):
     """Convert text to title case"""
-    # If a word is preceded by punctuation (e.g., a colon, semicolon, etc.) --> Capitalize it
-    words_preceded_by_punctuation = list(re.finditer(rf"([{re.escape(string.punctuation)}])\s+(\w+)", text))
-    char_index_preceded_by_punctuation = [match.start(2) for match in words_preceded_by_punctuation]
-    text_as_list = list(text)  # Convert string into a list of characters (NOT words)
-    for index in char_index_preceded_by_punctuation:
-        text_as_list[index] = text_as_list[index].upper()
-    text = ''.join(text_as_list)
 
     small_words = {"and", "or", "the", "in", "of", "a", "an", "to", "for", "nor", "but", "on", "at", "by", "with", "etc"}
     words = text.split()  # Convert string into a list of words (NOT characters)
@@ -66,7 +59,17 @@ def to_title_case(text):
         else:
             words[i] = words[i].lower()
 
-    return ' '.join(words)  # Unsplit the text
+    text = ' '.join(words)  # Unsplit the text
+
+    # If a word is preceded by punctuation (e.g., a colon, semicolon, etc.) EXCEPT COMMAS --> Capitalize it
+    punctuation = string.punctuation.replace(",", "")
+    words_preceded_by_punctuation = list(re.finditer(rf"([{re.escape(punctuation)}])\s+(\w+)", text))
+    char_index_preceded_by_punctuation = [match.start(2) for match in words_preceded_by_punctuation]
+    text_as_list = list(text)  # Convert string into a list of characters (NOT words)
+    for index in char_index_preceded_by_punctuation:
+        text_as_list[index] = text_as_list[index].upper()
+
+    return ''.join(text_as_list)
 
 
 def to_firstname_lastname(name):
