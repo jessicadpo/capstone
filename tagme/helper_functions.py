@@ -18,12 +18,17 @@ def decode_unicode(text_string):
     return html.unescape(text_string)
 
 
-def strip_punctuation(word):
-    """Remove punctuation from start and end of a string"""
-    word = decode_unicode(word)
-    word = word.strip("“")
-    word = word.strip("”")
-    return word.strip(string.punctuation)
+def strip_punctuation(word, keep_quotation_marks=False):
+    """Remove punctuation from start and end of a string. If keep_quotation_marks is True,
+    quotation marks beginning or ending a string will be kept (in case of titles beginning or ending with a quote)"""
+    clean_word = decode_unicode(word)
+    clean_word = clean_word.strip("“")
+    clean_word = clean_word.strip("”")
+    if keep_quotation_marks:
+        clean_word = clean_word.strip(string.punctuation.replace("\"", ""))
+    else:
+        clean_word = clean_word.strip(string.punctuation)
+    return clean_word
 
 
 def is_roman_numeral(word):
@@ -34,13 +39,25 @@ def is_roman_numeral(word):
 
 def to_title_case(text):
     """Convert text to title case"""
-    small_words = {"and", "or", "the", "in", "of", "a", "an", "to", "for", "nor", "but", "on", "at", "by", "with"}
-    words = text.split()
+    # If a word is preceded by punctuation (e.g., a colon, semicolon, etc.) --> Capitalize it
+    words_preceded_by_punctuation = list(re.finditer(rf"([{re.escape(string.punctuation)}])\s+(\w+)", text))
+    char_index_preceded_by_punctuation = [match.start(2) for match in words_preceded_by_punctuation]
+    text_as_list = list(text)  # Convert string into a list of characters (NOT words)
+    for index in char_index_preceded_by_punctuation:
+        text_as_list[index] = text_as_list[index].upper()
+    text = ''.join(text_as_list)
+
+    small_words = {"and", "or", "the", "in", "of", "a", "an", "to", "for", "nor", "but", "on", "at", "by", "with", "etc"}
+    words = text.split()  # Convert string into a list of words (NOT characters)
 
     # Capitalize 1st word & words that aren't small words
+    # If a word is originally in all-caps --> Keep it in all-caps
+    # If a word is roman numerals --> Put in all caps
     for i in range(len(words)):
         word_no_punctuation = strip_punctuation(words[i])
-        if is_roman_numeral(word_no_punctuation):
+        if word_no_punctuation.isupper():
+            continue
+        elif is_roman_numeral(word_no_punctuation):
             words[i] = words[i].upper()
         elif i == 0 or (word_no_punctuation.lower() not in small_words):
             capitalized_word = word_no_punctuation.capitalize()
