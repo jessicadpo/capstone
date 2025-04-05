@@ -57,7 +57,8 @@ def to_title_case(text):
         word_no_punctuation = strip_punctuation(words[i])
         if word_no_punctuation.isupper():
             continue
-        elif is_roman_numeral(word_no_punctuation):
+
+        if is_roman_numeral(word_no_punctuation):
             words[i] = words[i].upper()
         elif i == 0 or (word_no_punctuation.lower() not in small_words):
             capitalized_word = word_no_punctuation.capitalize()
