@@ -537,7 +537,7 @@ def get_tag_search_results(include_terms=None, exclude_terms=None):
         # Get all the Tags that include at least one of the exclude_terms in their tag value (case-insensitive)
         query = Q()
         for exclude_term in exclude_terms:
-            query |= Q(tag__icontains=exclude_term)
+            query |= Q(tag__iregex=rf"\b{exclude_term}\b")
         excluded_tags = Tag.objects.filter(query)
         excluded_link = UserContribution.objects.filter(Q(public_tags__tag__in=excluded_tags)).distinct()
         excluded_items = Item.objects.filter(item_id__in=excluded_link.values_list('item_id', flat=True)).distinct()
